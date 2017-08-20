@@ -12,6 +12,13 @@ void clean_file(std::string path) {
 int main(int argc, char const *argv[]) {
   std::vector<std::string> files{
     "./license-header.js",
+    "./Counters.js",
+    "./State.js",
+    "./ActionManager.js",
+    "./SoundManager.js",
+    "./ImageManager.js",
+    "./Painter.js",
+    "./Transition.js",
     "./Scene.js",
     "./Scenes.js",
     "./Game.js",

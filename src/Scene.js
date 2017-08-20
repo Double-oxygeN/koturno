@@ -6,7 +6,6 @@
 class Scene {
   constructor(name) {
     this.name = name;
-    Object.freeze(this);
   }
 
   /**

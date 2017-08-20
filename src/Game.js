@@ -5,7 +5,7 @@
  */
 class Game {
   constructor(obj) {
-    if (['scenes'].every(m => m in obj)) {
+    if (['scenes'].every(param => param in obj)) {
       this.scenes = obj.scenes;
     } else {
       throw new Error("Game must have 'scenes'!");

@@ -4,8 +4,16 @@
  */
 class Scenes {
   constructor(scenes) {
-    this.scenes = new Map();
-    scenes.forEach(scene => this.scenes.set(scene.name, scene));
+    this._scenes = new Map();
+    _scenes.forEach(scene => this.scenes.set(scene.name, scene));
+  }
+
+  get scenes() {
+    return this._scenes;
+  }
+
+  set scenes(scenes) {
+    throw new Error("Cannot set Scenes.scenes directly.\nIf you want to set a scene, please use Scenes.addScene(scene).");
   }
 
   /**
@@ -17,6 +25,7 @@ class Scenes {
     if (this.hasScene(scene.name)) {
       return false;
     } else {
+      this.scenes.set(scene.name, scene);
       return true;
     }
   }
@@ -43,6 +52,19 @@ class Scenes {
       return null;
     }
   }
+
+  /**
+   * Execute function for each scenes.
+   * @param {Scenes~forEach} f callback function
+   */
+  forEach(f) {
+    this.scenes.forEach(f);
+  }
+  /**
+   * @callback Scenes~forEach
+   * @param {string} key
+   * @param {Scene} value
+   */
 
   /**
    * Convert to string.
