@@ -79,7 +79,7 @@ class Game {
       const w = Math.ceil(this.canvas.width * this.divExpansionRate);
       const h = Math.ceil(this.canvas.height * this.divExpansionRate);
       this.divElem.base.setAttribute('style', `width: ${w}px; height: ${h}px; position: fixed; ` +
-        `left: ${(bodyRect.width - w) / 2}px; top: ${(bodyRect.height - h) / 2}px`
+        `left: ${(bodyRect.width - w) / 2}px; top: ${(bodyRect.height - h) / 2}px; border: 1px #ccc solid;`
       );
     };
     window.addEventListener('resize', onResize);
