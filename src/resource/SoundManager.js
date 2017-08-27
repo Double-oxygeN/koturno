@@ -109,9 +109,9 @@ class SoundManager {
       const se = this.SEs.get(name);
       const maxPlayTheSE = 'maxPlay' in opt ? opt.maxPlay : this.maxPlaySE;
       if (se.audio === null) {
-        throw new Error('Please load before playing!');
+        Logger.fatal('Please load before playing!');
       } else if (this.currentPlaySE >= this.maxPlaySE || se.playing >= maxPlayTheSE) {
-        console.warn(`Too many SEs are playing!\nSE: ${name}`);
+        Logger.warn(`Too many SEs are playing!\nSE: ${name}`);
       } else {
         const se0 = new Audio(se.src);
 
@@ -148,7 +148,7 @@ class SoundManager {
     if (this.BGMs.has(name)) {
       const bgm = this.BGMs.get(name);
       if (bgm.audio === null) {
-        throw new Error('Please load before playing!');
+        Logger.fatal('Please load before playing!');
       } else if (this.currentPlayBGM === null || this.currentPlayBGM.name !== name) {
         bgm.audio.currentTime = 'time' in opt ? opt.time : bgm.audio.currentTime;
         bgm.audio.volume = 'volume' in opt ? Math.min(1.0, Math.max(0.0, opt.volume)) : this.BGMVolume;
