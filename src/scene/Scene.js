@@ -5,6 +5,7 @@
  */
 class Scene {
   constructor(name) {
+    /** @member {string} */
     this.name = name;
   }
 
@@ -41,8 +42,10 @@ class Scene {
    * @param {Game} game game itself
    */
   draw(state, action, counters, painter, game) {
-    painter.background("#ffffff");
-    painter.text(this.name, game.width / 2, game.height / 2, { size: 64 }).fill("#000000");
+    if (painter.contextType === '2d') {
+      painter.background("#ffffff");
+      painter.text(this.name, painter.width / 2, painter.height / 2, { size: 64, align: 'center', baseline: 'middle' }).fill("#000000");
+    }
   }
 
   /**

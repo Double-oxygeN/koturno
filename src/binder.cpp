@@ -12,16 +12,29 @@ void clean_file(std::string path) {
 int main(int argc, char const *argv[]) {
   std::vector<std::string> files{
     "./license-header.js",
+    "./geo/Point.js",
+    "./geo/Point2d.js",
+    "./geo/Vector.js",
     "./Counters.js",
     "./State.js",
-    "./ActionManager.js",
-    "./SoundManager.js",
-    "./ImageManager.js",
-    "./Painter.js",
-    "./Transition.js",
-    "./Scene.js",
-    "./Scenes.js",
+    "./action/Action.js",
+    "./action/Keyboard.js",
+    "./action/MouseButton.js",
+    "./action/Mouse.js",
+    "./action/ActionManager.js",
+    "./resource/SoundType.js",
+    "./resource/SoundManager.js",
+    "./resource/ImageManager.js",
+    "./painter/Painter.js",
+    "./painter/Painter2D.js",
+    "./scene/Transition.js",
+    "./scene/Scene.js",
+    "./scene/Scenes.js",
+    "./logger/LogLevel.js",
+    "./logger/Logger.js",
+    "./Recorder.js",
     "./Game.js",
+    "./util/StdTransFunc.js"
   };
   std::string output_file_path = (argc > 1) ? argv[1] : "../koturno-all.js"; // 出力先を変更可能
   clean_file(output_file_path); // ファイルを一旦空にする

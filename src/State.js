@@ -1,6 +1,6 @@
 /**
  * Class representing a state.
- * @param {array} [data=[]] pairs of state name and value
+ * @param {any[]} [data=[]] pairs of state name and value
  */
 class State {
   constructor(data) {

@@ -1,56 +1,46 @@
 /**
  * Class representing two counters.
+ * @param {number} [general=0] general counter
+ * @param {number} [scene=0] scene counter
  */
 class Counters {
-  constructor() {
-    this._general = 0;
-    this._scene = 0;
-  }
-
-  get general() {
-    return this._general;
-  }
-
-  set general(n) {
-    throw new Error('Cannot set Counters.general directly!');
-  }
-
-  get scene() {
-    return this._scene;
-  }
-
-  set scene(n) {
-    throw new Error('Cannot set Counters.scene directly!');
+  constructor(general = 0, scene = 0) {
+    /**
+     * General counter.
+     * @member {number}
+     */
+    this.general = general;
+    /**
+     * Scene counter.
+     * @member {number}
+     */
+    this.scene = scene;
+    Object.freeze(this);
   }
 
   /**
    * Reset the scene counter.
    * @param {number} [scene=0] initial scene counter value
-   * @returns {Counters} this
+   * @returns {Counters}
    */
   reset(scene = 0) {
-    this._scene = scene;
-    return this;
+    return new Counters(this.general, scene);
   }
 
   /**
    * Reset all counters.
-   * @returns {Counters} this
+   * @returns {Counters}
    */
   hardReset() {
-    this._general = 0;
-    this._scene = 0;
-    return this;
+    return new Counters(0, 0);
   }
 
   /**
    * Count up.
-   * @returns {Counters} this
+   * @returns {Counters}
    */
   count() {
-    this._general++;
-    this._scene++;
-    return this;
+    return new Counters(this.general + 1, this.scene + 1);
   }
 
   /**
@@ -58,6 +48,6 @@ class Counters {
    * @returns {string} a string
    */
   toString() {
-    return `[Counters (${this.general}, ${this.scene})]`;
+    return `${this.general}:${this.scene}`;
   }
 }

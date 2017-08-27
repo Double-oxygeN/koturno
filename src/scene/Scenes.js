@@ -5,15 +5,16 @@
 class Scenes {
   constructor(scenes) {
     this._scenes = new Map();
-    _scenes.forEach(scene => this.scenes.set(scene.name, scene));
+    scenes.forEach(scene => this.scenes.set(scene.name, scene));
   }
 
+  /** @member {Map.<string, Scene>} */
   get scenes() {
     return this._scenes;
   }
 
   set scenes(scenes) {
-    throw new Error("Cannot set Scenes.scenes directly.\nIf you want to set a scene, please use Scenes.addScene(scene).");
+    Logger.fatal("Cannot set Scenes.scenes directly.\nIf you want to set a scene, please use Scenes#addScene(scene).");
   }
 
   /**
@@ -46,9 +47,9 @@ class Scenes {
    */
   getScene(name) {
     if (this.hasScene(name)) {
-      return this.get(name);
+      return this.scenes.get(name);
     } else {
-      throw new Error(`Scenes has no scene of name ${name}!`);
+      Logger.error(`Scenes has no scene of name ${name}!`);
       return null;
     }
   }
