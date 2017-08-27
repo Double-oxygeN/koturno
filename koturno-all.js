@@ -397,8 +397,10 @@ class Action {
    */
   _down(...actions) {
     actions.forEach(action => {
-      this.pressed.add(action);
-      this.down.add(action);
+      if (!this.down.has(action)) {
+        this.pressed.add(action);
+        this.down.add(action);
+      }
     });
   }
 
