@@ -9,7 +9,7 @@ This project is not completed yet.
 
 ## How to use
 
-    git clone [...] Koturno
+    git clone https://github.com/Double-oxygeN/koturno.git Koturno
 
 Then add this line to your HTML.
 
