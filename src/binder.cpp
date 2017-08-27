@@ -10,7 +10,7 @@ void clean_file(std::string path) {
 }
 
 int main(int argc, char const *argv[]) {
-  std::vector<std::string> files{
+  std::vector<std::string> min_files{
     "./license-header.js",
     "./geo/Point.js",
     "./geo/Point2d.js",
@@ -34,24 +34,44 @@ int main(int argc, char const *argv[]) {
     "./logger/Logger.js",
     "./Recorder.js",
     "./Game.js",
+  };
+  std::vector<std::string> opt_files{
     "./util/StdTransFunc.js"
   };
-  std::string output_file_path = (argc > 1) ? argv[1] : "../koturno-all.js"; // 出力先を変更可能
-  clean_file(output_file_path); // ファイルを一旦空にする
+  std::string koturno_min_file_path = "../koturno-min.js";
+  std::string koturno_all_file_path = "../koturno-all.js";
+  clean_file(koturno_min_file_path);
+  clean_file(koturno_all_file_path);
 
-  std::ofstream ofs(output_file_path, std::ios::out | std::ios::app); // 追記モードで書き込む
+  std::ofstream min_ofs(koturno_min_file_path, std::ios::out | std::ios::app);
+  std::ofstream all_ofs(koturno_all_file_path, std::ios::out | std::ios::app);
   std::string buf;
 
-  for (auto itr = files.begin(); itr != files.end(); ++itr) {
+  for (auto itr = min_files.cbegin(); itr != min_files.cend(); ++itr) {
     std::ifstream ifs(*itr);
     if (!ifs) {
       std::cerr << "Failed to open a file." << std::endl;
       return 1;
     } else {
       while (getline(ifs, buf)) {
-        ofs << buf << std::endl;
+        min_ofs << buf << std::endl;
+        all_ofs << buf << std::endl;
       }
-      ofs << std::endl;
+      min_ofs << std::endl;
+      all_ofs << std::endl;
+    }
+  }
+
+  for (auto itr = opt_files.cbegin(); itr != opt_files.cend(); ++itr) {
+    std::ifstream ifs(*itr);
+    if (!ifs) {
+      std::cerr << "Failed to open a file." << std::endl;
+      return 1;
+    } else {
+      while (getline(ifs, buf)) {
+        all_ofs << buf << std::endl;
+      }
+      all_ofs << std::endl;
     }
   }
   return 0;
