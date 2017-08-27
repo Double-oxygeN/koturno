@@ -1932,7 +1932,7 @@ class Game {
             }
           },
           end: () => {
-            // nope
+            Logger.debug(`Game ended.\ntotal frame: ${counters.general}f`);
           },
           reset: () => {
             window.requestAnimationFrame(stamp => {
