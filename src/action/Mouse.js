@@ -40,7 +40,7 @@ class Mouse extends Action {
     });
     [
       ['mouseup', e => {
-        this._down(e.button);
+        this._up(e.button);
       }],
       ['blur', e => {
         this._clear();

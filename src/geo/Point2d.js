@@ -12,6 +12,24 @@ class Point2d extends Point {
     this.y = y;
   }
 
+  get x() {
+    return this._x;
+  }
+
+  set x(val) {
+    this._x = val;
+    this.vector[0] = val;
+  }
+
+  get y() {
+    return this._y;
+  }
+
+  set y(val) {
+    this._y = val;
+    this.vector[1] = val;
+  }
+
   /**
    * Check if this point is interior of a circle in Euclidean space.
    * @param {Point2d} center center of a circle
