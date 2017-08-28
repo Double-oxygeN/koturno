@@ -169,7 +169,7 @@ class Painter2d extends Painter {
    */
   circle(x, y, r) {
     this.context.beginPath();
-    this.context.arc(x, y, r, -Math.PI, Math.PI);
+    this.context.arc(x, y, Math.abs(r), -Math.PI, Math.PI);
     this.context.closePath();
     return this.pathOperations;
   }
@@ -185,7 +185,7 @@ class Painter2d extends Painter {
    */
   ellipse(x, y, radiusX, radiusY, rotation = 0) {
     this.context.beginPath();
-    this.context.ellipse(x, y, radiusX, radiusY, rotation, -Math.PI, Math.PI);
+    this.context.ellipse(x, y, Math.abs(radiusX), Math.abs(radiusY), rotation, -Math.PI, Math.PI);
     this.context.closePath();
     return this.pathOperations;
   }
@@ -198,12 +198,8 @@ class Painter2d extends Painter {
    */
   polygon(vertices) {
     this.context.beginPath();
-    vertices.forEach((vertex, i) => {
-      if (i === 0) {
-        this.context.moveTo(vertex.x, vertex.y);
-      } else {
-        this.context.lineTo(vertex.x, vertex.y);
-      }
+    vertices.forEach(vertex => {
+      this.context.lineTo(vertex.x, vertex.y);
     });
     this.context.closePath();
     return this.pathOperations;
@@ -237,7 +233,7 @@ class Painter2d extends Painter {
    * @param {string} [opt.font] font name
    * @param {string} [opt.align] text alignment (start, end, left, right, center)
    * @param {string} [opt.baseline] baseline alignment (top, hanging, middle, alphabetic, ideographic, bottom)
-   * @param {number} [opt.lineHeight] line height
+   * @param {string} [opt.lineHeight] line height
    * @returns {Object} path operations
    */
   text(str, x, y, opt = {}) {

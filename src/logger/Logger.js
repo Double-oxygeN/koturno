@@ -15,7 +15,6 @@ const Logger = {
   _level: LogLevel.NORMAL,
   /**
    * Log fatal error and force to exit.
-   *
    * @param {...string} msg messages
    */
   fatal: (...msg) => {
