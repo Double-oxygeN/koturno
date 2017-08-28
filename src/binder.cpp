@@ -36,7 +36,8 @@ int main(int argc, char const *argv[]) {
     "./Game.js",
   };
   std::vector<std::string> opt_files{
-    "./util/StdTransFunc.js"
+    "./util/KoturnoUtil.js",
+    "./util/StdTransFunc.js",
   };
   std::string koturno_min_file_path = "../koturno-min.js";
   std::string koturno_all_file_path = "../koturno-all.js";
