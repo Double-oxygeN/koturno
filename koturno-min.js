@@ -1407,9 +1407,32 @@ class Painter2d extends Painter {
 
   /**
    * Transform and draw.
+   * @param {number} m11
+   * @param {number} m12
+   * @param {number} m21
+   * @param {number} m22
+   * @param {number} dx
+   * @param {number} dy
+   * @param {function} cb callback function
    */
-  transformAndDraw() {
-    // TODO: impl.
+  transformAndDraw(m11, m12, m21, m22, dx, dy, cb) {
+    this.context.save();
+    this.context.transform(m11, m12, m21, m22, dx, dy);
+    cb();
+    this.context.restore();
+  }
+
+  /**
+   * Rotate canvas and draw.
+   * @param {number} x x-coordinate of the center of rotation
+   * @param {number} y y-coordinate of the center of rotation
+   * @param {number} angle rotation angle, expressed in radians
+   * @param {function} cb callback function
+   */
+  rotateAndDraw(x, y, angle, cb) {
+    const cosVal = Math.cos(angle);
+    const sinVal = Math.sin(angle);
+    this.transformAndDraw(cosVal, -sinVal, sinVal, cosVal, -x * cosVal - y * sinVal + x, x * sinVal - y * cosVal + y, cb);
   }
 
   /**
