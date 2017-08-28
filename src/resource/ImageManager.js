@@ -56,6 +56,7 @@ class ImageManager {
     if (this.images.has(name)) {
       return this.images.get(name).image;
     } else {
+      Logger.fatal(`ImageManager has no image of name ${name}. Please preload before use.`);
       return null;
     }
   }

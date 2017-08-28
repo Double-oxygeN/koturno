@@ -66,18 +66,22 @@ class Painter2d extends Painter {
        * @param {number} [opt.width] line width
        * @param {string} [opt.cap] line cap
        * @param {string} [opt.join] line join
-       * @param {string} [opt.miterLimit] line miter limit
+       * @param {number} [opt.miterLimit] line miter limit
        * @param {number[]} [opt.dash] line dash
        * @param {number} [opt.dashOffset] line dash offset
        */
       stroke: (style, opt = {}) => {
         // configuration
-        if ('width' in opt) this.context.lineWidth = this.recentLineOptions.width = opt.width;
-        if ('cap' in opt) this.context.lineCap = this.recentLineOptions.cap = opt.cap;
-        if ('join' in opt) this.context.lineJoin = this.recentLineOptions.join = opt.join;
+        if ('width' in opt) this.recentLineOptions.width = opt.width;
+        if ('cap' in opt) this.recentLineOptions.cap = opt.cap;
+        if ('join' in opt) this.recentLineOptions.join = opt.join;
         if ('miterLimit' in opt) this.context.miterLimit = this.recentLineOptions.miterLimit = opt.miterLimit;
         if ('dash' in opt) this.context.setLineDash(this.recentLineOptions.dash = opt.dash);
         if ('dashOffset' in opt) this.context.lineDashOffset = this.recentLineOptions.dashOffset = opt.dashOffset;
+
+        this.context.lineWidth = this.recentLineOptions.width;
+        this.context.lineCap = this.recentLineOptions.cap;
+        this.context.lineJoin = this.recentLineOptions.join;
 
         this.context.strokeStyle = style;
         this.context.stroke();
@@ -143,15 +147,15 @@ class Painter2d extends Painter {
    * @returns {Object} path operations
    */
   roundRect(x, y, w, h, r) {
+    const hw = w / 2;
+    const hh = h / 2;
+    const _r = Math.abs(r);
     this.context.beginPath();
-    this.context.moveTo(x + r, y);
-    this.context.arcTo(x, y, x, y + r, r);
-    this.context.lineTo(x, y + h - r);
-    this.context.arcTo(x, y + h, x + r, y + h, r);
-    this.context.lineTo(x + w - r, y + h);
-    this.context.arcTo(x + w, y + h, x + w, y + h - r, r);
-    this.context.lineTo(x + w, y + r);
-    this.context.arcTo(x + w, y, x + w - r, y, r);
+    this.context.moveTo(x + hw, y);
+    this.context.arcTo(x, y, x, y + hh, _r);
+    this.context.arcTo(x, y + h, x + hw, y + h, _r);
+    this.context.arcTo(x + w, y + h, x + w, y + hh, _r);
+    this.context.arcTo(x + w, y, x + hw, y, _r);
     this.context.closePath();
     return this.pathOperations;
   }
@@ -261,12 +265,16 @@ class Painter2d extends Painter {
       },
       stroke: (style, lineOpt = {}) => {
         // configuration
-        if ('width' in lineOpt) this.context.lineWidth = this.recentLineOptions.width = lineOpt.width;
-        if ('cap' in lineOpt) this.context.lineCap = this.recentLineOptions.cap = lineOpt.cap;
-        if ('join' in lineOpt) this.context.lineJoin = this.recentLineOptions.join = lineOpt.join;
+        if ('width' in lineOpt) this.recentLineOptions.width = lineOpt.width;
+        if ('cap' in lineOpt) this.recentLineOptions.cap = lineOpt.cap;
+        if ('join' in lineOpt) this.recentLineOptions.join = lineOpt.join;
         if ('miterLimit' in lineOpt) this.context.miterLimit = this.recentLineOptions.miterLimit = lineOpt.miterLimit;
         if ('dash' in lineOpt) this.context.setLineDash(this.recentLineOptions.dash = lineOpt.dash);
         if ('dashOffset' in lineOpt) this.context.lineDashOffset = this.recentLineOptions.dashOffset = lineOpt.dashOffset;
+
+        this.context.lineWidth = this.recentLineOptions.width;
+        this.context.lineCap = this.recentLineOptions.cap;
+        this.context.lineJoin = this.recentLineOptions.join;
 
         this.context.strokeStyle = style;
         str.split('\n').forEach((line, lineNum) => {
@@ -366,6 +374,16 @@ class Painter2d extends Painter {
    */
   transformAndDraw() {
     // TODO: impl.
+  }
+
+  /**
+   * Create image pattern.
+   * @param {string} name image name
+   * @param {string} [repetition='repeat'] repetition. (`'repeat'`, `'repeat-x'`, `'repeat-y'`, or `'no-repeat'`)
+   * @returns {CanvasPattern} a pattern
+   */
+  createPattern(name, repetition = 'repeat') {
+    return this.context.createPattern(this.imageManager.getImage(name), repetition);
   }
 
   /**

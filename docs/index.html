@@ -949,6 +949,12 @@
                       </a></li>
                       
                       <li><a
+                        href='#painter2dcreatepattern'
+                        class='regular pre-open'>
+                        #createPattern
+                      </a></li>
+                      
+                      <li><a
                         href='#painter2dtostring'
                         class='regular pre-open'>
                         #toString
@@ -8859,6 +8865,92 @@ px
       </div>
     </div>
   
+    <div class='border-bottom' id='painter2dcreatepattern'>
+      <div class="clearfix small pointer toggle-sibling">
+        <div class="py1 contain">
+            <a class='icon pin-right py1 dark-link caret-right'>▸</a>
+            <span class='code strong strong truncate'>createPattern(name, repetition)</span>
+        </div>
+      </div>
+      <div class="clearfix display-none toggle-target">
+        <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+
+  <p>Create image pattern.</p>
+
+
+  <div class='pre p1 fill-light mt0'>createPattern(name: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a>, repetition: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a>): <a href="https://developer.mozilla.org/en-US/docs/Web/API/CanvasPattern">CanvasPattern</a></div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Parameters</div>
+    <div class='prose'>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>name</span> <code class='quiet'>(<a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a>)</code>
+	    image name
+
+          </div>
+          
+        </div>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>repetition</span> <code class='quiet'>(<a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a>
+            = <code>&#39;repeat&#39;</code>)</code>
+	    repetition. (
+<code>'repeat'</code>
+, 
+<code>'repeat-x'</code>
+, 
+<code>'repeat-y'</code>
+, or 
+<code>'no-repeat'</code>
+)
+
+          </div>
+          
+        </div>
+      
+    </div>
+  
+
+  
+
+  
+    
+      <div class='py1 quiet mt1 prose-big'>Returns</div>
+      <code><a href="https://developer.mozilla.org/en-US/docs/Web/API/CanvasPattern">CanvasPattern</a></code>:
+        a pattern
+
+      
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+      </div>
+    </div>
+  
     <div class='border-bottom' id='painter2dtostring'>
       <div class="clearfix small pointer toggle-sibling">
         <div class="py1 contain">
@@ -9067,7 +9159,7 @@ px
                 </tr>
               
                 <tr>
-                  <td class='break-word'><span class='code bold'>opt.miterLimit</span> <code class='quiet'><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a>?</code>
+                  <td class='break-word'><span class='code bold'>opt.miterLimit</span> <code class='quiet'><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>?</code>
                   </td>
                   <td class='break-word'><span>line miter limit
 </span></td>
