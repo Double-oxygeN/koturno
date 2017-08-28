@@ -755,7 +755,16 @@ class SoundManager {
         soundProp.audio.load();
       }
       res(null);
-    })));
+    }))).then(() => new Promise((res, rej) => {
+      let tmp = __SCRIPT_PATH__.split('/');
+      tmp[tmp.length - 1] = 'silent.wav';
+      const silent = new Audio(tmp.join('/'));
+      silent.loop = true;
+      silent.load();
+      silent.volume = 0.1;
+      silent.play();
+      res(null);
+    }));
   }
 
   /**
@@ -904,6 +913,13 @@ class SoundManager {
     return `[SoundManager (${this.BGMs.size}, ${this.SEs.size})]`;
   }
 }
+
+const __SCRIPT_PATH__ = (() => {
+  if (document.currentScript) return document.currentScript.src;
+  const scripts = document.getElementsByTagName('script');
+  const script = scripts[scripts.length - 1];
+  if (script.src) return script.src;
+})();
 
 /**
  * Class for manageing images.
