@@ -305,39 +305,44 @@ class Painter2d extends Painter {
    * @param {number} [opt.clip.width] width of the clipped image
    * @param {number} [opt.clip.height] height of the clipped image
    * @param {boolean} [opt.keepAspectRatio=false] if `true`, aspect ratio of an image is kept
+   * @param {number} [opt.spriteID=0] sprite ID
    */
   image(img, x, y, opt = {}) {
-    let i;
+    let imageProps;
     if (Object.prototype.toString.call(img) === '[object String]') {
-      i = this.imageManager.getImage(img);
+      imageProps = this.imageManager.getImageProperties(img);
     } else {
-      i = img;
+      imageProps = { image: img, size: { width: img.width, height: img.height } };
     }
 
+    const spriteCols = Math.floor(imageProps.image.width / imageProps.size.width);
+    const spriteRows = Math.floor(imageProps.image.height / imageProps.size.height);
+    const id = 'spriteID' in opt ? opt.spriteID % (spriteCols * spriteRows) : 0;
+    const spriteX = (id % spriteCols) * imageProps.size.width;
+    const spriteY = Math.floor(id / spriteCols) * imageProps.size.height;
+
     if ('clip' in opt) {
-      const cx = 'x' in opt.clip ? opt.clip.x : 0;
-      const cy = 'y' in opt.clip ? opt.clip.y : 0;
-      const cw = 'width' in opt.clip ? opt.clip.width : i.width - cx;
-      const ch = 'height' in opt.clip ? opt.clip.height : i.height - cy;
+      const cx = 'x' in opt.clip ? Math.min(opt.clip.x, imageProps.size.width) : 0;
+      const cy = 'y' in opt.clip ? Math.min(opt.clip.y, imageProps.size.height) : 0;
+      const cw = 'width' in opt.clip ? Math.min(opt.clip.width, imageProps.size.width - cx) : imageProps.size.width - cx;
+      const ch = 'height' in opt.clip ? Math.min(opt.clip.height, imageProps.size.height - cy) : imageProps.size.height - cy;
       const w = 'width' in opt ? opt.width : cw;
       const h = 'height' in opt ? opt.height : ch;
       if (`keepAspectRatio` in opt && opt.keepAspectRatio) {
         const expansionRate = Math.min(w / cw, h / ch);
-        this.context.drawImage(i, cx, cy, cw, ch, x, y, cw * expansionRate, ch * expansionRate);
+        this.context.drawImage(imageProps.image, spriteX + cx, spriteY + cy, cw, ch, x, y, cw * expansionRate, ch * expansionRate);
       } else {
-        this.context.drawImage(i, cx, cy, cw, ch, x, y, w, h);
-      }
-    } else if ('width' in opt || 'height' in opt) {
-      const w = 'width' in opt ? opt.width : i.width;
-      const h = 'height' in opt ? opt.height : i.height;
-      if (`keepAspectRatio` in opt && opt.keepAspectRatio) {
-        const expansionRate = Math.min(w / i.width, h / i.height);
-        this.context.drawImage(i, x, y, i.width * expansionRate, i.height * expansionRate);
-      } else {
-        this.context.drawImage(i, x, y, w, h);
+        this.context.drawImage(imageProps.image, spriteX + cx, spriteY + cy, cw, ch, x, y, w, h);
       }
     } else {
-      this.context.drawImage(i, x, y);
+      const w = 'width' in opt ? opt.width : imageProps.size.width;
+      const h = 'height' in opt ? opt.height : imageProps.size.height;
+      if (`keepAspectRatio` in opt && opt.keepAspectRatio) {
+        const expansionRate = Math.min(w / imageProps.size.width, h / imageProps.size.height);
+        this.context.drawImage(imageProps.image, spriteX, spriteY, imageProps.size.width, imageProps.size.height, x, y, imageProps.size.width * expansionRate, imageProps.size.height * expansionRate);
+      } else {
+        this.context.drawImage(imageProps.image, spriteX, spriteY, imageProps.size.width, imageProps.size.height, x, y, w, h);
+      }
     }
   }
 

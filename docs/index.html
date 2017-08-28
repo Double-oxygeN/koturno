@@ -773,6 +773,12 @@
                       </a></li>
                       
                       <li><a
+                        href='#imagemanagergetimageproperties'
+                        class='regular pre-open'>
+                        #getImageProperties
+                      </a></li>
+                      
+                      <li><a
                         href='#imagemanagertostring'
                         class='regular pre-open'>
                         #toString
@@ -6974,6 +6980,13 @@ Any edge of the n-box is parallel to one of the axes.</p>
 </span></td>
                 </tr>
               
+                <tr>
+                  <td class='break-word'><span class='code bold'>images[].sprite</span> <code class='quiet'><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a>?</code>
+                  </td>
+                  <td class='break-word'><span>if the image is a sprite, then use this parameter
+</span></td>
+                </tr>
+              
             </tbody>
           </table>
           
@@ -7099,6 +7112,74 @@ Any edge of the n-box is parallel to one of the axes.</p>
       <div class='py1 quiet mt1 prose-big'>Returns</div>
       <code><a href="https://developer.mozilla.org/en-US/docs/Web/API/HTMLImageElement/Image">Image</a>?</code>:
         the image
+
+      
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+      </div>
+    </div>
+  
+    <div class='border-bottom' id='imagemanagergetimageproperties'>
+      <div class="clearfix small pointer toggle-sibling">
+        <div class="py1 contain">
+            <a class='icon pin-right py1 dark-link caret-right'>▸</a>
+            <span class='code strong strong truncate'>getImageProperties(name)</span>
+        </div>
+      </div>
+      <div class="clearfix display-none toggle-target">
+        <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+
+  <p>Get image properties.</p>
+
+
+  <div class='pre p1 fill-light mt0'>getImageProperties(name: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a>): <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a>?</div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Parameters</div>
+    <div class='prose'>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>name</span> <code class='quiet'>(<a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a>)</code>
+	    image name
+
+          </div>
+          
+        </div>
+      
+    </div>
+  
+
+  
+
+  
+    
+      <div class='py1 quiet mt1 prose-big'>Returns</div>
+      <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a>?</code>:
+        the image properties
 
       
     
@@ -8686,6 +8767,15 @@ px
                   <td class='break-word'><span>if 
 <code>true</code>
 , aspect ratio of an image is kept
+</span></td>
+                </tr>
+              
+                <tr>
+                  <td class='break-word'><span class='code bold'>opt.spriteID</span> <code class='quiet'><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a></code>
+                  
+                    (default <code>0</code>)
+                  </td>
+                  <td class='break-word'><span>sprite ID
 </span></td>
                 </tr>
               

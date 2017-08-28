@@ -3,6 +3,9 @@
  * @param {Object[]} images image properties
  * @param {string} images[].name name of an image
  * @param {string} images[].src source path of an image
+ * @param {Object} [images[].sprite] if the image is a sprite, then use this parameter
+ * @param {number} [images[].sprite.width] sprite width
+ * @param {number} [images[].sprite.height] sprite height
  */
 class ImageManager {
   constructor(images) {
@@ -13,7 +16,8 @@ class ImageManager {
           name: image.name,
           src: image.src,
           image: null,
-          imageData: null
+          imageData: null,
+          size: 'sprite' in image ? image.sprite : null
         });
       });
     } else {
@@ -30,6 +34,7 @@ class ImageManager {
       if (imageProp.image === null) {
         imageProp.image = new Image();
         imageProp.image.onload = e => {
+          if (imageProp.size === null) imageProp.size = { width: imageProp.image.width, height: imageProp.image.height };
           const cv = document.createElement('canvas');
           const ctx = cv.getContext('2d');
           [cv.width, cv.height] = [imageProp.image.width, imageProp.image.height];
@@ -55,6 +60,20 @@ class ImageManager {
   getImage(name) {
     if (this.images.has(name)) {
       return this.images.get(name).image;
+    } else {
+      Logger.fatal(`ImageManager has no image of name ${name}. Please preload before use.`);
+      return null;
+    }
+  }
+
+  /**
+   * Get image properties.
+   * @param {string} name image name
+   * @returns {?Object} the image properties
+   */
+  getImageProperties(name) {
+    if (this.images.has(name)) {
+      return this.images.get(name);
     } else {
       Logger.fatal(`ImageManager has no image of name ${name}. Please preload before use.`);
       return null;
