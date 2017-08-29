@@ -1,0 +1,19 @@
+{
+  "name": "Koturno",
+  "version": "0.0.1",
+  "description": "JavaScript game library",
+  "main": "koturno-all.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Double-oxygeN/koturno.git"
+  },
+  "author": "Double_oxygeN",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/Double-oxygeN/koturno/issues"
+  },
+  "homepage": "https://github.com/Double-oxygeN/koturno"
+}
