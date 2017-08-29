@@ -12,6 +12,7 @@ void clean_file(std::string path) {
 int main(int argc, char const *argv[]) {
   std::vector<std::string> min_files{
     "./license-header.js",
+    "./geo/Directions.js",
     "./geo/Point.js",
     "./geo/Point2d.js",
     "./geo/Vector.js",
