@@ -1133,7 +1133,10 @@ class Painter2d extends Painter {
    * @returns {Painter2d} another painter
    */
   createAnotherPainter() {
-    const another = new Painter2d(document.createElement('canvas'), this.imageManager);
+    const anotherCanvas = document.createElement('canvas');
+    anotherCanvas.width = this.width;
+    anotherCanvas.height = this.height;
+    const another = new Painter2d(anotherCanvas, this.imageManager);
     another.recentLineOptions = this.recentLineOptions;
     another.recentTextOptions = this.recentTextOptions;
 
@@ -1217,6 +1220,13 @@ class Painter2d extends Painter {
         this.context.restore();
       }
     };
+  }
+
+  /**
+   * Clear the canvas.
+   */
+  clear() {
+    this.context.clearRect(0, 0, this.width, this.height);
   }
 
   /**
@@ -1404,13 +1414,14 @@ class Painter2d extends Painter {
    * @param {Object} [opt] options
    * @param {number} [opt.width] width of an image
    * @param {number} [opt.height] height of an image
-   * @param {Object} [opt.clip] clipping the image
-   * @param {number} [opt.clip.x=0] x-coordinate of the leftmost point of the clipped image
-   * @param {number} [opt.clip.y=0] y-coordinate of the uppermost point of the clipped image
-   * @param {number} [opt.clip.width] width of the clipped image
-   * @param {number} [opt.clip.height] height of the clipped image
+   * @param {Object} [opt.crop] cropping the image
+   * @param {number} [opt.crop.x=0] x-coordinate of the leftmost point of the cropped image
+   * @param {number} [opt.crop.y=0] y-coordinate of the uppermost point of the cropped image
+   * @param {number} [opt.crop.width] width of the cropped image
+   * @param {number} [opt.crop.height] height of the cropped image
    * @param {boolean} [opt.keepAspectRatio=false] if `true`, aspect ratio of an image is kept
    * @param {number} [opt.spriteID=0] sprite ID
+   * @param {Directions} [opt.relativeOrigin=Directions.NW] relative origin position
    */
   image(img, x, y, opt = {}) {
     let imageProps;
@@ -1425,28 +1436,35 @@ class Painter2d extends Painter {
     const id = 'spriteID' in opt ? opt.spriteID % (spriteCols * spriteRows) : 0;
     const spriteX = (id % spriteCols) * imageProps.size.width;
     const spriteY = Math.floor(id / spriteCols) * imageProps.size.height;
+    const relativeOrigin = 'relativeOrigin' in opt ? opt.relativeOrigin : Directions.NW;
+    const horizontalRelativeDiff = (relativeOrigin + 4) % 3;
+    const verticalRelativeDiff = Math.floor((relativeOrigin + 4) / 3);
 
-    if ('clip' in opt) {
-      const cx = 'x' in opt.clip ? Math.min(opt.clip.x, imageProps.size.width) : 0;
-      const cy = 'y' in opt.clip ? Math.min(opt.clip.y, imageProps.size.height) : 0;
-      const cw = 'width' in opt.clip ? Math.min(opt.clip.width, imageProps.size.width - cx) : imageProps.size.width - cx;
-      const ch = 'height' in opt.clip ? Math.min(opt.clip.height, imageProps.size.height - cy) : imageProps.size.height - cy;
+    if ('crop' in opt) {
+      const cx = 'x' in opt.crop ? Math.min(opt.crop.x, imageProps.size.width) : 0;
+      const cy = 'y' in opt.crop ? Math.min(opt.crop.y, imageProps.size.height) : 0;
+      const cw = Math.max('width' in opt.crop ? Math.min(opt.crop.width, imageProps.size.width - cx) : imageProps.size.width - cx, 0.01);
+      const ch = Math.max('height' in opt.crop ? Math.min(opt.crop.height, imageProps.size.height - cy) : imageProps.size.height - cy, 0.01);
       const w = 'width' in opt ? opt.width : cw;
       const h = 'height' in opt ? opt.height : ch;
+      const _x = x - w * horizontalRelativeDiff / 2;
+      const _y = y - h * verticalRelativeDiff / 2;
       if (`keepAspectRatio` in opt && opt.keepAspectRatio) {
         const expansionRate = Math.min(w / cw, h / ch);
-        this.context.drawImage(imageProps.image, spriteX + cx, spriteY + cy, cw, ch, x, y, cw * expansionRate, ch * expansionRate);
+        this.context.drawImage(imageProps.image, spriteX + cx, spriteY + cy, cw, ch, _x, _y, cw * expansionRate, ch * expansionRate);
       } else {
-        this.context.drawImage(imageProps.image, spriteX + cx, spriteY + cy, cw, ch, x, y, w, h);
+        this.context.drawImage(imageProps.image, spriteX + cx, spriteY + cy, cw, ch, _x, _y, w, h);
       }
     } else {
       const w = 'width' in opt ? opt.width : imageProps.size.width;
       const h = 'height' in opt ? opt.height : imageProps.size.height;
+      const _x = x - w * horizontalRelativeDiff / 2;
+      const _y = y - h * verticalRelativeDiff / 2;
       if (`keepAspectRatio` in opt && opt.keepAspectRatio) {
         const expansionRate = Math.min(w / imageProps.size.width, h / imageProps.size.height);
-        this.context.drawImage(imageProps.image, spriteX, spriteY, imageProps.size.width, imageProps.size.height, x, y, imageProps.size.width * expansionRate, imageProps.size.height * expansionRate);
+        this.context.drawImage(imageProps.image, spriteX, spriteY, imageProps.size.width, imageProps.size.height, _x, _y, imageProps.size.width * expansionRate, imageProps.size.height * expansionRate);
       } else {
-        this.context.drawImage(imageProps.image, spriteX, spriteY, imageProps.size.width, imageProps.size.height, x, y, w, h);
+        this.context.drawImage(imageProps.image, spriteX, spriteY, imageProps.size.width, imageProps.size.height, _x, _y, w, h);
       }
     }
   }
@@ -1477,12 +1495,12 @@ class Painter2d extends Painter {
 
   /**
    * Transform and draw.
-   * @param {number} m11
-   * @param {number} m12
-   * @param {number} m21
-   * @param {number} m22
-   * @param {number} dx
-   * @param {number} dy
+   * @param {number} m11 horizontal scaling
+   * @param {number} m12 horizontal skewing
+   * @param {number} m21 vertical skewing
+   * @param {number} m22 vertical scaling
+   * @param {number} dx horizontal moving
+   * @param {number} dy vertical moving
    * @param {function} cb callback function
    */
   transformAndDraw(m11, m12, m21, m22, dx, dy, cb) {
@@ -1503,6 +1521,18 @@ class Painter2d extends Painter {
     const cosVal = Math.cos(angle);
     const sinVal = Math.sin(angle);
     this.transformAndDraw(cosVal, -sinVal, sinVal, cosVal, -x * cosVal - y * sinVal + x, x * sinVal - y * cosVal + y, cb);
+  }
+
+  /**
+   * Scale canvas and draw.
+   * @param {number} focusX x-coordinate of the center of scaling
+   * @param {number} focusY y-coordinate of the center of scaling
+   * @param {number} scaleX scaling factor in the horizontal direction
+   * @param {number} scaleY scaling factor in the vertical direction
+   * @param {function} cb callback function
+   */
+  scaleAndDraw(focusX, focusY, scaleX, scaleY, cb) {
+    this.transformAndDraw(scaleX, 0, 0, scaleY, focusX * (1 - scaleX), focusY * (1 - scaleY), cb);
   }
 
   /**
@@ -2216,8 +2246,175 @@ const StdTransFunc = {
     painter.image(prev, 0, 0);
     return true;
   },
-  fade: null,
-  fadeWithColor: null
+  /**
+   * Fade.
+   * @param {number} duration duration of transition
+   * @returns {function} transition function
+   */
+  fade: (duration) => (prev, next, counter, painter) => {
+    painter.image(next, 0, 0);
+    painter.setGlobalAlphaAndDraw(1 - counter / duration, () => {
+      painter.image(prev, 0, 0);
+    });
+    return counter >= duration;
+  },
+  /**
+   * Fade with color.
+   * @param {number} duration duration of transition
+   * @param {(string|CanvasGradient|CanvasPattern)} [style='#000'] fill style
+   * @returns {function} transition function
+   */
+  fadeWithColor: (duration, style = '#000') => (prev, next, counter, painter) => {
+    painter.image(counter * 2 < duration ? prev : next, 0, 0);
+    painter.setGlobalAlphaAndDraw(counter * 2 < duration ? counter * 2 / duration : 2 - counter * 2 / duration, () => {
+      painter.background(style);
+    });
+    return counter >= duration;
+  },
+  /**
+   * Push the screen.
+   * @param {number} duration duration of transition
+   * @param {Directions} direction push direction
+   * @param {function} [ease] easing function
+   * @returns {function} transition function
+   */
+  push: (duration, direction, ease = x => x) => {
+    const horizontalRelativeDir = (direction + 4) % 3 - 1;
+    const verticalRelativeDir = Math.floor((direction + 4) / 3) - 1;
+    return (prev, next, counter, painter) => {
+      const progress = ease(counter / duration);
+      painter.background('#000');
+      painter.image(prev, horizontalRelativeDir * progress * prev.width, verticalRelativeDir * progress * prev.height);
+      painter.image(next, horizontalRelativeDir * (progress - 1) * next.width, verticalRelativeDir * (progress - 1) * next.height);
+      return counter >= duration;
+    };
+  },
+  /**
+   * Wipe the screen.
+   * @param {number} duration duration of transition
+   * @param {Directions} direction push direction
+   * @param {function} [ease] easing function
+   * @returns {function} transition function
+   */
+  wipe: (duration, direction, ease = x => x) => {
+    const horizontalRelativeDir = (direction + 4) % 3 - 1;
+    const verticalRelativeDir = Math.floor((direction + 4) / 3) - 1;
+    return (prev, next, counter, painter) => {
+      const progress = ease(counter / duration);
+      const x = horizontalRelativeDir < 0 ? (1 - progress) * next.width : 0;
+      const y = verticalRelativeDir < 0 ? (1 - progress) * next.height : 0;
+      painter.image(prev, 0, 0);
+      painter.image(next, x, y, {
+        crop: {
+          x,
+          y,
+          width: horizontalRelativeDir ? progress * next.width : next.width,
+          height: verticalRelativeDir ? progress * next.height : next.height
+        }
+      });
+      return counter >= duration;
+    };
+  },
+  /**
+   * Split the screen and come in.
+   * @param {number} duration duration of transition
+   * @param {Directions} direction direction to come in
+   * @param {Object} [opt] options
+   * @param {number} [opt.num=8] number of splitting
+   * @param {function} [opt.ease] easing function
+   */
+  stripeIn: (duration, direction, opt = {}) => {
+    const horizontalRelativeDir = (direction + 4) % 3 - 1;
+    const verticalRelativeDir = Math.floor((direction + 4) / 3) - 1;
+    const barNum = 'num' in opt ? opt.num : 8;
+    const ease = 'ease' in opt ? opt.ease : (x => x);
+    return (prev, next, counter, painter) => {
+      const progress = ease(counter / duration);
+      const barWidth = horizontalRelativeDir ? next.width : next.width / barNum;
+      const barHeight = verticalRelativeDir ? next.height : next.height / barNum;
+
+      painter.image(prev, 0, 0);
+      for (let i = 0, s = -1; i < barNum; i++, s *= -1) {
+        const cx = horizontalRelativeDir ? 0 : i * barWidth;
+        const cy = verticalRelativeDir ? 0 : i * barHeight;
+        const x = horizontalRelativeDir ? s * horizontalRelativeDir * (1 - progress) * next.width : i * barWidth;
+        const y = verticalRelativeDir ? s * verticalRelativeDir * (1 - progress) * next.height : i * barHeight;
+        painter.image(next, x, y, { crop: { x: cx, y: cy, width: barWidth, height: barHeight } });
+      }
+      return counter >= duration;
+    };
+  },
+  /**
+   * Split the screen and go out.
+   * @param {number} duration duration of transition
+   * @param {Directions} direction direction to go out
+   * @param {Object} [opt] options
+   * @param {number} [opt.num=8] number of splitting
+   * @param {function} [opt.ease] easing function
+   */
+  stripeOut: (duration, direction, opt = {}) => {
+    const horizontalRelativeDir = (direction + 4) % 3 - 1;
+    const verticalRelativeDir = Math.floor((direction + 4) / 3) - 1;
+    const barNum = 'num' in opt ? opt.num : 8;
+    const ease = 'ease' in opt ? opt.ease : (x => x);
+    return (prev, next, counter, painter) => {
+      const progress = ease(counter / duration);
+      const barWidth = horizontalRelativeDir ? next.width : next.width / barNum;
+      const barHeight = verticalRelativeDir ? next.height : next.height / barNum;
+
+      painter.image(next, 0, 0);
+      for (let i = 0, s = 1; i < barNum; i++, s *= -1) {
+        const cx = horizontalRelativeDir ? 0 : i * barWidth;
+        const cy = verticalRelativeDir ? 0 : i * barHeight;
+        const x = horizontalRelativeDir ? s * horizontalRelativeDir * progress * next.width : i * barWidth;
+        const y = verticalRelativeDir ? s * verticalRelativeDir * progress * next.height : i * barHeight;
+        painter.image(prev, x, y, { crop: { x: cx, y: cy, width: barWidth, height: barHeight } });
+      }
+      return counter >= duration;
+    };
+  },
+  /**
+   *
+   */
+  silhouetteIn: (duration, focusX, focusY, draw) => {
+    return (prev, next, counter, painter) => {
+      const progress = counter / duration;
+      const maxScale = Math.max(next.width, next.height);
+      const scale = Math.pow(maxScale, -1 + 2 * progress);
+      painter.clear();
+      painter.scaleAndDraw(focusX, focusY, scale, scale, () => {
+        draw(painter);
+      });
+      painter.setGlobalCompositeOperationAndDraw('source-in', () => {
+        painter.image(next, 0, 0);
+      });
+      painter.setGlobalCompositeOperationAndDraw('destination-over', () => {
+        painter.image(prev, 0, 0);
+      });
+      return counter >= duration;
+    };
+  },
+  /**
+   *
+   */
+  silhouetteOut: (duration, focusX, focusY, draw) => {
+    return (prev, next, counter, painter) => {
+      const progress = counter / duration;
+      const maxScale = Math.max(next.width, next.height);
+      const scale = Math.pow(maxScale, 1 - 2 * progress);
+      painter.clear();
+      painter.scaleAndDraw(focusX, focusY, scale, scale, () => {
+        draw(painter);
+      });
+      painter.setGlobalCompositeOperationAndDraw('source-in', () => {
+        painter.image(prev, 0, 0);
+      });
+      painter.setGlobalCompositeOperationAndDraw('destination-over', () => {
+        painter.image(next, 0, 0);
+      });
+      return counter >= duration;
+    };
+  }
 };
 
 Object.freeze(StdTransFunc);
