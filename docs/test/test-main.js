@@ -118,8 +118,8 @@
           if (row === 5) return Transition.Trans('title', { transFunc: StdTransFunc.stripeIn(60, Directions.N, { num: 16 }) });
           if (row === 6) return Transition.Trans('title', { transFunc: StdTransFunc.stripeOut(60, Directions.S, { num: 16 }) });
           // if (row === 7) return Transition.Trans('title', { transFunc: StdTransFunc.checker(60, Directions.S, { num: 16 }) });
-          // if (row === 8) return Transition.Trans('title', { transFunc: StdTransFunc.gateIn(60, Directions.S, { num: 16 }) });
-          // if (row === 9) return Transition.Trans('title', { transFunc: StdTransFunc.gateOut(60, Directions.S, { num: 16 }) });
+          if (row === 8) return Transition.Trans('title', { transFunc: StdTransFunc.gateIn(60, Directions.S) });
+          if (row === 9) return Transition.Trans('title', { transFunc: StdTransFunc.gateOut(60, Directions.S) });
           if (row === 10) return Transition.Trans('title', {
             transFunc: StdTransFunc.silhouetteIn(90, game.width / 2, game.height / 2, painter => {
               // painter.diamond(game.width / 4, game.height / 4, game.width / 2, game.height / 2).fill('#000');

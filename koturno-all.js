@@ -2376,6 +2376,47 @@ const StdTransFunc = {
   /**
    *
    */
+  gateIn: (duration, direction, ease = x => x) => {
+    const horizontalRelativeDir = (direction + 4) % 3 - 1;
+    const verticalRelativeDir = Math.floor((direction + 4) / 3) - 1;
+    return (prev, next, counter, painter) => {
+      const progress = ease(counter / duration);
+      const width = horizontalRelativeDir ? next.width / 2 : next.width;
+      const height = verticalRelativeDir ? next.height / 2 : next.height
+      painter.image(prev, 0, 0);
+      painter.image(next,
+        (progress - 1) * (next.width - width),
+        (progress - 1) * (next.height - height), { crop: { width, height } }
+      );
+      painter.image(next,
+        (2 - progress) * (next.width - width),
+        (2 - progress) * (next.height - height), { crop: { x: next.width - width, y: next.height - height, width, height } }
+      );
+      return counter >= duration;
+    };
+  },
+  /**
+   *
+   */
+  gateOut: (duration, direction, ease = x => x) => {
+    const horizontalRelativeDir = (direction + 4) % 3 - 1;
+    const verticalRelativeDir = Math.floor((direction + 4) / 3) - 1;
+    return (prev, next, counter, painter) => {
+      const progress = ease(counter / duration);
+      const width = horizontalRelativeDir ? next.width / 2 : next.width;
+      const height = verticalRelativeDir ? next.height / 2 : next.height
+      painter.image(next, 0, 0);
+      painter.image(prev, -progress * (next.width - width), -progress * (next.height - height), { crop: { width, height } });
+      painter.image(prev,
+        (1 + progress) * (next.width - width),
+        (1 + progress) * (next.height - height), { crop: { x: next.width - width, y: next.height - height, width, height } }
+      );
+      return counter >= duration;
+    };
+  },
+  /**
+   *
+   */
   silhouetteIn: (duration, focusX, focusY, draw) => {
     return (prev, next, counter, painter) => {
       const progress = counter / duration;
