@@ -23,7 +23,7 @@ const Logger = {
       console.trace('%cstack trace:', Logger.ITALIC_STYLE);
       console.groupEnd();
       if (Logger._game !== null) {
-        Logger._game.sendLog(msg);
+        Logger._game.sendLog(msg, Logger.FATAL_STYLE);
       }
 
       throw new Error('Some fatal error occurred. See error messages.');
@@ -39,7 +39,7 @@ const Logger = {
       console.trace('%cstack trace:', Logger.ITALIC_STYLE);
       console.groupEnd();
       if (Logger._game !== null) {
-        Logger._game.sendLog(msg);
+        Logger._game.sendLog(msg, Logger.ERROR_STYLE);
       }
     }
   },
@@ -53,7 +53,7 @@ const Logger = {
       console.trace('%cstack trace:', Logger.ITALIC_STYLE);
       console.groupEnd();
       if (Logger._game !== null) {
-        Logger._game.sendLog(msg);
+        Logger._game.sendLog(msg, Logger.WARNING_STYLE);
       }
     }
   },
@@ -68,7 +68,7 @@ const Logger = {
       console.trace('%cstack trace:', Logger.ITALIC_STYLE);
       console.groupEnd();
       if (Logger._game !== null) {
-        Logger._game.sendLog(msg);
+        Logger._game.sendLog(msg, Logger.INFO_STYLE);
       }
     }
   },
@@ -82,7 +82,7 @@ const Logger = {
       console.trace('%cstack trace:', Logger.ITALIC_STYLE);
       console.groupEnd();
       if (Logger._game !== null) {
-        Logger._game.sendLog(msg);
+        Logger._game.sendLog(msg, Logger.DEBUG_STYLE);
       }
     }
   },

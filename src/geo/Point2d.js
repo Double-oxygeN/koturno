@@ -48,6 +48,6 @@ class Point2d extends Point {
    * @param {number} height height of a rectangle
    */
   isInRectangle(x, y, width, height) {
-    return this.isInNBox(new Point2d(x, y), new Point2d(x + w, y + h));
+    return this.isInNBox(new Point2d(x, y), new Point2d(x + width, y + height));
   }
 }

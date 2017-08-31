@@ -28,6 +28,9 @@ class SoundManager {
       /** @member {number} */
       this.SEVolume = 1.0;
 
+      this._debugMode = false;
+      this._silent = null;
+
       sounds.forEach(sound => {
         const soundProp = {
           name: sound.name,
@@ -81,6 +84,13 @@ class SoundManager {
   }
 
   /**
+   * Switch to debug mode.
+   */
+  setDebugMode() {
+    this._debugMode = true;
+  }
+
+  /**
    * Load all sounds.
    * @returns {Promise}
    */
@@ -95,11 +105,11 @@ class SoundManager {
     }))).then(() => new Promise((res, rej) => {
       let tmp = __SCRIPT_PATH__.split('/');
       tmp[tmp.length - 1] = 'silent.wav';
-      const silent = new Audio(tmp.join('/'));
-      silent.loop = true;
-      silent.load();
-      silent.volume = 0.1;
-      silent.play();
+      this._silent = new Audio(tmp.join('/'));
+      this._silent.loop = true;
+      this._silent.load();
+      this._silent.volume = 0.1;
+      this._silent.play();
       res(null);
     }));
   }
@@ -180,7 +190,7 @@ class SoundManager {
    * @param {number} [param.speed] playing speed
    */
   changeBGMParams(param) {
-    if (this.currentPlayBGM !== null) {
+    if (this.isPlayingBGM()) {
       if ('time' in param)
         this.currentPlayBGM.audio.currentTime = param.time;
       if ('volume' in param)
@@ -194,8 +204,8 @@ class SoundManager {
    * Pause playing BGM.
    * @param {string} [name] BGM name. If it is blank, then pause playing BGM.
    */
-  pauseBGM(name = this.currentPlayBGM.name) {
-    if (this.currentPlayBGM !== null && (this.currentPlayBGM.name === name)) {
+  pauseBGM(name) {
+    if (this.isPlayingBGM() && (!name || this.currentPlayBGM.name === name)) {
       this.currentPlayBGM.audio.pause();
       this.currentPlayBGM = null;
     }
@@ -206,7 +216,7 @@ class SoundManager {
    * @param {string} [name] BGM name. If it is blank, then stop playing BGM.
    */
   stopBGM(name) {
-    if (this.currentPlayBGM !== null && (!name || this.currentPlayBGM.name === name)) {
+    if (this.isPlayingBGM() && (!name || this.currentPlayBGM.name === name)) {
       this.currentPlayBGM.audio.pause();
       this.currentPlayBGM.audio.currentTime = 0.0;
       this.currentPlayBGM = null;
@@ -221,9 +231,18 @@ class SoundManager {
    * @returns {number} current BGM volume
    */
   fadeBGM(duration, time, out = true) {
-    const volume = out ? 1 - time / duration : time / duration;
+    const volume = this.BGMVolume * (out ? 1 - time / duration : time / duration);
     this.changeBGMParams({ volume });
+    if (volume <= 0) this.stopBGM();
     return Math.min(1.0, Math.max(0.0, volume));
+  }
+
+  /**
+   * Check if there is any playing BGM.
+   * @returns {boolean} `true` if any BGM is playing now
+   */
+  isPlayingBGM() {
+    return this.currentPlayBGM !== null;
   }
 
   /**
@@ -240,6 +259,23 @@ class SoundManager {
     } else {
       return '';
     }
+  }
+
+  /**
+   * Reset
+   */
+  reset() {
+    this.stopBGM();
+    this.BGMVolume = 1.0;
+    this.SEVolume = 1.0;
+  }
+
+  /**
+   * Finalize sound manager.
+   */
+  finalize() {
+    this.stopBGM();
+    if (this._silent !== null) this._silent.pause();
   }
 
   /**

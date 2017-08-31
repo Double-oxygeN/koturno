@@ -202,7 +202,7 @@ class Point2d extends Point {
    * @param {number} height height of a rectangle
    */
   isInRectangle(x, y, width, height) {
-    return this.isInNBox(new Point2d(x, y), new Point2d(x + w, y + h));
+    return this.isInNBox(new Point2d(x, y), new Point2d(x + width, y + height));
   }
 }
 
@@ -745,6 +745,9 @@ class SoundManager {
       /** @member {number} */
       this.SEVolume = 1.0;
 
+      this._debugMode = false;
+      this._silent = null;
+
       sounds.forEach(sound => {
         const soundProp = {
           name: sound.name,
@@ -798,6 +801,13 @@ class SoundManager {
   }
 
   /**
+   * Switch to debug mode.
+   */
+  setDebugMode() {
+    this._debugMode = true;
+  }
+
+  /**
    * Load all sounds.
    * @returns {Promise}
    */
@@ -812,11 +822,11 @@ class SoundManager {
     }))).then(() => new Promise((res, rej) => {
       let tmp = __SCRIPT_PATH__.split('/');
       tmp[tmp.length - 1] = 'silent.wav';
-      const silent = new Audio(tmp.join('/'));
-      silent.loop = true;
-      silent.load();
-      silent.volume = 0.1;
-      silent.play();
+      this._silent = new Audio(tmp.join('/'));
+      this._silent.loop = true;
+      this._silent.load();
+      this._silent.volume = 0.1;
+      this._silent.play();
       res(null);
     }));
   }
@@ -897,7 +907,7 @@ class SoundManager {
    * @param {number} [param.speed] playing speed
    */
   changeBGMParams(param) {
-    if (this.currentPlayBGM !== null) {
+    if (this.isPlayingBGM()) {
       if ('time' in param)
         this.currentPlayBGM.audio.currentTime = param.time;
       if ('volume' in param)
@@ -911,8 +921,8 @@ class SoundManager {
    * Pause playing BGM.
    * @param {string} [name] BGM name. If it is blank, then pause playing BGM.
    */
-  pauseBGM(name = this.currentPlayBGM.name) {
-    if (this.currentPlayBGM !== null && (this.currentPlayBGM.name === name)) {
+  pauseBGM(name) {
+    if (this.isPlayingBGM() && (!name || this.currentPlayBGM.name === name)) {
       this.currentPlayBGM.audio.pause();
       this.currentPlayBGM = null;
     }
@@ -923,7 +933,7 @@ class SoundManager {
    * @param {string} [name] BGM name. If it is blank, then stop playing BGM.
    */
   stopBGM(name) {
-    if (this.currentPlayBGM !== null && (!name || this.currentPlayBGM.name === name)) {
+    if (this.isPlayingBGM() && (!name || this.currentPlayBGM.name === name)) {
       this.currentPlayBGM.audio.pause();
       this.currentPlayBGM.audio.currentTime = 0.0;
       this.currentPlayBGM = null;
@@ -938,9 +948,18 @@ class SoundManager {
    * @returns {number} current BGM volume
    */
   fadeBGM(duration, time, out = true) {
-    const volume = out ? 1 - time / duration : time / duration;
+    const volume = this.BGMVolume * (out ? 1 - time / duration : time / duration);
     this.changeBGMParams({ volume });
+    if (volume <= 0) this.stopBGM();
     return Math.min(1.0, Math.max(0.0, volume));
+  }
+
+  /**
+   * Check if there is any playing BGM.
+   * @returns {boolean} `true` if any BGM is playing now
+   */
+  isPlayingBGM() {
+    return this.currentPlayBGM !== null;
   }
 
   /**
@@ -957,6 +976,23 @@ class SoundManager {
     } else {
       return '';
     }
+  }
+
+  /**
+   * Reset
+   */
+  reset() {
+    this.stopBGM();
+    this.BGMVolume = 1.0;
+    this.SEVolume = 1.0;
+  }
+
+  /**
+   * Finalize sound manager.
+   */
+  finalize() {
+    this.stopBGM();
+    if (this._silent !== null) this._silent.pause();
   }
 
   /**
@@ -1830,7 +1866,7 @@ const Logger = {
       console.trace('%cstack trace:', Logger.ITALIC_STYLE);
       console.groupEnd();
       if (Logger._game !== null) {
-        Logger._game.sendLog(msg);
+        Logger._game.sendLog(msg, Logger.FATAL_STYLE);
       }
 
       throw new Error('Some fatal error occurred. See error messages.');
@@ -1846,7 +1882,7 @@ const Logger = {
       console.trace('%cstack trace:', Logger.ITALIC_STYLE);
       console.groupEnd();
       if (Logger._game !== null) {
-        Logger._game.sendLog(msg);
+        Logger._game.sendLog(msg, Logger.ERROR_STYLE);
       }
     }
   },
@@ -1860,7 +1896,7 @@ const Logger = {
       console.trace('%cstack trace:', Logger.ITALIC_STYLE);
       console.groupEnd();
       if (Logger._game !== null) {
-        Logger._game.sendLog(msg);
+        Logger._game.sendLog(msg, Logger.WARNING_STYLE);
       }
     }
   },
@@ -1875,7 +1911,7 @@ const Logger = {
       console.trace('%cstack trace:', Logger.ITALIC_STYLE);
       console.groupEnd();
       if (Logger._game !== null) {
-        Logger._game.sendLog(msg);
+        Logger._game.sendLog(msg, Logger.INFO_STYLE);
       }
     }
   },
@@ -1889,7 +1925,7 @@ const Logger = {
       console.trace('%cstack trace:', Logger.ITALIC_STYLE);
       console.groupEnd();
       if (Logger._game !== null) {
-        Logger._game.sendLog(msg);
+        Logger._game.sendLog(msg, Logger.DEBUG_STYLE);
       }
     }
   },
@@ -1949,7 +1985,8 @@ class Game {
       this.canvas.height = 'height' in obj ? Math.floor(obj.height) : 600;
       this.divElem.base.setAttribute('style', `width: ${this.canvas.width}px; height: ${this.canvas.height}px; border: 1px #ccc solid;`);
       this.divElem.canvas.appendChild(this.canvas);
-      this.divExpansionRate = -1;
+      this.divExpansionRate = 1;
+      this.centering = false;
 
       this.painter = new Painter2d(this.canvas, this.imageManager);
       this.action = new ActionManager(this.canvas);
@@ -1996,12 +2033,13 @@ class Game {
     };
     window.addEventListener('resize', onResize);
     onResize();
+    this.centering = true;
     return this;
   }
 
   _setNormalUI() {
     this.divElem.base.appendChild(this.divElem.canvas);
-    if (this.divExpansionRate > 0) {
+    if (this.centering) {
       const onResize = () => {
         this.canvas.setAttribute('style', `transform: scale(${this.divExpansionRate}, ${this.divExpansionRate}); position: relative; ` +
           `left: ${(this.divExpansionRate - 1) * this.canvas.width / 2}px; ` +
@@ -2019,37 +2057,14 @@ class Game {
     this.divElem.log = document.createElement('div');
     this.divElem.timeline = document.createElement('div');
 
-    if (this.divExpansionRate > 0) {
+    if (this.centering) {
       const onResize = () => {
-        const baseWidth = Math.ceil(this.canvas.width * this.divExpansionRate);
-        const baseHeight = Math.ceil(this.canvas.height * this.divExpansionRate);
-        this.divElem.canvas.setAttribute('style', `width: ${Math.round(baseWidth * 2 / 3)}px; height: ${Math.round(baseHeight * 2 / 3)}px; float: left;`);
-        this.divElem.frame.setAttribute('style', `width: ${Math.round(baseWidth / 3)}px; height: ${Math.round(baseHeight / 9)}px; ` +
-          `text-align: center; vertical-align: middle; display: table-cell; background-color: #f00;`);
-        this.divElem.ctrl.setAttribute('style', `width: ${Math.round(baseWidth / 3)}px; height: ${Math.round(baseHeight * 2 / 9)}px; background-color: #ff0;`);
-        this.divElem.log.setAttribute('style', `width: ${Math.round(baseWidth / 3)}px; height: ${Math.round(baseHeight / 3)}px; ` +
-          `overflow: scroll; background-color: #0f0;`);
-        this.divElem.timeline.setAttribute('style', `width: ${baseWidth}px; height: ${Math.round(baseHeight / 3)}px; ` +
-          `overflow: scroll; background-color: #0ff;`);
-
-        this.canvas.setAttribute('style', `transform: scale(${this.divExpansionRate * 2 / 3}, ${this.divExpansionRate * 2 / 3}); position: relative; ` +
-          `left: ${Math.round((this.divExpansionRate * 2 / 3 - 1) * this.canvas.width / 2)}px; ` +
-          `top: ${Math.round((this.divExpansionRate * 2 / 3 - 1) * this.canvas.height / 2)}px;`);
+        this._setDivStyle(Math.ceil(this.canvas.width * this.divExpansionRate), Math.ceil(this.canvas.height * this.divExpansionRate))
       };
       window.addEventListener('resize', onResize);
       onResize();
     } else {
-      this.divElem.canvas.setAttribute('style', `width: ${Math.round(this.canvas.width * 2 / 3)}px; height: ${Math.round(this.canvas.height * 2 / 3)}px; float: left;`);
-      this.divElem.frame.setAttribute('style', `width: ${Math.round(this.canvas.width / 3)}px; height: ${Math.round(this.canvas.height / 9)}px; ` +
-        `text-align: center; vertical-align: middle; display: table-cell; background-color: #f00;`);
-      this.divElem.ctrl.setAttribute('style', `width: ${Math.round(this.canvas.width / 3)}px; height: ${Math.round(this.canvas.height * 2 / 9)}px; background-color: #ff0;`);
-      this.divElem.log.setAttribute('style', `width: ${Math.round(this.canvas.width / 3)}px; height: ${Math.round(this.canvas.height / 3)}px; ` +
-        `overflow: scroll; background-color: #0f0;`);
-      this.divElem.timeline.setAttribute('style', `width: ${this.canvas.width}px; height: ${Math.round(this.canvas.height / 3)}px; ` +
-        `overflow: scroll; background-color: #0ff;`);
-
-      this.canvas.setAttribute('style', `transform: scale(${2 / 3}, ${2 / 3}); position: relative; ` +
-        `left: ${-Math.round(this.canvas.width / 6)}px; top: ${-Math.round(this.canvas.height / 6)}px;`);
+      this._setDivStyle(this.canvas.width, this.canvas.height);
     }
 
     sideDiv.setAttribute('style', 'float: left;');
@@ -2063,6 +2078,57 @@ class Game {
     this.divElem.base.appendChild(this.divElem.timeline);
   }
 
+  _setDivStyle(baseWidth, baseHeight) {
+    this.divElem.canvas.setAttribute('style', `width: ${Math.round(baseWidth * 2 / 3)}px; height: ${Math.round(baseHeight * 2 / 3)}px; float: left;`);
+    this.divElem.frame.setAttribute('style', `width: ${Math.round(baseWidth / 3) - 6}px; height: ${Math.round(baseHeight / 9) - 6}px; ` +
+      `text-align: center; vertical-align: middle; display: table-cell; background-color: #000; border: 3px #0f0 solid; ` +
+      `color: #0f0; font-size: 150%;`);
+    this.divElem.ctrl.setAttribute('style', `width: ${Math.round(baseWidth / 3) - 6}px; height: ${Math.round(baseHeight * 2 / 9) - 6}px; ` +
+      `background-color: #000; border: 3px #0f0 solid;`);
+    this.divElem.log.setAttribute('style', `width: ${Math.round(baseWidth / 3) - 6}px; height: ${Math.round(baseHeight / 3) - 6}px; ` +
+      `overflow: scroll; background-color: #000; border: 3px #0f0 solid;`);
+    this.divElem.timeline.setAttribute('style', `width: ${baseWidth - 3}px; height: ${Math.round(baseHeight / 3) - 3}px; ` +
+      `overflow: scroll; background-color: #000; border: 3px #0f0 solid;`);
+
+    this.canvas.setAttribute('style', `transform: scale(${this.divExpansionRate * 2 / 3}, ${this.divExpansionRate * 2 / 3}); position: relative; ` +
+      `left: ${Math.round((this.divExpansionRate * 2 / 3 - 1) * this.canvas.width / 2)}px; ` +
+      `top: ${Math.round((this.divExpansionRate * 2 / 3 - 1) * this.canvas.height / 2)}px;`);
+  }
+
+  _updateDebugInfo(sceneName, counters) {
+    this.divElem.frame.innerHTML = counters.toString();
+
+    // const timelineRow = document.createElement('tr');
+    // for (let i = 0; i < 6; i++) {
+    //   const cell = document.createElement('td');
+    //   cell.setAttribute('style', `border: 1px #0f0 solid; color: #0f0; ` +
+    //     `text-align: ${i === 2 ? 'right' : i === 4 ? 'left' : 'center'}`);
+    //   switch (i) {
+    //   case 0:
+    //     cell.innerHTML = '-';
+    //     break;
+    //   case 1:
+    //     cell.innerHTML = counters.general.toString(10);
+    //     break;
+    //   case 2:
+    //     /* TODO: frame 2 time */
+    //     break;
+    //   case 3:
+    //     cell.innerHTML = sceneName;
+    //     break;
+    //   case 4:
+    //     cell.innerHTML = Array.from(this.action.keyboard.down.values()).join(' ');
+    //     break;
+    //   case 5:
+    //     cell.innerHTML = this.action.mouse.position.toString();
+    //     break;
+    //   }
+    //   timelineRow.appendChild(cell);
+    // }
+    // this.timeTable.appendChild(timelineRow);
+    // this.divElem.timeline.scrollTop = this.divElem.timeline.scrollHeight;
+  }
+
   /**
    * Start the game.
    * @param {boolean} debug if `true`, then start as debug mode
@@ -2071,11 +2137,10 @@ class Game {
     const mainLoop = (sceneName, initState, initCounters) => {
       const currentScene = this.scenes.getScene(sceneName);
       const loop = (currentState, counters) => {
-        /* 描画 */
         currentScene.draw(currentState, this.action, counters, this.painter, this);
-        /* 状態の更新 */
+
         const nextState = currentScene.update(currentState, this.action, counters, this.soundManager, this);
-        /* シーン遷移判定 */
+
         currentScene.transition(currentState, this.action, counters, this).match({
           stay: () => {
             window.requestAnimationFrame(stamp => {
@@ -2100,6 +2165,7 @@ class Game {
                 this._millisecondsBetweenTwoFrame.push(stamp);
                 this._millisecondsBetweenTwoFrame.shift();
                 transLoop({
+                  name: sceneName,
                   img: prevPainter.canvas,
                   state: currentState
                 }, {
@@ -2112,8 +2178,10 @@ class Game {
           },
           end: () => {
             Logger.debug(`Game ended.\ntotal frame: ${counters.general}f`);
+            this.soundManager.finalize();
           },
           reset: () => {
+            this.soundManager.reset();
             window.requestAnimationFrame(stamp => {
               this._millisecondsBetweenTwoFrame.push(stamp);
               this._millisecondsBetweenTwoFrame.shift();
@@ -2121,11 +2189,11 @@ class Game {
             });
           }
         });
-        /* デバッグモードの処理 */
+
         if (debug) {
-          this.divElem.frame.innerHTML = counters.toString();
+          this._updateDebugInfo(sceneName, counters);
         }
-        /* 入力を初期化 */
+
         this.action.resetAction();
       };
 
@@ -2150,7 +2218,7 @@ class Game {
       }
       /* デバッグモードの処理 */
       if (debug) {
-        this.divElem.frame.innerHTML = counters.toString();
+        this._updateDebugInfo(`${prev.name} → ${next.name}`, counters);
       }
     };
 
@@ -2163,6 +2231,7 @@ class Game {
     // blackout
     this.painter.background("#000000");
 
+    // loading resources
     this.imageManager.load()
       .then(() => this.soundManager.load(), () => {
         Logger.fatal('Image load error!');
@@ -2186,6 +2255,8 @@ class Game {
    */
   debug() {
     this.action.listen();
+    Logger.setGame(this);
+    this.soundManager.setDebugMode();
     this.start(true);
   }
 
@@ -2198,9 +2269,16 @@ class Game {
 
   /**
    * @param {string[]} msg messages
+   * @param {string} style style of log
    */
-  sendLog(msg) {
-    // TODO: impl.
+  sendLog(msg, style) {
+    if (this.divElem.log !== null) {
+      const log = document.createElement('div');
+      log.setAttribute('style', `width: auto; border: 1px #999 solid; overflow-wrap: break-word; ` + style);
+      log.innerHTML = msg.join('<br>').replace(/\n/g, '<br>');
+      this.divElem.log.appendChild(log);
+      this.divElem.log.scrollTop = this.divElem.log.scrollHeight;
+    }
   }
 
   /**

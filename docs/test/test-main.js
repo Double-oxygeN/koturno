@@ -102,7 +102,7 @@
           return Transition.Trans(`ActionManager-${row}`);
           break;
         case 2:
-          if (row === 0) return Transition.Trans(`SoundManager-${row}`);
+          return Transition.Trans(`SoundManager-${row}`);
           break;
         case 4:
           if (row === 0) return Transition.Trans('title');
@@ -731,22 +731,230 @@ mollit anim id est laborum.`;
     }
 
     init(state, counters, game) {
-      return State.init({});
+      return State.init({
+        circles: []
+      });
     }
 
     update(state, action, counters, sound, game) {
-      if (action.keyboard.isPressed('KeyS')) sound.playSE('move');
-      if (action.keyboard.isPressed('KeyG')) sound.playSE('se1');
-      if (action.keyboard.isPressed('KeyK')) sound.playSE('se2');
-      return state;
+      let circles = state.getState('circles');
+      circles = circles.map(circle => { circle.r++; return circle; }).filter(circle => circle.r <= 100);
+      if (action.keyboard.isPressed('KeyS') || action.mouse.isPressed(MouseButton.LEFT) && action.mouse.position.isInCircle(new Point2d(100, 300), 50)) {
+        sound.playSE('move');
+        circles.push({ x: 100, y: 300, r: 50, color: '#f00' });
+      }
+      if (action.keyboard.isPressed('KeyG') || action.mouse.isPressed(MouseButton.LEFT) && action.mouse.position.isInCircle(new Point2d(300, 300), 50)) {
+        sound.playSE('se1');
+        circles.push({ x: 300, y: 300, r: 50, color: '#0f0' });
+      }
+      if (action.keyboard.isPressed('KeyK') || action.mouse.isPressed(MouseButton.LEFT) && action.mouse.position.isInCircle(new Point2d(500, 300), 50)) {
+        sound.playSE('se2');
+        circles.push({ x: 500, y: 300, r: 50, color: '#00f' });
+      }
+      return state.setState('circles', circles);
     }
 
     draw(state, action, counters, painter, game) {
+      const pressS = action.keyboard.isDown('KeyS') || action.mouse.isDown(MouseButton.LEFT) && action.mouse.position.isInCircle(new Point2d(100, 300), 50);
+      const pressG = action.keyboard.isDown('KeyG') || action.mouse.isDown(MouseButton.LEFT) && action.mouse.position.isInCircle(new Point2d(300, 300), 50);
+      const pressK = action.keyboard.isDown('KeyK') || action.mouse.isDown(MouseButton.LEFT) && action.mouse.position.isInCircle(new Point2d(500, 300), 50);
+
       painter.background('#fff');
+
+      painter.circle(100, 300, pressS ? 45 : 50).outlined('#000', '#f66', 3);
+      painter.circle(300, 300, pressG ? 45 : 50).outlined('#000', '#6f6', 3);
+      painter.circle(500, 300, pressK ? 45 : 50).outlined('#000', '#66f', 3);
+      painter.text('S', 100, 300, { size: 24, align: 'center', baseline: 'middle' }).fill('#fcc');
+      painter.text('G', 300, 300).fill('#cfc');
+      painter.text('K', 500, 300).fill('#ccf');
+
+      state.getState('circles').forEach(circle => {
+        painter.setGlobalAlphaAndDraw(10 / (circle.r - 40), () => {
+          painter.circle(circle.x, circle.y, circle.r).stroke(circle.color, { width: 3 });
+        });
+      });
     }
 
     transition(state, action, counters, game) {
       return action.keyboard.isPressed('Space', 'Enter') ? Transition.Trans('title') : Transition.Stay();
+    }
+  };
+
+  const SoundTestScene1 = class extends Scene {
+    constructor() {
+      super('SoundManager-1');
+    }
+
+    init(state, counters, game) {
+      return State.init({
+        speed: 1.0,
+        fade: { start: -1, mode: 'none' }
+      });
+    }
+
+    update(state, action, counters, sound, game) {
+      const speed = state.getState('speed');
+      const fade = state.getState('fade');
+
+      if (fade.mode === 'in') {
+        sound.fadeBGM(180, counters.scene - fade.start, false);
+        if (counters.scene - fade.start >= 180) fade.mode = 'none';
+      }
+      if (fade.mode === 'out') {
+        sound.fadeBGM(180, counters.scene - fade.start, true);
+        if (counters.scene - fade.start >= 180) fade.mode = 'none';
+      }
+
+      if (action.keyboard.isPressed('Space', 'Enter')) {
+        sound.stopBGM();
+      }
+
+      if (action.mouse.isPressed(MouseButton.LEFT)) {
+        if (action.mouse.position.isInRectangle(50, 100, 150, 40)) {
+          sound.playBGM('theme', { speed });
+        }
+        if (action.mouse.position.isInRectangle(50, 200, 150, 40)) {
+          sound.pauseBGM();
+        }
+        if (action.mouse.position.isInRectangle(50, 300, 150, 40)) {
+          sound.stopBGM();
+        }
+        if (action.mouse.position.isInRectangle(300, 80, 80, 80)) {
+          sound.changeBGMParams({ speed: 0.8 });
+          return state.setState('speed', 0.8);
+        }
+        if (action.mouse.position.isInRectangle(400, 80, 80, 80)) {
+          sound.changeBGMParams({ speed: 1.0 });
+          return state.setState('speed', 1.0);
+        }
+        if (action.mouse.position.isInRectangle(500, 80, 80, 80)) {
+          sound.changeBGMParams({ speed: 1.2 });
+          return state.setState('speed', 1.2);
+        }
+        if (action.mouse.position.isInRectangle(50, 400, 150, 40)) {
+          sound.playBGM('theme', { speed });
+          sound.changeBGMParams({ volume: 0.0 });
+          return state.setState('fade', { start: counters.scene, mode: 'in' });
+        }
+        if (action.mouse.position.isInRectangle(50, 500, 150, 40)) {
+          return state.setState('fade', { start: counters.scene, mode: 'out' });
+        }
+      }
+      return state;
+    }
+
+    draw(state, action, counters, painter, game) {
+      const speed = state.getState('speed');
+      painter.background('#fff');
+
+      painter.rect(50, 100, 150, 40).outlined('#000', '#f66', 3);
+      painter.text('PLAY', 125, 120, { size: 24, align: 'center', baseline: 'middle' }).fill('#fcc');
+
+      painter.rect(300, 80, 80, 80).outlined(speed < 1 ? '#333' : '#000', '#ff6', 3);
+      painter.text('x0.8', 340, 120).fill('#ffc');
+      painter.rect(400, 80, 80, 80).outlined(speed === 1 ? '#333' : '#000', '#ff6', 3);
+      painter.text('x1.0', 440, 120).fill('#ffc');
+      painter.rect(500, 80, 80, 80).outlined(speed > 1 ? '#333' : '#000', '#ff6', 3);
+      painter.text('x1.2', 540, 120).fill('#ffc');
+
+      painter.rect(50, 200, 150, 40).outlined('#000', '#6f6', 3);
+      painter.text('PAUSE', 125, 220).fill('#cfc');
+
+      painter.rect(50, 300, 150, 40).outlined('#000', '#66f', 3);
+      painter.text('STOP', 125, 320).fill('#ccf');
+
+      painter.rect(50, 400, 150, 40).outlined('#000', '#666', 3);
+      painter.text('FADE IN', 125, 420).fill('#ccc');
+
+      painter.rect(50, 500, 150, 40).outlined('#000', '#666', 3);
+      painter.text('FADE OUT', 125, 520).fill('#ccc');
+    }
+
+    transition(state, action, counters, game) {
+      return action.keyboard.isPressed('Space', 'Enter') ? Transition.Trans('title') : Transition.Stay();
+    }
+  };
+
+  const SoundTestScene2 = class extends Scene {
+    constructor() {
+      super('SoundManager-2');
+    }
+
+    static get OPTIONS() {
+      return [
+        'BGM',
+        'SE',
+        'BGM VOLUME',
+        'SE VOLUME',
+        'EXIT'
+      ];
+    }
+
+    init(state, counters, game) {
+      return State.init({
+        cursor: 0,
+        bgmId: 0,
+        seId: 0
+      });
+    }
+
+    update(state, action, counters, sound, game) {
+      const optionNum = SoundTestScene2.OPTIONS.length;
+      const cursor = state.getState('cursor');
+
+      if (action.keyboard.isPressed('Space', 'Enter')) {
+        if (cursor === 0) sound.playBGM(sound.getNameFromID(state.getState('bgmId'), SoundType.BGM));
+        if (cursor === 1) sound.playSE(sound.getNameFromID(state.getState('seId'), SoundType.SE));
+        if (cursor === 4) sound.stopBGM();
+      }
+      if (action.keyboard.isPressed('ArrowLeft')) {
+        if (cursor === 0) return state.modifyState('bgmId', x => (x - 1 + sound.BGMList.length) % sound.BGMList.length);
+        if (cursor === 1) return state.modifyState('seId', x => (x - 1 + sound.SEList.length) % sound.SEList.length);
+        if (cursor === 2) sound.setVolume(SoundType.BGM, sound.getVolume(SoundType.BGM) - 0.2);
+        if (cursor === 3) sound.setVolume(SoundType.SE, sound.getVolume(SoundType.SE) - 0.2);
+      }
+      if (action.keyboard.isPressed('ArrowRight')) {
+        if (cursor === 0) return state.modifyState('bgmId', x => (x + 1) % sound.BGMList.length);
+        if (cursor === 1) return state.modifyState('seId', x => (x + 1) % sound.SEList.length);
+        if (cursor === 2) sound.setVolume(SoundType.BGM, sound.getVolume(SoundType.BGM) + 0.2);
+        if (cursor === 3) sound.setVolume(SoundType.SE, sound.getVolume(SoundType.SE) + 0.2);
+      }
+      if (action.keyboard.isPressed('ArrowUp')) {
+        sound.stopBGM();
+        return state.modifyState('cursor', x => (x - 1 + optionNum) % optionNum);
+      }
+      if (action.keyboard.isPressed('ArrowDown')) {
+        sound.stopBGM();
+        return state.modifyState('cursor', x => (x + 1) % optionNum);
+      }
+      return state;
+    }
+
+    draw(state, action, counters, painter, game) {
+      const cursor = state.getState('cursor');
+
+      painter.background('#fff');
+
+      painter.text('SOUND TEST', game.width / 2, 40, { size: 32, align: 'center', baseline: 'middle' }).fill('#333');
+      SoundTestScene2.OPTIONS.forEach((option, i) => {
+        painter.text(option, option === 'EXIT' ? 300 : 150, 120 + i * 80).fill(cursor === i ? '#000' : '#333');
+      });
+      painter.text(state.getState('bgmId').toString(), 450, 120).fill(cursor === 0 ? '#000' : '#333');
+      painter.text(state.getState('seId').toString(), 450, 200).fill(cursor === 1 ? '#000' : '#333');
+      [1, 2, 3, 4, 5].map((x, i, a) => x / a.length).forEach((threshold, i, a) => {
+        painter.rect(394 + i * 100 / a.length, 300, 12, -40 * threshold).fill(game.soundManager.BGMVolume >= threshold ? '#99f' : '#006');
+        painter.rect(394 + i * 100 / a.length, 380, 10, -40 * threshold).fill(game.soundManager.SEVolume >= threshold ? '#99f' : '#006');
+      });
+
+      painter.rect(20, 90 + cursor * 80, game.width - 40, 60).stroke('#33f', { width: 5 });
+      if (cursor !== 4) {
+        painter.polygon([new Point2d(350, 100 + cursor * 80), new Point2d(350, 140 + cursor * 80), new Point2d(330, 120 + cursor * 80)]).fill('#99f');
+        painter.polygon([new Point2d(550, 100 + cursor * 80), new Point2d(550, 140 + cursor * 80), new Point2d(570, 120 + cursor * 80)]).fill('#99f');
+      }
+    }
+
+    transition(state, action, counters, game) {
+      return action.keyboard.isPressed('Space', 'Enter') && state.getState('cursor') === 4 ? Transition.Trans('title') : Transition.Stay();
     }
   };
 
@@ -765,6 +973,8 @@ mollit anim id est laborum.`;
     new ActionTestScene0(),
     new ActionTestScene1(),
     new SoundTestScene0(),
+    new SoundTestScene1(),
+    new SoundTestScene2(),
   ]);
 
   Logger.setLogLevel(LogLevel.DEBUG);
@@ -780,7 +990,7 @@ mollit anim id est laborum.`;
       { name: 'move', src: 'sound/cursor_move_2.ogg', type: SoundType.SE },
       { name: 'se1', src: 'sound/se01a.wav', type: SoundType.SE },
       { name: 'se2', src: 'sound/se02a.mp3', type: SoundType.SE },
-      { name: 'theme', src: 'sound/reversible_world.ogg', type: SoundType.BGM }
+      { name: 'theme', src: 'sound/reversible_world.ogg', type: SoundType.BGM, loop: true }
     ]
   }).center().run();
 })();
