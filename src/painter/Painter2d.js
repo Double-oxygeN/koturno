@@ -441,6 +441,20 @@ class Painter2d extends Painter {
   }
 
   /**
+   * Return information about measured text.
+   * @param {string} text text
+   * @param {Object} [opt] options
+   * @param {number} [opt.size] font size [px]
+   * @param {string} [opt.font] font name
+   * @returns {TextMetrics}
+   */
+  measureText(text, opt = {}) {
+    if ('size' in opt) this.context.font = `${(this.recentTextOptions.size = opt.size).toString(10)}px ${this.recentTextOptions.font}`;
+    if ('font' in opt) this.context.font = `${this.recentTextOptions.size.toString(10)}px ${this.recentTextOptions.font = opt.font}`;
+    return this.context.measureText(text);
+  }
+
+  /**
    * Convert to string.
    * @returns {string} a string
    */

@@ -19,7 +19,7 @@ Then add this line to your HTML.
 
 * Chrome 60.0–
 * Firefox 57.0–
-* Safari 10.1–
+* Safari 11–
 * Vivaldi 1.11–
 * Cốc Cốc 64.4–
 

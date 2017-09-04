@@ -14,10 +14,10 @@ class SoundManager {
       this.BGMs = new Map();
       this.SEs = new Map();
 
-      /** @member {Object[]} */
-      this.BGMList = sounds.filter(sound => sound.type === SoundType.BGM);
-      /** @member {Object[]} */
-      this.SEList = sounds.filter(sound => sound.type === SoundType.SE);
+      /** @member {string[]} */
+      this.BGMList = sounds.filter(sound => sound.type === SoundType.BGM).map(sound => sound.name);
+      /** @member {string[]} */
+      this.SEList = sounds.filter(sound => sound.type === SoundType.SE).map(sound => sound.name);
 
       this.maxPlaySE = maxPlaySE;
       this.currentPlaySE = 0;
@@ -85,9 +85,10 @@ class SoundManager {
 
   /**
    * Switch to debug mode.
+   * @param {boolean} flag
    */
-  setDebugMode() {
-    this._debugMode = true;
+  setDebugMode(flag) {
+    this._debugMode = flag;
   }
 
   /**
@@ -253,9 +254,9 @@ class SoundManager {
    */
   getNameFromID(id, type) {
     if (type === SoundType.BGM) {
-      return this.BGMList[id - Math.floor(id / this.BGMList.length)].name;
+      return this.BGMList[id - Math.floor(id / this.BGMList.length)];
     } else if (type === SoundType.SE) {
-      return this.SEList[id - Math.floor(id / this.SEList.length)].name;
+      return this.SEList[id - Math.floor(id / this.SEList.length)];
     } else {
       return '';
     }

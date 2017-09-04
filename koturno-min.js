@@ -731,10 +731,10 @@ class SoundManager {
       this.BGMs = new Map();
       this.SEs = new Map();
 
-      /** @member {Object[]} */
-      this.BGMList = sounds.filter(sound => sound.type === SoundType.BGM);
-      /** @member {Object[]} */
-      this.SEList = sounds.filter(sound => sound.type === SoundType.SE);
+      /** @member {string[]} */
+      this.BGMList = sounds.filter(sound => sound.type === SoundType.BGM).map(sound => sound.name);
+      /** @member {string[]} */
+      this.SEList = sounds.filter(sound => sound.type === SoundType.SE).map(sound => sound.name);
 
       this.maxPlaySE = maxPlaySE;
       this.currentPlaySE = 0;
@@ -802,9 +802,10 @@ class SoundManager {
 
   /**
    * Switch to debug mode.
+   * @param {boolean} flag
    */
-  setDebugMode() {
-    this._debugMode = true;
+  setDebugMode(flag) {
+    this._debugMode = flag;
   }
 
   /**
@@ -970,9 +971,9 @@ class SoundManager {
    */
   getNameFromID(id, type) {
     if (type === SoundType.BGM) {
-      return this.BGMList[id - Math.floor(id / this.BGMList.length)].name;
+      return this.BGMList[id - Math.floor(id / this.BGMList.length)];
     } else if (type === SoundType.SE) {
-      return this.SEList[id - Math.floor(id / this.SEList.length)].name;
+      return this.SEList[id - Math.floor(id / this.SEList.length)];
     } else {
       return '';
     }
@@ -1582,6 +1583,20 @@ class Painter2d extends Painter {
   }
 
   /**
+   * Return information about measured text.
+   * @param {string} text text
+   * @param {Object} [opt] options
+   * @param {number} [opt.size] font size [px]
+   * @param {string} [opt.font] font name
+   * @returns {TextMetrics}
+   */
+  measureText(text, opt = {}) {
+    if ('size' in opt) this.context.font = `${(this.recentTextOptions.size = opt.size).toString(10)}px ${this.recentTextOptions.font}`;
+    if ('font' in opt) this.context.font = `${this.recentTextOptions.size.toString(10)}px ${this.recentTextOptions.font = opt.font}`;
+    return this.context.measureText(text);
+  }
+
+  /**
    * Convert to string.
    * @returns {string} a string
    */
@@ -1965,12 +1980,16 @@ class Game {
       this.firstScene = obj.firstScene;
       this.firstState = 'state' in obj ? obj.state : State.init({});
 
-      this._millisecondsBetweenTwoFrame = [0.0, 0.0];
-
-      /** @member {ImageManager} */
-      this.imageManager = new ImageManager('images' in obj ? obj.images : []);
-      /** @member {SoundManager} */
-      this.soundManager = new SoundManager('sounds' in obj ? obj.sounds : []);
+      this._fps = (() => {
+        const millisecondsBetweenTwoFrame = [0.0, 0.0];
+        return {
+          update: (stamp) => {
+            millisecondsBetweenTwoFrame.push(stamp);
+            millisecondsBetweenTwoFrame.shift();
+          },
+          getValue: () => 1000.0 / (millisecondsBetweenTwoFrame[1] - millisecondsBetweenTwoFrame[0])
+        };
+      })();
 
       this.divElem = {
         base: document.getElementById('divId' in obj ? obj.divId : 'koturno-ui'),
@@ -1988,6 +2007,10 @@ class Game {
       this.divExpansionRate = 1;
       this.centering = false;
 
+      /** @member {ImageManager} */
+      this.imageManager = new ImageManager('images' in obj ? obj.images : []);
+      /** @member {SoundManager} */
+      this.soundManager = new SoundManager('sounds' in obj ? obj.sounds : []);
       this.painter = new Painter2d(this.canvas, this.imageManager);
       this.action = new ActionManager(this.canvas);
 
@@ -2011,7 +2034,7 @@ class Game {
    * @member {number}
    */
   get fps() {
-    return 1000.0 / (this._millisecondsBetweenTwoFrame[1] - this._millisecondsBetweenTwoFrame[0]);
+    return this._fps.getValue();
   }
 
   /**
@@ -2129,11 +2152,22 @@ class Game {
     // this.divElem.timeline.scrollTop = this.divElem.timeline.scrollHeight;
   }
 
+  _displayFPS() {
+    const textOptions = Object.assign({}, this.painter.recentTextOptions);
+    this.painter.setGlobalAlphaAndDraw(0.8, () => {
+      const textMetrics = this.painter.measureText('FPS ' + Math.round(this.fps), { size: 10, font: 'monospace' });
+      this.painter.rect(0, this.height - 10, textMetrics.width + 3, 10).fill('#fff');
+      this.painter.text('FPS ' + Math.round(this.fps), 0, this.height, { align: 'start', baseline: 'bottom' }).fill('#000');
+    });
+    this.painter.recentTextOptions = textOptions;
+  }
+
   /**
    * Start the game.
    * @param {boolean} debug if `true`, then start as debug mode
+   * @param {boolean} displayFPS if `true`, then display current FPS
    */
-  start(debug) {
+  start(debug, displayFPS) {
     const mainLoop = (sceneName, initState, initCounters) => {
       const currentScene = this.scenes.getScene(sceneName);
       const loop = (currentState, counters) => {
@@ -2144,8 +2178,7 @@ class Game {
         currentScene.transition(currentState, this.action, counters, this).match({
           stay: () => {
             window.requestAnimationFrame(stamp => {
-              this._millisecondsBetweenTwoFrame.push(stamp);
-              this._millisecondsBetweenTwoFrame.shift();
+              this._fps.update(stamp);
               loop(nextState, counters.count());
             });
           },
@@ -2162,8 +2195,7 @@ class Game {
 
               // begin transition loop
               window.requestAnimationFrame(stamp => {
-                this._millisecondsBetweenTwoFrame.push(stamp);
-                this._millisecondsBetweenTwoFrame.shift();
+                this._fps.update(stamp);
                 transLoop({
                   name: sceneName,
                   img: prevPainter.canvas,
@@ -2183,8 +2215,7 @@ class Game {
           reset: () => {
             this.soundManager.reset();
             window.requestAnimationFrame(stamp => {
-              this._millisecondsBetweenTwoFrame.push(stamp);
-              this._millisecondsBetweenTwoFrame.shift();
+              this._fps.update(stamp);
               mainLoop(this.firstScene, this.firstState, counters.hardReset());
             });
           }
@@ -2192,6 +2223,9 @@ class Game {
 
         if (debug) {
           this._updateDebugInfo(sceneName, counters);
+        }
+        if (displayFPS) {
+          this._displayFPS();
         }
 
         this.action.resetAction();
@@ -2205,20 +2239,21 @@ class Game {
     const transLoop = (prev, next, counters, transFunc) => {
       if (transFunc(prev.img, next.img, counters.scene, this.painter)) {
         window.requestAnimationFrame(stamp => {
-          this._millisecondsBetweenTwoFrame.push(stamp);
-          this._millisecondsBetweenTwoFrame.shift();
+          this._fps.update(stamp);
           mainLoop(next.name, prev.state, counters.count().reset(next.counter));
         })
       } else {
         window.requestAnimationFrame(stamp => {
-          this._millisecondsBetweenTwoFrame.push(stamp);
-          this._millisecondsBetweenTwoFrame.shift();
+          this._fps.update(stamp);
           transLoop(prev, next, counters.count(), transFunc)
         });
       }
-      /* デバッグモードの処理 */
+
       if (debug) {
         this._updateDebugInfo(`${prev.name} → ${next.name}`, counters);
+      }
+      if (displayFPS) {
+        this._displayFPS();
       }
     };
 
@@ -2244,27 +2279,33 @@ class Game {
 
   /**
    * Run as normal mode.
+   * @param {Object} [opt] options
+   * @param {boolean} [opt.displayFPS=false]
    */
-  run() {
+  run(opt = {}) {
     this.action.listen();
-    this.start(false);
+    this.start(false, 'displayFPS' in opt ? opt.displayFPS : false);
   }
 
   /**
    * Run as debug mode.
+   * @param {Object} [opt] options
+   * @param {boolean} [opt.displayFPS]
    */
-  debug() {
+  debug(opt = {}) {
     this.action.listen();
     Logger.setGame(this);
-    this.soundManager.setDebugMode();
-    this.start(true);
+    this.soundManager.setDebugMode(true);
+    this.start(true, 'displayFPS' in opt ? opt.displayFPS : false);
   }
 
   /**
    * Run automatically.
+   * @param {Object} [opt] options
+   * @param {boolean} [opt.displayFPS]
    */
-  autorun() {
-    this.start(false);
+  autorun(opt = {}) {
+    this.start(false, 'displayFPS' in opt ? opt.displayFPS : false);
   }
 
   /**
