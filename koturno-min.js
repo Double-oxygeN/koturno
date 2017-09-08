@@ -783,7 +783,6 @@ class SoundManager {
     }
   }
 
-
   /**
    * Set volume.
    * @param {SoundType} type sound type
@@ -860,7 +859,11 @@ class SoundManager {
         se.playing++;
 
         se0.addEventListener('loadedmetadata', () => {
-          se0.play();
+          if (this._debugMode) {
+            Logger.debug(`play se: ${name}`);
+          } else {
+            se0.play();
+          }
           window.setTimeout(() => {
             this.currentPlaySE--;
             se.playing--;
@@ -893,7 +896,11 @@ class SoundManager {
 
         this.stopBGM();
         this.currentPlayBGM = bgm;
-        bgm.audio.play();
+        if (this._debugMode) {
+          Logger.debug(`play bgm: ${name}`);
+        } else {
+          bgm.audio.play();
+        }
       }
     } else {
       Logger.error(`There is no BGM of name ${name}!`);
@@ -924,7 +931,11 @@ class SoundManager {
    */
   pauseBGM(name) {
     if (this.isPlayingBGM() && (!name || this.currentPlayBGM.name === name)) {
-      this.currentPlayBGM.audio.pause();
+      if (this._debugMode) {
+        Logger.debug('pause bgm');
+      } else {
+        this.currentPlayBGM.audio.pause();
+      }
       this.currentPlayBGM = null;
     }
   }
@@ -935,7 +946,11 @@ class SoundManager {
    */
   stopBGM(name) {
     if (this.isPlayingBGM() && (!name || this.currentPlayBGM.name === name)) {
-      this.currentPlayBGM.audio.pause();
+      if (this._debugMode) {
+        Logger.debug('stop bgm');
+      } else {
+        this.currentPlayBGM.audio.pause();
+      }
       this.currentPlayBGM.audio.currentTime = 0.0;
       this.currentPlayBGM = null;
     }
@@ -2289,8 +2304,6 @@ class Recorder {
     }
     this._detail.endTime = Date.now();
 
-    console.log(this.data);
-
     // parse action data
     const binaryData0 = [0x18];
     let waitFrames = -1;
@@ -2519,7 +2532,6 @@ class Recorder {
       }
       readingByte++;
     }
-    console.log(this.data);
   }
 
   /**
