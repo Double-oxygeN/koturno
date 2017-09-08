@@ -1960,12 +1960,612 @@ const Logger = {
   }
 };
 
+/**
+ * Key code bi-direction map.
+ * @namespace
+ */
+const KeycodeBiDiMap = (() => {
+  const nameToCode = new Map();
+  const codeToName = new Map();
+  const register = (name, code) => {
+    if (nameToCode.has(name) || codeToName.has(code)) Logger.fatal('key code duplicated!');
+    nameToCode.set(name, code);
+    codeToName.set(code, name);
+  };
+
+  const keycodeTable = {
+    BackSpace: 8,
+    Tab: 9,
+    Enter: 13,
+    ShiftLeft: 14,
+    ControlLeft: 15,
+    ShiftRight: 16,
+    ControlRight: 17,
+    AltLeft: 18,
+    AltRight: 19,
+    CapsLock: 20,
+    Escape: 27,
+    Space: 32,
+    ArrowLeft: 37,
+    ArrowUp: 38,
+    ArrowRight: 39,
+    ArrowDown: 40,
+    Digit0: 48,
+    Digit1: 49,
+    Digit2: 50,
+    Digit3: 51,
+    Digit4: 52,
+    Digit5: 53,
+    Digit6: 54,
+    Digit7: 55,
+    Digit8: 56,
+    Digit9: 57,
+    KeyA: 65,
+    KeyB: 66,
+    KeyC: 67,
+    KeyD: 68,
+    KeyE: 69,
+    KeyF: 70,
+    KeyG: 71,
+    KeyH: 72,
+    KeyI: 73,
+    KeyJ: 74,
+    KeyK: 75,
+    KeyL: 76,
+    KeyM: 77,
+    KeyN: 78,
+    KeyO: 79,
+    KeyP: 80,
+    KeyQ: 81,
+    KeyR: 82,
+    KeyS: 83,
+    KeyT: 84,
+    KeyU: 85,
+    KeyV: 86,
+    KeyW: 87,
+    KeyX: 88,
+    KeyY: 89,
+    KeyZ: 90,
+    MetaLeft: 91,
+    MetaRight: 92,
+    F1: 112,
+    F2: 113,
+    F3: 114,
+    F4: 115,
+    F5: 116,
+    F6: 117,
+    F7: 118,
+    F8: 119,
+    F9: 120,
+    F10: 121,
+    F11: 122,
+    F12: 123,
+    Semicolon: 186,
+    Equal: 187,
+    Comma: 188,
+    Minus: 189,
+    Period: 190,
+    Backquote: 192,
+    IntlRo: 193,
+    BracketLeft: 219,
+    Backslash: 220,
+    BracketRight: 221,
+    Quote: 222,
+    OSLeft: 224,
+    OSRight: 225,
+    IntlYen: 255
+  };
+
+  Object.keys(keycodeTable).forEach(name => {
+    register(name, keycodeTable[name]);
+  });
+
+  return {
+    getName: (num) => {
+      return codeToName.get(num);
+    },
+    getCodes: (names) => {
+      return names.filter(name => nameToCode.has(name)).map(name => nameToCode.get(name));
+    }
+  };
+})();
+Object.freeze(KeycodeBiDiMap);
+
+/**
+ * Namespace for hashing.
+ * @namespace
+ */
+const SHA256 = (() => {
+  const H = Uint32Array.from([
+    0x6a09e667,
+    0xbb67ae85,
+    0x3c6ef372,
+    0xa54ff53a,
+    0x510e527f,
+    0x9b05688c,
+    0x1f83d9ab,
+    0x5be0cd19
+  ]);
+  const K = Uint32Array.from([
+    0x428a2f98,
+    0x71374491,
+    0xb5c0fbcf,
+    0xe9b5dba5,
+    0x3956c25b,
+    0x59f111f1,
+    0x923f82a4,
+    0xab1c5ed5,
+    0xd807aa98,
+    0x12835b01,
+    0x243185be,
+    0x550c7dc3,
+    0x72be5d74,
+    0x80deb1fe,
+    0x9bdc06a7,
+    0xc19bf174,
+    0xe49b69c1,
+    0xefbe4786,
+    0x0fc19dc6,
+    0x240ca1cc,
+    0x2de92c6f,
+    0x4a7484aa,
+    0x5cb0a9dc,
+    0x76f988da,
+    0x983e5152,
+    0xa831c66d,
+    0xb00327c8,
+    0xbf597fc7,
+    0xc6e00bf3,
+    0xd5a79147,
+    0x06ca6351,
+    0x14292967,
+    0x27b70a85,
+    0x2e1b2138,
+    0x4d2c6dfc,
+    0x53380d13,
+    0x650a7354,
+    0x766a0abb,
+    0x81c2c92e,
+    0x92722c85,
+    0xa2bfe8a1,
+    0xa81a664b,
+    0xc24b8b70,
+    0xc76c51a3,
+    0xd192e819,
+    0xd6990624,
+    0xf40e3585,
+    0x106aa070,
+    0x19a4c116,
+    0x1e376c08,
+    0x2748774c,
+    0x34b0bcb5,
+    0x391c0cb3,
+    0x4ed8aa4a,
+    0x5b9cca4f,
+    0x682e6ff3,
+    0x748f82ee,
+    0x78a5636f,
+    0x84c87814,
+    0x8cc70208,
+    0x90befffa,
+    0xa4506ceb,
+    0xbef9a3f7,
+    0xc67178f2
+  ]);
+  const PLUS = (...args) => args.length ? (args[0] + PLUS(...args.slice(1))) & 0xffffffff : 0;
+  const CH = (x, y, z) => (x & y) ^ (~x & z);
+  const MAJ = (x, y, z) => (x & y) ^ (x & z) ^ (y & z);
+  const SHR = (x, n) => x >>> n;
+  const ROTR = (x, n) => (x >>> n) | (x << (32 - n));
+  const SIGMA0 = x => ROTR(x, 2) ^ ROTR(x, 13) ^ ROTR(x, 22);
+  const SIGMA1 = x => ROTR(x, 6) ^ ROTR(x, 11) ^ ROTR(x, 25);
+  const _SIGMA0 = x => ROTR(x, 7) ^ ROTR(x, 18) ^ SHR(x, 3);
+  const _SIGMA1 = x => ROTR(x, 17) ^ ROTR(x, 19) ^ SHR(x, 10);
+  return {
+    parse: (uint32Array) => {
+      let blocks = [];
+      uint32Array.forEach((int, i) => {
+        if (i % 16 === 0) blocks[(i / 16) | 0] = new Uint32Array(16);
+        blocks[Math.floor(i / 16)][i % 16] = int;
+      });
+      return blocks;
+    },
+    digest: (uint32Array) => {
+      // TODO: impl.
+      let hashes = Uint32Array.from(H);
+      // parse buffer to some blocks
+      const BLOCKS = SHA256.parse(uint32Array);
+      BLOCKS.forEach(M => {
+        let W = new Uint32Array(64);
+        for (let t = 0; t < 64; ++t)
+          W[t] = t < 16 ? M[t] : PLUS(_SIGMA1(W[t - 2]), W[t - 7], _SIGMA0(W[t - 15]), W[t - 16]);
+        let [a, b, c, d, e, f, g, h] = hashes;
+        for (let t = 0; t < 64; t++) {
+          const T1 = PLUS(h, SIGMA1(e), CH(e, f, g), K[t], W[t]);
+          const T2 = PLUS(SIGMA0(a), MAJ(a, b, c));
+          h = g;
+          g = f;
+          f = e;
+          e = PLUS(d, T1);
+          d = c;
+          c = b;
+          b = a;
+          a = PLUS(T1, T2);
+        }
+        hashes[0] = PLUS(hashes[0], a);
+        hashes[1] = PLUS(hashes[1], b);
+        hashes[2] = PLUS(hashes[2], c);
+        hashes[3] = PLUS(hashes[3], d);
+        hashes[4] = PLUS(hashes[4], e);
+        hashes[5] = PLUS(hashes[5], f);
+        hashes[6] = PLUS(hashes[6], g);
+        hashes[7] = PLUS(hashes[7], h);
+      });
+      return hashes;
+    }
+  };
+})();
+
+/**
+ * Class for recording and auto-playing tool.
+ */
+class Recorder {
+  constructor() {
+    this.data = [];
+    this.mode = 'r';
+
+    this._detail = {
+      startTime: 0,
+      endTime: 0,
+      revision: 0,
+      title: `NoTitle:${document.lastModified}`
+    };
+  }
+
+  /**
+   * Version number of Recorder.js.
+   */
+  static get VERSION() {
+    return 0x2001;
+  }
+
+  /**
+   * Set recorder mode.
+   * @param {string} mode `'r'` if reading, `'w'` if writing
+   */
+  setMode(mode) {
+    this.mode = mode;
+  }
+
+  /**
+   * Start recording.
+   * @param {string} [title] game title
+   */
+  startRecord(title = null) {
+    if (this.mode === 'r') return;
+    if (title !== null) this._detail.title = title;
+    if (this._detail.startTime === 0) this._detail.startTime = Date.now();
+    else this._detail.revision++;
+  }
+
+  /**
+   * Store action as data.
+   * @param {ActionManager} action
+   * @param {number} frame
+   */
+  storeAction(action, frame) {
+    if (this.mode === 'r') return;
+    while (!(frame in this.data)) this.data.push({
+      keyboard: [],
+      mouseButton: [],
+      mousePosition: { x: Number.NaN, y: Number.NaN }
+    });
+    this.data[frame].keyboard = [...action.keyboard.down];
+    this.data[frame].mouseButton = [...action.mouse.down];
+    this.data[frame].mousePosition.x = action.mouse.position.x;
+    this.data[frame].mousePosition.y = action.mouse.position.y;
+  }
+
+  /**
+   * Reset data after the frame.
+   * @param {number} frame
+   */
+  resetAfter(frame) {
+    if (this.mode === 'r') return;
+    if (this.data.length - 1 > frame) {
+      this.data = this.data.slice(0, frame);
+    }
+  }
+
+  /**
+   * Save as a file.
+   * @param {string} [fileName='savedata'] name of save file
+   */
+  save(fileName = 'savedata') {
+    if (this.mode === 'r') return;
+    if (!window.Blob) {
+      Logger.error('The File APIs are not fully supported in this browser.');
+      return;
+    }
+    this._detail.endTime = Date.now();
+
+    console.log(this.data);
+
+    // parse action data
+    const binaryData0 = [0x18];
+    let waitFrames = -1;
+    let prevData = {
+      keyboard: [],
+      mouseButton: [],
+      mousePosition: { x: Number.NaN, y: Number.NaN }
+    };
+    this.data.forEach(frameData => {
+      const keyboardPlus = frameData.keyboard.filter(frameKey => !prevData.keyboard.includes(frameKey));
+      const keyboardMinus = prevData.keyboard.filter(prevKey => !frameData.keyboard.includes(prevKey));
+      const mouseButtonPlus = frameData.mouseButton.filter(frameButton => !prevData.mouseButton.includes(frameButton));
+      const mouseButtonMinus = prevData.mouseButton.filter(prevButton => !frameData.mouseButton.includes(prevButton));
+      const mouseMove = (prevData.mousePosition.x !== frameData.mousePosition.x && (!Number.isNaN(prevData.mousePosition.x) || !Number.isNaN(frameData.mousePosition.x))) ||
+        (prevData.mousePosition.y !== frameData.mousePosition.y && (!Number.isNaN(prevData.mousePosition.y) || !Number.isNaN(frameData.mousePosition.y)));
+      if (keyboardPlus.length + keyboardMinus.length + mouseButtonPlus.length + mouseButtonMinus.length === 0 && !mouseMove) {
+        waitFrames++;
+      } else {
+        switch (waitFrames) {
+        case -1:
+          break;
+        case 0:
+          binaryData0.push(0x10);
+          break;
+        case 1:
+          binaryData0.push(0x10, 0x10);
+          break;
+        default:
+          waitFrames++;
+          binaryData0.push(0x1a, waitFrames & 0xff, waitFrames >>> 8);
+        }
+        KeycodeBiDiMap.getCodes(keyboardPlus).forEach(code => binaryData0.push(0x20, code));
+        KeycodeBiDiMap.getCodes(keyboardMinus).forEach(code => binaryData0.push(0x21, code));
+        mouseButtonPlus.forEach(code => binaryData0.push(0x30, code));
+        mouseButtonMinus.forEach(code => binaryData0.push(0x31, code));
+        if (mouseMove) {
+          const mouseX = frameData.mousePosition.x;
+          const mouseY = frameData.mousePosition.y;
+          binaryData0.push(0x38);
+          if (Number.isNaN(mouseX)) binaryData0.push(0xff, 0xff);
+          else binaryData0.push(mouseX & 0xff, mouseX >>> 8);
+          if (Number.isNaN(mouseY)) binaryData0.push(0xff, 0xff);
+          else binaryData0.push(mouseY & 0xff, mouseY >>> 8);
+        }
+
+        waitFrames = 0;
+        prevData = frameData;
+      }
+    });
+    switch (waitFrames) {
+    case 0:
+      binaryData0.push(0x10);
+      break;
+    case 1:
+      binaryData0.push(0x10, 0x10);
+      break;
+    default:
+      waitFrames++;
+      binaryData0.push(0x1a, waitFrames & 0xff, waitFrames >>> 8);
+    }
+    binaryData0.push(0x19);
+
+    // padding
+    const nopeLength = 1024 - binaryData0.length % 512;
+    for (let i = 0; i < nopeLength; i++) {
+      binaryData0.push(0xff);
+    }
+
+    // create checksum
+    const checkSum = SHA256.digest(new Uint32Array(Uint8Array.from(binaryData0).buffer));
+
+    const binaryData1 = [];
+    const pushUint = (array, number, length) => {
+      for (let i = 0; i < length; i++) {
+        array.push(Math.floor((number / 2 ** (8 * i)) & 0xff));
+      }
+    };
+    // push version
+    binaryData1.push(Recorder.VERSION & 0xff, Recorder.VERSION >>> 8, 0, 0, 0, 0, 0, 0);
+    // push last frames
+    pushUint(binaryData1, this.data.length, 4);
+    // push revision time
+    pushUint(binaryData1, this._detail.revision, 4);
+    // push start time
+    pushUint(binaryData1, this._detail.startTime, 8);
+    // push end time
+    pushUint(binaryData1, this._detail.endTime, 8);
+    // push game title
+    for (let i = 0; i < 32; i++) {
+      if (i >= this._detail.title.length) binaryData1.push(0);
+      else binaryData1.push(this._detail.title.charCodeAt(i) & 0xff);
+    }
+    // push reserved
+    for (let i = 0; i < 32; i++) {
+      binaryData1.push(Math.floor(Math.random() * 0xff));
+    }
+    // push checksum
+    new Uint8Array(checkSum.buffer).forEach(num => binaryData1.push(num));
+    // push action data
+    binaryData1.push(...binaryData0);
+
+    // download save data
+    const blob = new Blob([Uint8Array.from(binaryData1).buffer]);
+    const url = window.URL.createObjectURL(blob);
+    const aElem = document.createElement('a');
+    document.body.appendChild(aElem);
+    aElem.setAttribute('style', 'display: none;');
+    aElem.href = url;
+    aElem.download = fileName;
+    aElem.click();
+    window.URL.revokeObjectURL(url);
+  }
+
+  /**
+   * Load a record data.
+   */
+  load() {
+    if (this.mode === 'w') return Promise.reject('Please set recorder in reading mode.');
+    if (!window.File || !window.FileReader) {
+      return Promise.reject('The File APIs are not fully supported in this browser.');
+    }
+
+    const inputElem = document.createElement('input');
+    document.body.appendChild(inputElem);
+    inputElem.setAttribute('style', 'display: none;');
+    inputElem.setAttribute('type', 'file');
+    inputElem.setAttribute('name', 'savedata');
+
+    return new Promise((res, rej) => {
+      inputElem.addEventListener('change', ev0 => {
+        const reader = new FileReader();
+        reader.addEventListener('load', ev1 => {
+          const result = ev1.target.result;
+          if (new Uint16Array(result, 0, 1)[0] !== Recorder.VERSION) {
+            rej('Save data is wrong or too old!');
+          }
+          const checkSum = new Uint32Array(result, 0x60, 8);
+          const exackHashes = SHA256.digest(new Uint32Array(result, 0x80));
+          if (!checkSum.every((hash, i) => hash === exackHashes[i])) {
+            rej('Save data is broken!');
+          }
+
+          this._detail.revision = new Uint32Array(result, 0x0c, 1)[0];
+          this._detail.title = String.fromCharCode(...new Uint8Array(result, 0x20, 32).filter(byte => byte !== 0));
+          const timeBinary = new Uint32Array(result, 0x10, 4);
+          this._detail.startTime = timeBinary[0] + (timeBinary[1] * 2 ** 32);
+          this._detail.endTime = timeBinary[2] + (timeBinary[3] * 2 ** 32);
+
+          const dataBinary = new Uint8Array(result, 0x80);
+          this.parseData(dataBinary);
+          res();
+        });
+        reader.readAsArrayBuffer(ev0.target.files[0])
+      }, false);
+      inputElem.click();
+    });
+  }
+
+  /**
+   * Parse binary to data.
+   * @param {Uint8Array} binary
+   */
+  parseData(binary) {
+    let _tmpData = {
+      keyboard: [],
+      mouseButton: [],
+      mousePosition: { x: Number.NaN, y: Number.NaN }
+    };
+    let readingByte = 0;
+    let _end = false;
+    while (!_end) {
+      switch (binary[readingByte]) {
+      case 0x10:
+        this.data.push({
+          keyboard: [..._tmpData.keyboard],
+          mouseButton: [..._tmpData.mouseButton],
+          mousePosition: { x: _tmpData.mousePosition.x, y: _tmpData.mousePosition.y }
+        });
+        break;
+      case 0x18:
+        this.data = [];
+        _tmpData = {
+          keyboard: [],
+          mouseButton: [],
+          mousePosition: { x: Number.NaN, y: Number.NaN }
+        };
+        break;
+      case 0x19:
+        _end = true;
+        break;
+      case 0x1a:
+        const skipFrames = binary[readingByte + 1] | (binary[readingByte + 2] << 8);
+        for (let i = 0; i < skipFrames; i++)
+          this.data.push({
+            keyboard: [..._tmpData.keyboard],
+            mouseButton: [..._tmpData.mouseButton],
+            mousePosition: { x: _tmpData.mousePosition.x, y: _tmpData.mousePosition.y }
+          });
+        readingByte += 2;
+        break;
+      case 0x20:
+        _tmpData.keyboard.push(KeycodeBiDiMap.getName(binary[readingByte + 1]));
+        readingByte += 1;
+        break;
+      case 0x21:
+        _tmpData.keyboard = _tmpData.keyboard.filter(key => key != KeycodeBiDiMap.getName(binary[readingByte + 1]));
+        readingByte += 1;
+        break;
+      case 0x30:
+        _tmpData.mouseButton.push(binary[readingByte + 1]);
+        readingByte += 1;
+        break;
+      case 0x31:
+        _tmpData.mouseButton = _tmpData.mouseButton.filter(button => button != binary[readingByte + 1]);
+        readingByte += 1;
+        break;
+      case 0x38:
+        _tmpData.mousePosition.x = binary[readingByte + 1] | (binary[readingByte + 2] << 8);
+        _tmpData.mousePosition.y = binary[readingByte + 3] | (binary[readingByte + 4] << 8);
+        if (_tmpData.mousePosition.x === 0xffff)
+          _tmpData.mousePosition = { x: Number.NaN, y: Number.NaN };
+        readingByte += 4;
+        break;
+      default:
+        //
+      }
+      readingByte++;
+    }
+    console.log(this.data);
+  }
+
+  /**
+   * Read action from record data.
+   * @param {ActionManager} action
+   * @param {number} frame
+   */
+  readAction(action, frame) {
+    if (this.mode === 'w') return;
+    if (this.data.length === frame) {
+      Logger.debug(`movie end\nframes: ${frame}f\nrevision: ${this._detail.revision}`);
+      return;
+    } else if (this.data.length < frame) {
+      return;
+    }
+    this.data[frame].keyboard.forEach(key => {
+      action.keyboard._down(key);
+    });
+    [...action.keyboard.down].filter(key => !this.data[frame].keyboard.includes(key)).forEach(key => {
+      action.keyboard._up(key);
+    });
+    this.data[frame].mouseButton.forEach(button => {
+      action.mouse._down(button);
+    });
+    [...action.mouse.down].filter(button => !this.data[frame].mouseButton.includes(button)).forEach(button => {
+      action.mouse._up(button);
+    });
+    action.mouse.position.x = this.data[frame].mousePosition.x;
+    action.mouse.position.y = this.data[frame].mousePosition.y;
+  }
+
+  /**
+   * Convert to string.
+   * @returns {string} a string
+   */
+  toString() {
+    return `[Recorder ${this.mode}]`;
+  }
+}
 
 /**
  * Class representing a game.
  * @param {Object} obj various settings
  * @param {Scenes} obj.scenes game scenes
  * @param {string} obj.firstScene the first scene name
+ * @param {string} [obj.name] game name
  * @param {string} [obj.divId='koturno-ui'] id name of the {@link https://developer.mozilla.org/en-US/docs/Web/API/HTMLDivElement|HTMLDivElememt} which will be the game content
  * @param {State} [obj.state] the first state
  * @param {Object[]} [obj.images] image properties. See {@link ImageManager}
@@ -1979,6 +2579,7 @@ class Game {
       this.scenes = obj.scenes;
       this.firstScene = obj.firstScene;
       this.firstState = 'state' in obj ? obj.state : State.init({});
+      this.name = 'name' in obj ? obj.name : null;
 
       this._fps = (() => {
         const millisecondsBetweenTwoFrame = [0.0, 0.0];
@@ -2166,11 +2767,13 @@ class Game {
    * Start the game.
    * @param {boolean} debug if `true`, then start as debug mode
    * @param {boolean} displayFPS if `true`, then display current FPS
+   * @param {Recorder} [recorder]
    */
-  start(debug, displayFPS) {
+  start(debug, displayFPS, recorder) {
     const mainLoop = (sceneName, initState, initCounters) => {
       const currentScene = this.scenes.getScene(sceneName);
       const loop = (currentState, counters) => {
+        if (recorder !== null) recorder.readAction(this.action, counters.general);
         currentScene.draw(currentState, this.action, counters, this.painter, this);
 
         const nextState = currentScene.update(currentState, this.action, counters, this.soundManager, this);
@@ -2201,8 +2804,8 @@ class Game {
                   img: prevPainter.canvas,
                   state: currentState
                 }, {
-                  img: nextPainter.canvas,
                   name: nextSceneName,
+                  img: nextPainter.canvas,
                   counter: nextSceneCounter
                 }, counters.count().reset(), transFunc);
               });
@@ -2226,6 +2829,9 @@ class Game {
         }
         if (displayFPS) {
           this._displayFPS();
+        }
+        if (recorder !== null) {
+          recorder.storeAction(this.action, counters.general);
         }
 
         this.action.resetAction();
@@ -2255,6 +2861,10 @@ class Game {
       if (displayFPS) {
         this._displayFPS();
       }
+      if (recorder !== null) {
+        recorder.readAction(this.action, counters.general);
+        recorder.storeAction(this.action, counters.general);
+      }
     };
 
     // set UI
@@ -2271,6 +2881,7 @@ class Game {
       .then(() => this.soundManager.load(), () => {
         Logger.fatal('Image load error!');
       }).then(() => {
+        if (recorder !== null) recorder.startRecord(this.name);
         mainLoop(this.firstScene, this.firstState, new Counters());
       }, () => {
         Logger.fatal('Sound load error!');
@@ -2281,31 +2892,43 @@ class Game {
    * Run as normal mode.
    * @param {Object} [opt] options
    * @param {boolean} [opt.displayFPS=false]
+   * @param {Recorder} [opt.recorder] recorder
    */
   run(opt = {}) {
+    const recorder = 'recorder' in opt ? opt.recorder : null;
+    if (recorder !== null) recorder.setMode('w');
     this.action.listen();
-    this.start(false, 'displayFPS' in opt ? opt.displayFPS : false);
+    this.start(false, 'displayFPS' in opt ? opt.displayFPS : false, recorder);
   }
 
   /**
    * Run as debug mode.
    * @param {Object} [opt] options
    * @param {boolean} [opt.displayFPS]
+   * @param {Recorder} [opt.recorder] recorder
    */
   debug(opt = {}) {
+    const recorder = 'recorder' in opt ? opt.recorder : null;
+    if (recorder !== null) recorder.setMode('w');
     this.action.listen();
     Logger.setGame(this);
     this.soundManager.setDebugMode(true);
-    this.start(true, 'displayFPS' in opt ? opt.displayFPS : false);
+    this.start(true, 'displayFPS' in opt ? opt.displayFPS : false, recorder);
   }
 
   /**
    * Run automatically.
+   * @param {Recorder} recorder recorder
    * @param {Object} [opt] options
    * @param {boolean} [opt.displayFPS]
    */
-  autorun(opt = {}) {
-    this.start(false, 'displayFPS' in opt ? opt.displayFPS : false);
+  autorun(recorder, opt = {}) {
+    recorder.setMode('r');
+    recorder.load().then(() => {
+      this.start(false, 'displayFPS' in opt ? opt.displayFPS : false, recorder);
+    }, reason => {
+      Logger.fatal(reason);
+    });
   }
 
   /**

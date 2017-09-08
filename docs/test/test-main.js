@@ -1,4 +1,5 @@
 (() => {
+  const recorder = new Recorder();
   const TitleScene = class extends Scene {
     constructor() {
       super('title');
@@ -106,7 +107,7 @@
           break;
         case 4:
           if (row === 0) return Transition.Trans('title');
-          if (row === 1) return Transition.End();
+          if (row === 1) { recorder.save(); return Transition.End(); };
           if (row === 2) return Transition.Reset();
           break;
         case 5:
@@ -992,5 +993,6 @@ mollit anim id est laborum.`;
       { name: 'se2', src: 'sound/se02a.mp3', type: SoundType.SE },
       { name: 'theme', src: 'sound/reversible_world.ogg', type: SoundType.BGM, loop: true }
     ]
-  }).center().run();
+  }).center().autorun(recorder);
+  // }).center().run({ displayFPS: true, recorder });
 })();

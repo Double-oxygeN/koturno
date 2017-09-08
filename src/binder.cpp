@@ -33,7 +33,9 @@ int main(int argc, char const *argv[]) {
     "./scene/Scenes.js",
     "./logger/LogLevel.js",
     "./logger/Logger.js",
-    "./Recorder.js",
+    "./recorder/KeycodeBiDiMap.js",
+    "./recorder/SHA256.js",
+    "./recorder/Recorder.js",
     "./Game.js",
   };
   std::vector<std::string> opt_files{

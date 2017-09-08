@@ -3,6 +3,7 @@
  * @param {Object} obj various settings
  * @param {Scenes} obj.scenes game scenes
  * @param {string} obj.firstScene the first scene name
+ * @param {string} [obj.name] game name
  * @param {string} [obj.divId='koturno-ui'] id name of the {@link https://developer.mozilla.org/en-US/docs/Web/API/HTMLDivElement|HTMLDivElememt} which will be the game content
  * @param {State} [obj.state] the first state
  * @param {Object[]} [obj.images] image properties. See {@link ImageManager}
@@ -16,6 +17,7 @@ class Game {
       this.scenes = obj.scenes;
       this.firstScene = obj.firstScene;
       this.firstState = 'state' in obj ? obj.state : State.init({});
+      this.name = 'name' in obj ? obj.name : null;
 
       this._fps = (() => {
         const millisecondsBetweenTwoFrame = [0.0, 0.0];
@@ -203,11 +205,13 @@ class Game {
    * Start the game.
    * @param {boolean} debug if `true`, then start as debug mode
    * @param {boolean} displayFPS if `true`, then display current FPS
+   * @param {Recorder} [recorder]
    */
-  start(debug, displayFPS) {
+  start(debug, displayFPS, recorder) {
     const mainLoop = (sceneName, initState, initCounters) => {
       const currentScene = this.scenes.getScene(sceneName);
       const loop = (currentState, counters) => {
+        if (recorder !== null) recorder.readAction(this.action, counters.general);
         currentScene.draw(currentState, this.action, counters, this.painter, this);
 
         const nextState = currentScene.update(currentState, this.action, counters, this.soundManager, this);
@@ -264,6 +268,9 @@ class Game {
         if (displayFPS) {
           this._displayFPS();
         }
+        if (recorder !== null) {
+          recorder.storeAction(this.action, counters.general);
+        }
 
         this.action.resetAction();
       };
@@ -292,6 +299,10 @@ class Game {
       if (displayFPS) {
         this._displayFPS();
       }
+      if (recorder !== null) {
+        recorder.readAction(this.action, counters.general);
+        recorder.storeAction(this.action, counters.general);
+      }
     };
 
     // set UI
@@ -308,6 +319,7 @@ class Game {
       .then(() => this.soundManager.load(), () => {
         Logger.fatal('Image load error!');
       }).then(() => {
+        if (recorder !== null) recorder.startRecord(this.name);
         mainLoop(this.firstScene, this.firstState, new Counters());
       }, () => {
         Logger.fatal('Sound load error!');
@@ -318,31 +330,43 @@ class Game {
    * Run as normal mode.
    * @param {Object} [opt] options
    * @param {boolean} [opt.displayFPS=false]
+   * @param {Recorder} [opt.recorder] recorder
    */
   run(opt = {}) {
+    const recorder = 'recorder' in opt ? opt.recorder : null;
+    if (recorder !== null) recorder.setMode('w');
     this.action.listen();
-    this.start(false, 'displayFPS' in opt ? opt.displayFPS : false);
+    this.start(false, 'displayFPS' in opt ? opt.displayFPS : false, recorder);
   }
 
   /**
    * Run as debug mode.
    * @param {Object} [opt] options
    * @param {boolean} [opt.displayFPS]
+   * @param {Recorder} [opt.recorder] recorder
    */
   debug(opt = {}) {
+    const recorder = 'recorder' in opt ? opt.recorder : null;
+    if (recorder !== null) recorder.setMode('w');
     this.action.listen();
     Logger.setGame(this);
     this.soundManager.setDebugMode(true);
-    this.start(true, 'displayFPS' in opt ? opt.displayFPS : false);
+    this.start(true, 'displayFPS' in opt ? opt.displayFPS : false, recorder);
   }
 
   /**
    * Run automatically.
+   * @param {Recorder} recorder recorder
    * @param {Object} [opt] options
    * @param {boolean} [opt.displayFPS]
    */
-  autorun(opt = {}) {
-    this.start(false, 'displayFPS' in opt ? opt.displayFPS : false);
+  autorun(recorder, opt = {}) {
+    recorder.setMode('r');
+    recorder.load().then(() => {
+      this.start(false, 'displayFPS' in opt ? opt.displayFPS : false, recorder);
+    }, reason => {
+      Logger.fatal(reason);
+    });
   }
 
   /**
