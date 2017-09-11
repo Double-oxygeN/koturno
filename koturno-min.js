@@ -2419,8 +2419,10 @@ class Recorder {
 
   /**
    * Load a record data.
+   * @param {EventTarget} target
+   * @returns {Promise}
    */
-  load() {
+  load(target) {
     if (this.mode === 'w') return Promise.reject('Please set recorder in reading mode.');
     if (!window.File || !window.FileReader) {
       return Promise.reject('The File APIs are not fully supported in this browser.');
@@ -2428,9 +2430,14 @@ class Recorder {
 
     const inputElem = document.createElement('input');
     document.body.appendChild(inputElem);
-    inputElem.setAttribute('style', 'display: none;');
     inputElem.setAttribute('type', 'file');
     inputElem.setAttribute('name', 'savedata');
+    inputElem.setAttribute('style', 'display: none;');
+    const clickEvent = () => {
+      inputElem.click();
+    };
+
+    target.addEventListener('click', clickEvent, true);
 
     return new Promise((res, rej) => {
       inputElem.addEventListener('change', ev0 => {
@@ -2456,9 +2463,10 @@ class Recorder {
           this.parseData(dataBinary);
           res();
         });
-        reader.readAsArrayBuffer(ev0.target.files[0])
+        reader.readAsArrayBuffer(ev0.target.files[0]);
+
+        target.removeEventListener('click', clickEvent, true);
       }, false);
-      inputElem.click();
     });
   }
 
@@ -2603,6 +2611,29 @@ class Game {
           getValue: () => 1000.0 / (millisecondsBetweenTwoFrame[1] - millisecondsBetweenTwoFrame[0])
         };
       })();
+      this._animationState = (() => {
+        let flag = false;
+        let persist = false;
+        return {
+          getFlag: () => flag,
+          _reset: () => {
+            if (!persist) flag = false;
+          },
+          next: () => {
+            persist = false;
+            flag = true;
+          },
+          play: () => {
+            persist = true;
+            flag = true;
+          },
+          stop: () => {
+            persist = false;
+          }
+        };
+      })();
+      Object.freeze(this._fps);
+      Object.freeze(this._animationState);
 
       this.divElem = {
         base: document.getElementById('divId' in obj ? obj.divId : 'koturno-ui'),
@@ -2782,6 +2813,17 @@ class Game {
    * @param {Recorder} [recorder]
    */
   start(debug, displayFPS, recorder) {
+    const requestNextFrame = f => {
+      window.requestAnimationFrame(stamp => {
+        if (debug && !this._animationState.getFlag()) {
+          requestNextFrame(f);
+        } else {
+          this._animationState._reset();
+          this._fps.update(stamp);
+          f();
+        }
+      });
+    };
     const mainLoop = (sceneName, initState, initCounters) => {
       const currentScene = this.scenes.getScene(sceneName);
       const loop = (currentState, counters) => {
@@ -2792,8 +2834,12 @@ class Game {
 
         currentScene.transition(currentState, this.action, counters, this).match({
           stay: () => {
-            window.requestAnimationFrame(stamp => {
-              this._fps.update(stamp);
+            // window.requestAnimationFrame(stamp => {
+            //   while (debug && !this._animationState.getFlag()) {}
+            //   this._animationState._reset();
+            //   this._fps.update(stamp);
+            // });
+            requestNextFrame(() => {
               loop(nextState, counters.count());
             });
           },
@@ -2809,8 +2855,12 @@ class Game {
               nextScene.draw(nextScene.init(currentState, nextCounter, this), this.action, nextCounter, nextPainter, this);
 
               // begin transition loop
-              window.requestAnimationFrame(stamp => {
-                this._fps.update(stamp);
+              // window.requestAnimationFrame(stamp => {
+              //   while (debug && !this._animationState.getFlag()) {}
+              //   this._animationState._reset();
+              //   this._fps.update(stamp);
+              // });
+              requestNextFrame(() => {
                 transLoop({
                   name: sceneName,
                   img: prevPainter.canvas,
@@ -2829,8 +2879,12 @@ class Game {
           },
           reset: () => {
             this.soundManager.reset();
-            window.requestAnimationFrame(stamp => {
-              this._fps.update(stamp);
+            // window.requestAnimationFrame(stamp => {
+            //   while (debug && !this._animationState.getFlag()) {}
+            //   this._animationState._reset();
+            //   this._fps.update(stamp);
+            // });
+            requestNextFrame(() => {
               mainLoop(this.firstScene, this.firstState, counters.hardReset());
             });
           }
@@ -2856,13 +2910,21 @@ class Game {
 
     const transLoop = (prev, next, counters, transFunc) => {
       if (transFunc(prev.img, next.img, counters.scene, this.painter)) {
-        window.requestAnimationFrame(stamp => {
-          this._fps.update(stamp);
+        // window.requestAnimationFrame(stamp => {
+        //   while (debug && !this._animationState.getFlag()) {}
+        //   this._animationState._reset();
+        //   this._fps.update(stamp);
+        // });
+        requestNextFrame(() => {
           mainLoop(next.name, prev.state, counters.count().reset(next.counter));
-        })
+        });
       } else {
-        window.requestAnimationFrame(stamp => {
-          this._fps.update(stamp);
+        // window.requestAnimationFrame(stamp => {
+        //   while (debug && !this._animationState.getFlag()) {}
+        //   this._animationState._reset();
+        //   this._fps.update(stamp);
+        // });
+        requestNextFrame(() => {
           transLoop(prev, next, counters.count(), transFunc)
         });
       }
@@ -2936,7 +2998,7 @@ class Game {
    */
   autorun(recorder, opt = {}) {
     recorder.setMode('r');
-    recorder.load().then(() => {
+    recorder.load(this.divElem.base).then(() => {
       this.start(false, 'displayFPS' in opt ? opt.displayFPS : false, recorder);
     }, reason => {
       Logger.fatal(reason);

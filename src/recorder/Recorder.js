@@ -196,8 +196,10 @@ class Recorder {
 
   /**
    * Load a record data.
+   * @param {EventTarget} target
+   * @returns {Promise}
    */
-  load() {
+  load(target) {
     if (this.mode === 'w') return Promise.reject('Please set recorder in reading mode.');
     if (!window.File || !window.FileReader) {
       return Promise.reject('The File APIs are not fully supported in this browser.');
@@ -205,9 +207,14 @@ class Recorder {
 
     const inputElem = document.createElement('input');
     document.body.appendChild(inputElem);
-    inputElem.setAttribute('style', 'display: none;');
     inputElem.setAttribute('type', 'file');
     inputElem.setAttribute('name', 'savedata');
+    inputElem.setAttribute('style', 'display: none;');
+    const clickEvent = () => {
+      inputElem.click();
+    };
+
+    target.addEventListener('click', clickEvent, true);
 
     return new Promise((res, rej) => {
       inputElem.addEventListener('change', ev0 => {
@@ -233,9 +240,10 @@ class Recorder {
           this.parseData(dataBinary);
           res();
         });
-        reader.readAsArrayBuffer(ev0.target.files[0])
+        reader.readAsArrayBuffer(ev0.target.files[0]);
+
+        target.removeEventListener('click', clickEvent, true);
       }, false);
-      inputElem.click();
     });
   }
 
