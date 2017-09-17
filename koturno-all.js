@@ -2734,6 +2734,8 @@ class Game {
       this._setDivStyle(this.canvas.width, this.canvas.height);
     }
 
+    this.divElem.ctrl.appendChild(this._createCtrlUI());
+
     sideDiv.setAttribute('style', 'float: left;');
     sideDiv.appendChild(this.divElem.frame);
     sideDiv.appendChild(this.divElem.ctrl);
@@ -2743,6 +2745,41 @@ class Game {
     this.divElem.base.appendChild(this.divElem.canvas);
     this.divElem.base.appendChild(sideDiv);
     this.divElem.base.appendChild(this.divElem.timeline);
+  }
+
+  _createCtrlUI() {
+    const div0 = document.createElement('div');
+    const div1 = document.createElement('div');
+    div0.setAttribute('style', 'text-align: center; padding: 8px;');
+    div1.setAttribute('style', 'border: 1px #0f0 solid; display: inline-block; margin: auto; font-size: 20px;');
+    div0.appendChild(div1);
+
+    const stepForwardI = document.createElement('i');
+    const playI = document.createElement('i');
+    stepForwardI.setAttribute('style', 'background-color: #000; color: #0f0; width: 25.7px; height: 20px;');
+    stepForwardI.setAttribute('class', 'fa fa-fw fa-step-forward');
+    stepForwardI.setAttribute('title', 'step forward');
+    playI.setAttribute('style', 'background-color: #000; color: #0f0; width: 25.7px; height: 20px;');
+    playI.setAttribute('class', 'fa fa-fw fa-play');
+    playI.setAttribute('title', 'play');
+    stepForwardI.addEventListener('mousedown', () => {
+      this._animationState.next();
+    });
+    playI.addEventListener('mousedown', () => {
+      if (this._animationState.getFlag()) {
+        this._animationState.stop();
+        playI.setAttribute('class', 'fa fa-fw fa-play');
+        playI.setAttribute('title', 'play');
+      } else {
+        this._animationState.play();
+        playI.setAttribute('class', 'fa fa-fw fa-pause');
+        playI.setAttribute('title', 'pause');
+      }
+    });
+    div1.appendChild(stepForwardI);
+    div1.appendChild(playI);
+
+    return div0;
   }
 
   _setDivStyle(baseWidth, baseHeight) {
@@ -2982,8 +3019,8 @@ class Game {
    * @param {Recorder} [opt.recorder] recorder
    */
   debug(opt = {}) {
-    const recorder = 'recorder' in opt ? opt.recorder : null;
-    if (recorder !== null) recorder.setMode('w');
+    const recorder = 'recorder' in opt ? opt.recorder : new Recorder();
+    recorder.setMode('w');
     this.action.listen();
     Logger.setGame(this);
     this.soundManager.setDebugMode(true);
