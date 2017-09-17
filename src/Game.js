@@ -34,7 +34,7 @@ class Game {
         let persist = false;
         return {
           getFlag: () => flag,
-          _reset: () => {
+          reset: () => {
             if (!persist) flag = false;
           },
           next: () => {
@@ -273,7 +273,7 @@ class Game {
         if (debug && !this._animationState.getFlag()) {
           requestNextFrame(f);
         } else {
-          this._animationState._reset();
+          this._animationState.reset();
           this._fps.update(stamp);
           f();
         }
@@ -289,11 +289,6 @@ class Game {
 
         currentScene.transition(currentState, this.action, counters, this).match({
           stay: () => {
-            // window.requestAnimationFrame(stamp => {
-            //   while (debug && !this._animationState.getFlag()) {}
-            //   this._animationState._reset();
-            //   this._fps.update(stamp);
-            // });
             requestNextFrame(() => {
               loop(nextState, counters.count());
             });
@@ -309,12 +304,6 @@ class Game {
               currentScene.draw(currentState, this.action, counters, prevPainter, this);
               nextScene.draw(nextScene.init(currentState, nextCounter, this), this.action, nextCounter, nextPainter, this);
 
-              // begin transition loop
-              // window.requestAnimationFrame(stamp => {
-              //   while (debug && !this._animationState.getFlag()) {}
-              //   this._animationState._reset();
-              //   this._fps.update(stamp);
-              // });
               requestNextFrame(() => {
                 transLoop({
                   name: sceneName,
@@ -334,11 +323,6 @@ class Game {
           },
           reset: () => {
             this.soundManager.reset();
-            // window.requestAnimationFrame(stamp => {
-            //   while (debug && !this._animationState.getFlag()) {}
-            //   this._animationState._reset();
-            //   this._fps.update(stamp);
-            // });
             requestNextFrame(() => {
               mainLoop(this.firstScene, this.firstState, counters.hardReset());
             });
@@ -365,20 +349,10 @@ class Game {
 
     const transLoop = (prev, next, counters, transFunc) => {
       if (transFunc(prev.img, next.img, counters.scene, this.painter)) {
-        // window.requestAnimationFrame(stamp => {
-        //   while (debug && !this._animationState.getFlag()) {}
-        //   this._animationState._reset();
-        //   this._fps.update(stamp);
-        // });
         requestNextFrame(() => {
           mainLoop(next.name, prev.state, counters.count().reset(next.counter));
         });
       } else {
-        // window.requestAnimationFrame(stamp => {
-        //   while (debug && !this._animationState.getFlag()) {}
-        //   this._animationState._reset();
-        //   this._fps.update(stamp);
-        // });
         requestNextFrame(() => {
           transLoop(prev, next, counters.count(), transFunc)
         });
