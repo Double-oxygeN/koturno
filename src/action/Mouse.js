@@ -7,8 +7,8 @@ class Mouse extends Action {
     super();
     this.target = target;
     this.over = false;
-    /** @member {Point2d} */
-    this.position = new Point2d(Number.NaN, Number.NaN);
+    /** @member {Vector2d} */
+    this.position = new Vector2d(Number.NaN, Number.NaN);
   }
 
   /**

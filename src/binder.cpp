@@ -13,9 +13,8 @@ int main(int argc, char const *argv[]) {
   std::vector<std::string> min_files{
     "./license-header.js",
     "./geo/Directions.js",
-    "./geo/Point.js",
-    "./geo/Point2d.js",
     "./geo/Vector.js",
+    "./geo/Vector2d.js",
     "./Counters.js",
     "./State.js",
     "./action/Action.js",
@@ -39,6 +38,11 @@ int main(int argc, char const *argv[]) {
     "./Game.js",
   };
   std::vector<std::string> opt_files{
+    "./figure/Material.js",
+    "./figure/PhysicalType.js",
+    "./figure/Shape2d.js",
+    "./figure/Rect2d.js",
+    "./figure/Rigid2d.js",
     "./util/KoturnoUtil.js",
     "./util/StdTransFunc.js",
   };

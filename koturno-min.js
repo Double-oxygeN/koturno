@@ -70,143 +70,6 @@ const Directions = {
 Object.freeze(Directions);
 
 /**
- * Class representing point.
- * @param {number[]} vector position vector
- */
-class Point {
-  constructor(vector) {
-    /** @member {number[]} */
-    this.vector = vector;
-  }
-
-  get dimension() {
-    return this.vector.length;
-  }
-
-  /**
-   * Calculate distance to another point.
-   * @param {Point} another another point
-   * @returns {number} distance (if error occurred, then return `NaN`)
-   */
-  distanceTo(another) {
-    if (this.dimension === another.dimension) {
-      return Math.hypot(...this.vector.map((v0, i) => another.vector[i] - v0));
-    } else {
-      Logger.error(`Cannot calculate distance to different dimension!\nthis: ${this.dimension}\nanother: ${another.dimension}`);
-      return Number.NaN;
-    }
-  }
-
-  /**
-   * Calculate direction vector from this to another point.
-   * @param {Point} another another point
-   * @returns {?Vector} direction vector to another point
-   */
-  to(another) {
-    if (this.dimension === another.dimension) {
-      return new Vector(...this.vector.map((v0, i) => another.vector[i] - v0));
-    } else {
-      Logger.error(`Cannot calculate vector to different dimension!\nthis: ${this.dimension}\nanother: ${another.dimension}`);
-      return null;
-    }
-  }
-
-  /**
-   * Check if this point is interior of an n-ball in Euclidean space.
-   * @param {Point} center center of an n-ball
-   * @param {number} radius radius of an n-ball
-   * @returns {boolean} `true` if this point is interior
-   */
-  isInNBall(center, radius) {
-    if (this.dimension === center.dimension) {
-      return center.distanceTo(this) < radius;
-    } else {
-      Logger.error(`Cannot calculate distance to different dimension!\nthis: ${this.dimension}\ncenter: ${center.dimension}`);
-      return false;
-    }
-  }
-
-  /**
-   * Check if this point is interior of an n-orthotope (or n-box) in Euclidean space.
-   * The method requires two points, which is one of the n-agonals of n-box.
-   * Any edge of the n-box is parallel to one of the axes.
-   * @param {Point} p1 point of an n-box
-   * @param {Point} p2 point of an n-box
-   * @returns {boolean} `true` if this point is interior
-   */
-  isInNBox(p1, p2) {
-    if (this.dimension === p1.dimension && this.dimension === p2.dimension) {
-      return this.vector.every((p, i) => (p1.vector[i] - p) * (p2.vector[i] - p) < 0);
-    } else {
-      Logger.error(`Dimension of the points must be the same each other!\nthis: ${this.dimension}\np1: ${p1.dimension}\np2: ${p2.dimension}`);
-      return false;
-    }
-  }
-
-  /**
-   * Convert to string.
-   * @returns {string} a string
-   */
-  toString() {
-    return `(${this.vector.join(', ')})`;
-  }
-}
-
-/**
- * Class representing 2-dimentional point.
- * @param {number} x x-coordinate
- * @param {number} y y-coordinate
- */
-class Point2d extends Point {
-  constructor(x, y) {
-    super([x, y]);
-    /** @member {number} */
-    this.x = x;
-    /** @member {number} */
-    this.y = y;
-  }
-
-  get x() {
-    return this._x;
-  }
-
-  set x(val) {
-    this._x = val;
-    this.vector[0] = val;
-  }
-
-  get y() {
-    return this._y;
-  }
-
-  set y(val) {
-    this._y = val;
-    this.vector[1] = val;
-  }
-
-  /**
-   * Check if this point is interior of a circle in Euclidean space.
-   * @param {Point2d} center center of a circle
-   * @param {number} radius radius of a circle
-   * @returns {boolean} `true` if this point is interior
-   */
-  isInCircle(center, radius) {
-    return this.isInNBall(center, radius);
-  }
-
-  /**
-   * Check if this point is interior of a rectangle in Euclidean space.
-   * @param {number} x x-coordinate of the leftmost point of a rectangle
-   * @param {number} y y-coordinate of the uppermost point of a rectangle
-   * @param {number} width width of a rectangle
-   * @param {number} height height of a rectangle
-   */
-  isInRectangle(x, y, width, height) {
-    return this.isInNBox(new Point2d(x, y), new Point2d(x + width, y + height));
-  }
-}
-
-/**
  * Class representing vector.
  * @param {number[]} vector vector
  */
@@ -216,8 +79,14 @@ class Vector {
     this.vector = vector;
   }
 
+  /** @member {number} */
   get dimension() {
     return this.vector.length;
+  }
+
+  /** @member {number} */
+  get norm() {
+    return Math.hypot(...this.vector);
   }
 
   /**
@@ -249,6 +118,20 @@ class Vector {
   }
 
   /**
+   * Calculate distance to another point.
+   * @param {Vector} another another point
+   * @returns {number} distance (if error occurred, then return `NaN`)
+   */
+  distanceTo(another) {
+    if (this.dimension === another.dimension) {
+      return another.minus(this).norm;
+    } else {
+      Logger.error(`Cannot calculate distance to different dimension!\nthis: ${this.dimension}\nanother: ${another.dimension}`);
+      return Number.NaN;
+    }
+  }
+
+  /**
    * Scalar product.
    * @param {number} k scalar
    * @returns {Vector}
@@ -267,11 +150,134 @@ class Vector {
   }
 
   /**
+   * Check if this point is interior of an n-ball in Euclidean space.
+   * @param {Vector} center center of an n-ball
+   * @param {number} radius radius of an n-ball
+   * @returns {boolean} `true` if this point is interior
+   */
+  isInNBall(center, radius) {
+    if (this.dimension === center.dimension) {
+      return center.distanceTo(this) < radius;
+    } else {
+      Logger.error(`Cannot calculate distance to different dimension!\nthis: ${this.dimension}\ncenter: ${center.dimension}`);
+      return false;
+    }
+  }
+
+  /**
+   * Check if this point is interior of an n-orthotope (or n-box) in Euclidean space.
+   * The method requires two points, which is one of the n-agonals of n-box.
+   * Any edge of the n-box is parallel to one of the axes.
+   * @param {Vector} p1 point of an n-box
+   * @param {Vector} p2 point of an n-box
+   * @returns {boolean} `true` if this point is interior
+   */
+  isInNBox(p1, p2) {
+    if (this.dimension === p1.dimension && this.dimension === p2.dimension) {
+      return this.vector.every((p, i) => (p1.vector[i] - p) * (p2.vector[i] - p) < 0);
+    } else {
+      Logger.error(`Dimension of the points must be the same each other!\nthis: ${this.dimension}\np1: ${p1.dimension}\np2: ${p2.dimension}`);
+      return false;
+    }
+  }
+
+  /**
    * Convert to string.
    * @returns {string} a string
    */
   toString() {
-    return `[${this.vector.join(', ')}]`;
+    return `(${this.vector.join(', ')})`;
+  }
+}
+
+/**
+ * Class representing 2-dimensional vector.
+ * @param {number} x x
+ * @param {number} y y
+ */
+class Vector2d extends Vector {
+  constructor(x, y) {
+    super([x, y]);
+    /** @member {number} */
+    this.x = x;
+    /** @member {number} */
+    this.y = y;
+  }
+
+  get x() {
+    return this._x;
+  }
+
+  set x(val) {
+    this._x = val;
+    this.vector[0] = val;
+  }
+
+  get y() {
+    return this._y;
+  }
+
+  set y(val) {
+    this._y = val;
+    this.vector[1] = val;
+  }
+
+  /**
+   * Plus.
+   * @param {Vector2d} another another vector
+   * @returns {Vector2d}
+   */
+  plus(another) {
+    return new Vector2d(this.x + another.x, this.y + another.y);
+  }
+
+  /**
+   * Minus.
+   * @param {Vector2d} another another vector
+   * @returns {Vector2d}
+   */
+  minus(another) {
+    return new Vector2d(this.x - another.x, this.y - another.y);
+  }
+
+  /**
+   * Scalar product.
+   * @param {number} k scalar
+   * @returns {Vector2d}
+   */
+  scalar(k) {
+    return new Vector2d(k * this.x, k * this.y);
+  }
+
+  /**
+   * Calculate z-coordinate value of the cross product with other vector.
+   * @param {Vector2d} another another vector
+   * @returns {number} z-coordinate of the cross product
+   */
+  crossProd(another) {
+    return this.x * another.y - another.x * this.y;
+  }
+
+  /**
+   * Check if this point is interior of a circle in Euclidean space.
+   * @param {Vector2d} center center of a circle
+   * @param {number} radius radius of a circle
+   * @returns {boolean} `true` if this point is interior
+   */
+  isInCircle(center, radius) {
+    return this.isInNBall(center, radius);
+  }
+
+  /**
+   * Check if this point is interior of a rectangle in Euclidean space.
+   * @param {number} x x-coordinate of the leftmost point of a rectangle
+   * @param {number} y y-coordinate of the uppermost point of a rectangle
+   * @param {number} width width of a rectangle
+   * @param {number} height height of a rectangle
+   * @returns {boolean} `true` if this point is interior
+   */
+  isInRectangle(x, y, width, height) {
+    return this.isInNBox(new Vector2d(x, y), new Vector2d(x + width, y + height));
   }
 }
 
@@ -600,8 +606,8 @@ class Mouse extends Action {
     super();
     this.target = target;
     this.over = false;
-    /** @member {Point2d} */
-    this.position = new Point2d(Number.NaN, Number.NaN);
+    /** @member {Vector2d} */
+    this.position = new Vector2d(Number.NaN, Number.NaN);
   }
 
   /**
@@ -2616,7 +2622,7 @@ class Game {
         let persist = false;
         return {
           getFlag: () => flag,
-          _reset: () => {
+          reset: () => {
             if (!persist) flag = false;
           },
           next: () => {
@@ -2855,7 +2861,7 @@ class Game {
         if (debug && !this._animationState.getFlag()) {
           requestNextFrame(f);
         } else {
-          this._animationState._reset();
+          this._animationState.reset();
           this._fps.update(stamp);
           f();
         }
@@ -2871,11 +2877,6 @@ class Game {
 
         currentScene.transition(currentState, this.action, counters, this).match({
           stay: () => {
-            // window.requestAnimationFrame(stamp => {
-            //   while (debug && !this._animationState.getFlag()) {}
-            //   this._animationState._reset();
-            //   this._fps.update(stamp);
-            // });
             requestNextFrame(() => {
               loop(nextState, counters.count());
             });
@@ -2891,12 +2892,6 @@ class Game {
               currentScene.draw(currentState, this.action, counters, prevPainter, this);
               nextScene.draw(nextScene.init(currentState, nextCounter, this), this.action, nextCounter, nextPainter, this);
 
-              // begin transition loop
-              // window.requestAnimationFrame(stamp => {
-              //   while (debug && !this._animationState.getFlag()) {}
-              //   this._animationState._reset();
-              //   this._fps.update(stamp);
-              // });
               requestNextFrame(() => {
                 transLoop({
                   name: sceneName,
@@ -2916,11 +2911,6 @@ class Game {
           },
           reset: () => {
             this.soundManager.reset();
-            // window.requestAnimationFrame(stamp => {
-            //   while (debug && !this._animationState.getFlag()) {}
-            //   this._animationState._reset();
-            //   this._fps.update(stamp);
-            // });
             requestNextFrame(() => {
               mainLoop(this.firstScene, this.firstState, counters.hardReset());
             });
@@ -2947,20 +2937,10 @@ class Game {
 
     const transLoop = (prev, next, counters, transFunc) => {
       if (transFunc(prev.img, next.img, counters.scene, this.painter)) {
-        // window.requestAnimationFrame(stamp => {
-        //   while (debug && !this._animationState.getFlag()) {}
-        //   this._animationState._reset();
-        //   this._fps.update(stamp);
-        // });
         requestNextFrame(() => {
           mainLoop(next.name, prev.state, counters.count().reset(next.counter));
         });
       } else {
-        // window.requestAnimationFrame(stamp => {
-        //   while (debug && !this._animationState.getFlag()) {}
-        //   this._animationState._reset();
-        //   this._fps.update(stamp);
-        // });
         requestNextFrame(() => {
           transLoop(prev, next, counters.count(), transFunc)
         });

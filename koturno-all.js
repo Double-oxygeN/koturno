@@ -70,143 +70,6 @@ const Directions = {
 Object.freeze(Directions);
 
 /**
- * Class representing point.
- * @param {number[]} vector position vector
- */
-class Point {
-  constructor(vector) {
-    /** @member {number[]} */
-    this.vector = vector;
-  }
-
-  get dimension() {
-    return this.vector.length;
-  }
-
-  /**
-   * Calculate distance to another point.
-   * @param {Point} another another point
-   * @returns {number} distance (if error occurred, then return `NaN`)
-   */
-  distanceTo(another) {
-    if (this.dimension === another.dimension) {
-      return Math.hypot(...this.vector.map((v0, i) => another.vector[i] - v0));
-    } else {
-      Logger.error(`Cannot calculate distance to different dimension!\nthis: ${this.dimension}\nanother: ${another.dimension}`);
-      return Number.NaN;
-    }
-  }
-
-  /**
-   * Calculate direction vector from this to another point.
-   * @param {Point} another another point
-   * @returns {?Vector} direction vector to another point
-   */
-  to(another) {
-    if (this.dimension === another.dimension) {
-      return new Vector(...this.vector.map((v0, i) => another.vector[i] - v0));
-    } else {
-      Logger.error(`Cannot calculate vector to different dimension!\nthis: ${this.dimension}\nanother: ${another.dimension}`);
-      return null;
-    }
-  }
-
-  /**
-   * Check if this point is interior of an n-ball in Euclidean space.
-   * @param {Point} center center of an n-ball
-   * @param {number} radius radius of an n-ball
-   * @returns {boolean} `true` if this point is interior
-   */
-  isInNBall(center, radius) {
-    if (this.dimension === center.dimension) {
-      return center.distanceTo(this) < radius;
-    } else {
-      Logger.error(`Cannot calculate distance to different dimension!\nthis: ${this.dimension}\ncenter: ${center.dimension}`);
-      return false;
-    }
-  }
-
-  /**
-   * Check if this point is interior of an n-orthotope (or n-box) in Euclidean space.
-   * The method requires two points, which is one of the n-agonals of n-box.
-   * Any edge of the n-box is parallel to one of the axes.
-   * @param {Point} p1 point of an n-box
-   * @param {Point} p2 point of an n-box
-   * @returns {boolean} `true` if this point is interior
-   */
-  isInNBox(p1, p2) {
-    if (this.dimension === p1.dimension && this.dimension === p2.dimension) {
-      return this.vector.every((p, i) => (p1.vector[i] - p) * (p2.vector[i] - p) < 0);
-    } else {
-      Logger.error(`Dimension of the points must be the same each other!\nthis: ${this.dimension}\np1: ${p1.dimension}\np2: ${p2.dimension}`);
-      return false;
-    }
-  }
-
-  /**
-   * Convert to string.
-   * @returns {string} a string
-   */
-  toString() {
-    return `(${this.vector.join(', ')})`;
-  }
-}
-
-/**
- * Class representing 2-dimentional point.
- * @param {number} x x-coordinate
- * @param {number} y y-coordinate
- */
-class Point2d extends Point {
-  constructor(x, y) {
-    super([x, y]);
-    /** @member {number} */
-    this.x = x;
-    /** @member {number} */
-    this.y = y;
-  }
-
-  get x() {
-    return this._x;
-  }
-
-  set x(val) {
-    this._x = val;
-    this.vector[0] = val;
-  }
-
-  get y() {
-    return this._y;
-  }
-
-  set y(val) {
-    this._y = val;
-    this.vector[1] = val;
-  }
-
-  /**
-   * Check if this point is interior of a circle in Euclidean space.
-   * @param {Point2d} center center of a circle
-   * @param {number} radius radius of a circle
-   * @returns {boolean} `true` if this point is interior
-   */
-  isInCircle(center, radius) {
-    return this.isInNBall(center, radius);
-  }
-
-  /**
-   * Check if this point is interior of a rectangle in Euclidean space.
-   * @param {number} x x-coordinate of the leftmost point of a rectangle
-   * @param {number} y y-coordinate of the uppermost point of a rectangle
-   * @param {number} width width of a rectangle
-   * @param {number} height height of a rectangle
-   */
-  isInRectangle(x, y, width, height) {
-    return this.isInNBox(new Point2d(x, y), new Point2d(x + width, y + height));
-  }
-}
-
-/**
  * Class representing vector.
  * @param {number[]} vector vector
  */
@@ -216,8 +79,14 @@ class Vector {
     this.vector = vector;
   }
 
+  /** @member {number} */
   get dimension() {
     return this.vector.length;
+  }
+
+  /** @member {number} */
+  get norm() {
+    return Math.hypot(...this.vector);
   }
 
   /**
@@ -249,6 +118,20 @@ class Vector {
   }
 
   /**
+   * Calculate distance to another point.
+   * @param {Vector} another another point
+   * @returns {number} distance (if error occurred, then return `NaN`)
+   */
+  distanceTo(another) {
+    if (this.dimension === another.dimension) {
+      return another.minus(this).norm;
+    } else {
+      Logger.error(`Cannot calculate distance to different dimension!\nthis: ${this.dimension}\nanother: ${another.dimension}`);
+      return Number.NaN;
+    }
+  }
+
+  /**
    * Scalar product.
    * @param {number} k scalar
    * @returns {Vector}
@@ -267,11 +150,134 @@ class Vector {
   }
 
   /**
+   * Check if this point is interior of an n-ball in Euclidean space.
+   * @param {Vector} center center of an n-ball
+   * @param {number} radius radius of an n-ball
+   * @returns {boolean} `true` if this point is interior
+   */
+  isInNBall(center, radius) {
+    if (this.dimension === center.dimension) {
+      return center.distanceTo(this) < radius;
+    } else {
+      Logger.error(`Cannot calculate distance to different dimension!\nthis: ${this.dimension}\ncenter: ${center.dimension}`);
+      return false;
+    }
+  }
+
+  /**
+   * Check if this point is interior of an n-orthotope (or n-box) in Euclidean space.
+   * The method requires two points, which is one of the n-agonals of n-box.
+   * Any edge of the n-box is parallel to one of the axes.
+   * @param {Vector} p1 point of an n-box
+   * @param {Vector} p2 point of an n-box
+   * @returns {boolean} `true` if this point is interior
+   */
+  isInNBox(p1, p2) {
+    if (this.dimension === p1.dimension && this.dimension === p2.dimension) {
+      return this.vector.every((p, i) => (p1.vector[i] - p) * (p2.vector[i] - p) < 0);
+    } else {
+      Logger.error(`Dimension of the points must be the same each other!\nthis: ${this.dimension}\np1: ${p1.dimension}\np2: ${p2.dimension}`);
+      return false;
+    }
+  }
+
+  /**
    * Convert to string.
    * @returns {string} a string
    */
   toString() {
-    return `[${this.vector.join(', ')}]`;
+    return `(${this.vector.join(', ')})`;
+  }
+}
+
+/**
+ * Class representing 2-dimensional vector.
+ * @param {number} x x
+ * @param {number} y y
+ */
+class Vector2d extends Vector {
+  constructor(x, y) {
+    super([x, y]);
+    /** @member {number} */
+    this.x = x;
+    /** @member {number} */
+    this.y = y;
+  }
+
+  get x() {
+    return this._x;
+  }
+
+  set x(val) {
+    this._x = val;
+    this.vector[0] = val;
+  }
+
+  get y() {
+    return this._y;
+  }
+
+  set y(val) {
+    this._y = val;
+    this.vector[1] = val;
+  }
+
+  /**
+   * Plus.
+   * @param {Vector2d} another another vector
+   * @returns {Vector2d}
+   */
+  plus(another) {
+    return new Vector2d(this.x + another.x, this.y + another.y);
+  }
+
+  /**
+   * Minus.
+   * @param {Vector2d} another another vector
+   * @returns {Vector2d}
+   */
+  minus(another) {
+    return new Vector2d(this.x - another.x, this.y - another.y);
+  }
+
+  /**
+   * Scalar product.
+   * @param {number} k scalar
+   * @returns {Vector2d}
+   */
+  scalar(k) {
+    return new Vector2d(k * this.x, k * this.y);
+  }
+
+  /**
+   * Calculate z-coordinate value of the cross product with other vector.
+   * @param {Vector2d} another another vector
+   * @returns {number} z-coordinate of the cross product
+   */
+  crossProd(another) {
+    return this.x * another.y - another.x * this.y;
+  }
+
+  /**
+   * Check if this point is interior of a circle in Euclidean space.
+   * @param {Vector2d} center center of a circle
+   * @param {number} radius radius of a circle
+   * @returns {boolean} `true` if this point is interior
+   */
+  isInCircle(center, radius) {
+    return this.isInNBall(center, radius);
+  }
+
+  /**
+   * Check if this point is interior of a rectangle in Euclidean space.
+   * @param {number} x x-coordinate of the leftmost point of a rectangle
+   * @param {number} y y-coordinate of the uppermost point of a rectangle
+   * @param {number} width width of a rectangle
+   * @param {number} height height of a rectangle
+   * @returns {boolean} `true` if this point is interior
+   */
+  isInRectangle(x, y, width, height) {
+    return this.isInNBox(new Vector2d(x, y), new Vector2d(x + width, y + height));
   }
 }
 
@@ -600,8 +606,8 @@ class Mouse extends Action {
     super();
     this.target = target;
     this.over = false;
-    /** @member {Point2d} */
-    this.position = new Point2d(Number.NaN, Number.NaN);
+    /** @member {Vector2d} */
+    this.position = new Vector2d(Number.NaN, Number.NaN);
   }
 
   /**
@@ -2616,7 +2622,7 @@ class Game {
         let persist = false;
         return {
           getFlag: () => flag,
-          _reset: () => {
+          reset: () => {
             if (!persist) flag = false;
           },
           next: () => {
@@ -2855,7 +2861,7 @@ class Game {
         if (debug && !this._animationState.getFlag()) {
           requestNextFrame(f);
         } else {
-          this._animationState._reset();
+          this._animationState.reset();
           this._fps.update(stamp);
           f();
         }
@@ -2871,11 +2877,6 @@ class Game {
 
         currentScene.transition(currentState, this.action, counters, this).match({
           stay: () => {
-            // window.requestAnimationFrame(stamp => {
-            //   while (debug && !this._animationState.getFlag()) {}
-            //   this._animationState._reset();
-            //   this._fps.update(stamp);
-            // });
             requestNextFrame(() => {
               loop(nextState, counters.count());
             });
@@ -2891,12 +2892,6 @@ class Game {
               currentScene.draw(currentState, this.action, counters, prevPainter, this);
               nextScene.draw(nextScene.init(currentState, nextCounter, this), this.action, nextCounter, nextPainter, this);
 
-              // begin transition loop
-              // window.requestAnimationFrame(stamp => {
-              //   while (debug && !this._animationState.getFlag()) {}
-              //   this._animationState._reset();
-              //   this._fps.update(stamp);
-              // });
               requestNextFrame(() => {
                 transLoop({
                   name: sceneName,
@@ -2916,11 +2911,6 @@ class Game {
           },
           reset: () => {
             this.soundManager.reset();
-            // window.requestAnimationFrame(stamp => {
-            //   while (debug && !this._animationState.getFlag()) {}
-            //   this._animationState._reset();
-            //   this._fps.update(stamp);
-            // });
             requestNextFrame(() => {
               mainLoop(this.firstScene, this.firstState, counters.hardReset());
             });
@@ -2947,20 +2937,10 @@ class Game {
 
     const transLoop = (prev, next, counters, transFunc) => {
       if (transFunc(prev.img, next.img, counters.scene, this.painter)) {
-        // window.requestAnimationFrame(stamp => {
-        //   while (debug && !this._animationState.getFlag()) {}
-        //   this._animationState._reset();
-        //   this._fps.update(stamp);
-        // });
         requestNextFrame(() => {
           mainLoop(next.name, prev.state, counters.count().reset(next.counter));
         });
       } else {
-        // window.requestAnimationFrame(stamp => {
-        //   while (debug && !this._animationState.getFlag()) {}
-        //   this._animationState._reset();
-        //   this._fps.update(stamp);
-        // });
         requestNextFrame(() => {
           transLoop(prev, next, counters.count(), transFunc)
         });
@@ -3062,6 +3042,207 @@ class Game {
    */
   toString() {
     return `[Game]`;
+  }
+}
+
+/**
+ * Class for material.
+ * @param {number} density average density
+ * @param {number} friction coefficient of friction
+ * @param {number} restitution coefficient of restitution
+ */
+class Material {
+  constructor(density, friction, restitution) {
+    this.density = density;
+    this.friction = friction;
+    this.restitution = restitution;
+  }
+
+  /**
+   * Calculate mass.
+   * @param {number} volume volume
+   * @returns {number} mass
+   */
+  calcMass(volume) {
+    return this.density * volume;
+  }
+
+  /**
+   * Convert to string.
+   * @returns {string} a string
+   */
+  toString() {
+    return `[Material density=${this.density}, friction=${this.friction}, restitution=${this.restitution}]`;
+  }
+}
+
+/**
+ * Enum for physical type.
+ * @enum {number}
+ */
+const PhysicalType = {
+  STATIC: 1,
+  DYNAMIC: 2
+};
+Object.freeze(PhysicalType);
+
+/**
+ * Abstract class for 2-dimensional shape.
+ * @param {string} name name of shape
+ * @param {number} area area
+ * @param {Vector2d} gravityCenter relative center position of gravity
+ * @param {number} gyradius radius of gyration
+ */
+class Shape2d {
+  constructor(name, area, gravityCenter, gyradius) {
+    this.name = name;
+    this.area = area;
+    this.gravityCenter = gravityCenter;
+    this.gyradius = gyradius;
+  }
+
+  /**
+   * Calculate moment of inertia.
+   * @param {number} mass mass
+   * @returns {number} moment of inertia
+   */
+  calcInertia(mass) {
+    return mass * this.gyradius ** 2;
+  }
+
+  /**
+   * Create the path of the shape.
+   * @param {Painter2d} painter painter
+   * @returns {Object} path operations
+   */
+  createPath(painter) {
+    Logger.fatal(`Shape2d#createPath is not implemented!`);
+  }
+
+  /**
+   * Convert to string.
+   * @returns {string} a string
+   */
+  toString() {
+    return `[Shape2d ${this.name}]`;
+  }
+}
+
+/**
+ * Class for rectangle shape.
+ * @param {number} width width
+ * @param {number} height height
+ * @param {Vector2d} [gravityCenter] relative center position of gravity
+ * @param {number} [gyradius = 1] radius of gyration
+ */
+class Rect2d extends Shape2d {
+  constructor(width, height, gravityCenter = new Vector2d(0, 0), gyradius) {
+    if (gyradius === undefined) {
+      const a = width / 2 - gravityCenter.x;
+      const b = -width / 2 - gravityCenter.x;
+      const c = height / 2 - gravityCenter.y;
+      const d = -height / 2 - gravityCenter.y;
+      gyradius = Math.sqrt((a * a + a * b + b * b + c * c + c * d + d * d) / 3);
+    }
+    super('rect2d', width * height, gravityCenter, gyradius);
+    this.width = width;
+    this.height = height;
+  }
+
+  createPath(painter) {
+    return painter.rect(-this.width / 2, -this.height / 2, this.width, this.height);
+  }
+}
+
+/**
+ * Class for 2-dimensional figures.
+ * @param {PhysicalType} physicalType physical type
+ * @param {Shape2d} shape shape
+ * @param {Material} material material
+ * @param {Vector2d} center center position
+ * @param {number} rotation rotation angle
+ * @param {Vector2d} velocity velocity
+ * @param {number} angularVelocity angular velocity
+ */
+class Rigid2d {
+  constructor(physicalType, shape, material, center, rotation, velocity, angularVelocity) {
+    this.physicalType = physicalType;
+    this.shape = shape;
+    this.material = material;
+    this.center = center;
+    this.rotation = rotation;
+    this.velocity = velocity;
+    this.angularVelocity = angularVelocity;
+  }
+
+  /** @member {number} */
+  get mass() {
+    return this.material.calcMass(this.shape.area);
+  }
+
+  /** @member {number} */
+  get inertia() {
+    return this.shape.calcInertia(this.mass);
+  }
+
+  /**
+   * Apply force.
+   * @param {Vector2d} force force
+   * @param {Vector2d} [from] start point of force (relative)
+   * @returns {Rigid2d} updated figure
+   */
+  applyForce(force, from = new Vector2d(0, 0)) {
+    if (this.physicalType === PhysicalType.DYNAMIC) {
+      const R = this.shape.gravityCenter.minus(from);
+      const F_g = R.norm === 0 ? force : R.scalar(force.innerProd(R) / R.norm ** 2);
+      const N_h = R.crossProd(force);
+
+      const nextVelocity = this.velocity.plus(F_g.scalar(1 / this.mass));
+      const nextAngular = this.angularVelocity + N_h / this.inertia;
+      return new Rigid2d(this.physicalType, this.shape, this.material, this.center, this.rotation, nextVelocity, nextAngular);
+    } else {
+      return this;
+    }
+  }
+
+  /**
+   * Step next frame.
+   * @returns {Rigid2d} updated figure
+   */
+  step() {
+    return new Rigid2d(this.physicalType, this.shape, this.material, this.center.plus(this.velocity), this.rotation + this.angularVelocity, this.velocity, this.angularVelocity);
+  }
+
+  /**
+   * Create the path of the figure.
+   * @param {Painter2d} painter painter
+   * @returns {Object} path operations
+   */
+  createPath(painter) {
+    const cosVal = Math.cos(this.rotation);
+    const sinVal = Math.sin(this.rotation);
+    return {
+      fill: (...args) => {
+        painter.transformAndDraw(cosVal, -sinVal, sinVal, cosVal, this.center.x, this.center.y, () => this.shape.createPath(painter).fill(...args));
+      },
+      stroke: (...args) => {
+        painter.transformAndDraw(cosVal, -sinVal, sinVal, cosVal, this.center.x, this.center.y, () => this.shape.createPath(painter).stroke(...args));
+      },
+      outlined: (...args) => {
+        painter.transformAndDraw(cosVal, -sinVal, sinVal, cosVal, this.center.x, this.center.y, () => this.shape.createPath(painter).outlined(...args));
+      },
+      clip: (...args) => {
+        painter.transformAndDraw(cosVal, -sinVal, sinVal, cosVal, this.center.x, this.center.y, () => this.shape.createPath(painter).clip(...args));
+      }
+    };
+  }
+
+  /**
+   * Convert to string.
+   * @returns {string} a stirng
+   */
+  toString() {
+    return `[Rigid2d ${this.shape.name} ${this.center.toString()}]`;
   }
 }
 

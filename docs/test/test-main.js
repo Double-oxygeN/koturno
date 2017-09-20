@@ -13,7 +13,8 @@
         'Logger',
         'Scene',
         'StdTransFunc',
-        'Tween'
+        'Tween',
+        'Rigid2d',
       ];
     }
 
@@ -24,8 +25,9 @@
         ['SE', 'BGM', 'sound test'],
         ['debug', 'info', 'warn', 'error', 'fatal'],
         ['transition', 'end', 'reset'],
-        ['cut', 'fade', 'fadeWithColor', 'push', 'wipe', 'stripeIn', 'stripeOut', 'checker', 'gateIn', 'gateOut', 'silhouetteIn', 'silhouetteOut'],
-        ['no data']
+        ['cut', 'fade', 'fadeWithColor', 'push', 'wipe', 'stripeIn', 'stripeOut', 'gateIn', 'gateOut', 'silhouetteIn', 'silhouetteOut'],
+        ['no data'],
+        ['Rect2d']
       ];
     }
 
@@ -118,16 +120,15 @@
           if (row === 4) return Transition.Trans('title', { transFunc: StdTransFunc.wipe(60, Directions.E) });
           if (row === 5) return Transition.Trans('title', { transFunc: StdTransFunc.stripeIn(60, Directions.N, { num: 16 }) });
           if (row === 6) return Transition.Trans('title', { transFunc: StdTransFunc.stripeOut(60, Directions.S, { num: 16 }) });
-          // if (row === 7) return Transition.Trans('title', { transFunc: StdTransFunc.checker(60, Directions.S, { num: 16 }) });
-          if (row === 8) return Transition.Trans('title', { transFunc: StdTransFunc.gateIn(60, Directions.S) });
-          if (row === 9) return Transition.Trans('title', { transFunc: StdTransFunc.gateOut(60, Directions.S) });
-          if (row === 10) return Transition.Trans('title', {
+          if (row === 7) return Transition.Trans('title', { transFunc: StdTransFunc.gateIn(60, Directions.S) });
+          if (row === 8) return Transition.Trans('title', { transFunc: StdTransFunc.gateOut(60, Directions.S) });
+          if (row === 9) return Transition.Trans('title', {
             transFunc: StdTransFunc.silhouetteIn(90, game.width / 2, game.height / 2, painter => {
               // painter.diamond(game.width / 4, game.height / 4, game.width / 2, game.height / 2).fill('#000');
               painter.image('box-sprite', game.width / 2, game.height / 2, { relativeOrigin: Directions.C });
             })
           });
-          if (row === 11) return Transition.Trans('title', {
+          if (row === 10) return Transition.Trans('title', {
             transFunc: StdTransFunc.silhouetteOut(90, game.width / 2, game.height / 2, painter => {
               // painter.diamond(game.width / 4, game.height / 4, game.width / 2, game.height / 2).fill('#000');
               painter.image('box-sprite', game.width / 2, game.height / 2, { relativeOrigin: Directions.C });
@@ -135,6 +136,9 @@
           });
           break;
         case 6:
+          break;
+        case 7:
+          return Transition.Trans(`Rigid2d-${row}`);
           break;
         }
       }
@@ -416,30 +420,30 @@
       const star = (x, y, r) => {
         return [0, 1, 2, 3, 4]
           .map(i => KoturnoUtil.toRadians(144 * i))
-          .map(rad => new Point2d(x - r * Math.sin(rad), y - r * Math.cos(rad)));
+          .map(rad => new Vector2d(x - r * Math.sin(rad), y - r * Math.cos(rad)));
       };
       painter.background('#fff');
 
-      painter.polygon([new Point2d(30, 10), new Point2d(10, 50), new Point2d(50, 50)]).fill("#f00");
-      painter.polygon([new Point2d(10, 130), new Point2d(130, 130), new Point2d(190, 70), new Point2d(70, 70)]).fill("#0f0");
-      painter.polygon([new Point2d(100, 10), new Point2d(70, 40), new Point2d(100, 190), new Point2d(130, 40)]).fill("#00f");
+      painter.polygon([new Vector2d(30, 10), new Vector2d(10, 50), new Vector2d(50, 50)]).fill("#f00");
+      painter.polygon([new Vector2d(10, 130), new Vector2d(130, 130), new Vector2d(190, 70), new Vector2d(70, 70)]).fill("#0f0");
+      painter.polygon([new Vector2d(100, 10), new Vector2d(70, 40), new Vector2d(100, 190), new Vector2d(130, 40)]).fill("#00f");
       painter.polygon(star(170, 170, 20)).fill("#000");
 
-      painter.polygon([new Point2d(230, 10), new Point2d(210, 50), new Point2d(250, 50)]).stroke("#f00", { width: 1, join: 'miter', miterLimit: 10.0 });
-      painter.polygon([new Point2d(210, 130), new Point2d(330, 130), new Point2d(390, 70), new Point2d(270, 70)]).stroke("#0f0", { width: 2, miterLimit: 0.4 });
-      painter.polygon([new Point2d(300, 10), new Point2d(270, 40), new Point2d(300, 190), new Point2d(330, 40)]).stroke("#00f", { width: 3, join: 'round' });
+      painter.polygon([new Vector2d(230, 10), new Vector2d(210, 50), new Vector2d(250, 50)]).stroke("#f00", { width: 1, join: 'miter', miterLimit: 10.0 });
+      painter.polygon([new Vector2d(210, 130), new Vector2d(330, 130), new Vector2d(390, 70), new Vector2d(270, 70)]).stroke("#0f0", { width: 2, miterLimit: 0.4 });
+      painter.polygon([new Vector2d(300, 10), new Vector2d(270, 40), new Vector2d(300, 190), new Vector2d(330, 40)]).stroke("#00f", { width: 3, join: 'round' });
       painter.polygon(star(370, 170, 20)).stroke("#000", { width: 4, join: 'bevel' });
 
-      painter.polygon([new Point2d(430, 10), new Point2d(410, 50), new Point2d(450, 50)]).outlined("#f00", "#999", 4);
-      painter.polygon([new Point2d(410, 130), new Point2d(530, 130), new Point2d(590, 70), new Point2d(470, 70)]).outlined("#0f0", "#999", 3);
-      painter.polygon([new Point2d(500, 10), new Point2d(470, 40), new Point2d(500, 190), new Point2d(530, 40)]).outlined("#00f", "#999", 2);
+      painter.polygon([new Vector2d(430, 10), new Vector2d(410, 50), new Vector2d(450, 50)]).outlined("#f00", "#999", 4);
+      painter.polygon([new Vector2d(410, 130), new Vector2d(530, 130), new Vector2d(590, 70), new Vector2d(470, 70)]).outlined("#0f0", "#999", 3);
+      painter.polygon([new Vector2d(500, 10), new Vector2d(470, 40), new Vector2d(500, 190), new Vector2d(530, 40)]).outlined("#00f", "#999", 2);
       painter.polygon(star(570, 170, 20)).outlined("#000", "#999", 1);
 
-      painter.polygon([new Point2d(10, 290), new Point2d(70, 250), new Point2d(130, 290), new Point2d(190, 210), new Point2d(130, 250), new Point2d(70, 210)]).fill(patternStyle);
-      painter.polygon([new Point2d(210, 290), new Point2d(270, 250), new Point2d(330, 290), new Point2d(390, 210), new Point2d(330, 250), new Point2d(270, 210)]).stroke(patternStyle, { width: 6, join: 'miter', miterLimit: 10.0 });
-      painter.polygon([new Point2d(410, 290), new Point2d(470, 250), new Point2d(530, 290), new Point2d(590, 210), new Point2d(530, 250), new Point2d(470, 210)]).outlined(patternStyle, "#384d98", 2);
+      painter.polygon([new Vector2d(10, 290), new Vector2d(70, 250), new Vector2d(130, 290), new Vector2d(190, 210), new Vector2d(130, 250), new Vector2d(70, 210)]).fill(patternStyle);
+      painter.polygon([new Vector2d(210, 290), new Vector2d(270, 250), new Vector2d(330, 290), new Vector2d(390, 210), new Vector2d(330, 250), new Vector2d(270, 210)]).stroke(patternStyle, { width: 6, join: 'miter', miterLimit: 10.0 });
+      painter.polygon([new Vector2d(410, 290), new Vector2d(470, 250), new Vector2d(530, 290), new Vector2d(590, 210), new Vector2d(530, 250), new Vector2d(470, 210)]).outlined(patternStyle, "#384d98", 2);
 
-      painter.polygon([new Point2d(10, 390), new Point2d(70, 350), new Point2d(130, 390), new Point2d(190, 310), new Point2d(130, 350), new Point2d(70, 310)]).clipAndDraw(() => {
+      painter.polygon([new Vector2d(10, 390), new Vector2d(70, 350), new Vector2d(130, 390), new Vector2d(190, 310), new Vector2d(130, 350), new Vector2d(70, 310)]).clipAndDraw(() => {
         painter.background(patternStyle);
         painter.circle(160, 420, 150).fill("#0f0");
         painter.circle(190, 280, 80).fill("#00f");
@@ -740,15 +744,15 @@ mollit anim id est laborum.`;
     update(state, action, counters, sound, game) {
       let circles = state.getState('circles');
       circles = circles.map(circle => { circle.r++; return circle; }).filter(circle => circle.r <= 100);
-      if (action.keyboard.isPressed('KeyS') || action.mouse.isPressed(MouseButton.LEFT) && action.mouse.position.isInCircle(new Point2d(100, 300), 50)) {
+      if (action.keyboard.isPressed('KeyS') || action.mouse.isPressed(MouseButton.LEFT) && action.mouse.position.isInCircle(new Vector2d(100, 300), 50)) {
         sound.playSE('move');
         circles.push({ x: 100, y: 300, r: 50, color: '#f00' });
       }
-      if (action.keyboard.isPressed('KeyG') || action.mouse.isPressed(MouseButton.LEFT) && action.mouse.position.isInCircle(new Point2d(300, 300), 50)) {
+      if (action.keyboard.isPressed('KeyG') || action.mouse.isPressed(MouseButton.LEFT) && action.mouse.position.isInCircle(new Vector2d(300, 300), 50)) {
         sound.playSE('se1');
         circles.push({ x: 300, y: 300, r: 50, color: '#0f0' });
       }
-      if (action.keyboard.isPressed('KeyK') || action.mouse.isPressed(MouseButton.LEFT) && action.mouse.position.isInCircle(new Point2d(500, 300), 50)) {
+      if (action.keyboard.isPressed('KeyK') || action.mouse.isPressed(MouseButton.LEFT) && action.mouse.position.isInCircle(new Vector2d(500, 300), 50)) {
         sound.playSE('se2');
         circles.push({ x: 500, y: 300, r: 50, color: '#00f' });
       }
@@ -756,9 +760,9 @@ mollit anim id est laborum.`;
     }
 
     draw(state, action, counters, painter, game) {
-      const pressS = action.keyboard.isDown('KeyS') || action.mouse.isDown(MouseButton.LEFT) && action.mouse.position.isInCircle(new Point2d(100, 300), 50);
-      const pressG = action.keyboard.isDown('KeyG') || action.mouse.isDown(MouseButton.LEFT) && action.mouse.position.isInCircle(new Point2d(300, 300), 50);
-      const pressK = action.keyboard.isDown('KeyK') || action.mouse.isDown(MouseButton.LEFT) && action.mouse.position.isInCircle(new Point2d(500, 300), 50);
+      const pressS = action.keyboard.isDown('KeyS') || action.mouse.isDown(MouseButton.LEFT) && action.mouse.position.isInCircle(new Vector2d(100, 300), 50);
+      const pressG = action.keyboard.isDown('KeyG') || action.mouse.isDown(MouseButton.LEFT) && action.mouse.position.isInCircle(new Vector2d(300, 300), 50);
+      const pressK = action.keyboard.isDown('KeyK') || action.mouse.isDown(MouseButton.LEFT) && action.mouse.position.isInCircle(new Vector2d(500, 300), 50);
 
       painter.background('#fff');
 
@@ -949,13 +953,60 @@ mollit anim id est laborum.`;
 
       painter.rect(20, 90 + cursor * 80, game.width - 40, 60).stroke('#33f', { width: 5 });
       if (cursor !== 4) {
-        painter.polygon([new Point2d(350, 100 + cursor * 80), new Point2d(350, 140 + cursor * 80), new Point2d(330, 120 + cursor * 80)]).fill('#99f');
-        painter.polygon([new Point2d(550, 100 + cursor * 80), new Point2d(550, 140 + cursor * 80), new Point2d(570, 120 + cursor * 80)]).fill('#99f');
+        painter.polygon([new Vector2d(350, 100 + cursor * 80), new Vector2d(350, 140 + cursor * 80), new Vector2d(330, 120 + cursor * 80)]).fill('#99f');
+        painter.polygon([new Vector2d(550, 100 + cursor * 80), new Vector2d(550, 140 + cursor * 80), new Vector2d(570, 120 + cursor * 80)]).fill('#99f');
       }
     }
 
     transition(state, action, counters, game) {
       return action.keyboard.isPressed('Space', 'Enter') && state.getState('cursor') === 4 ? Transition.Trans('title') : Transition.Stay();
+    }
+  };
+
+  const RigidTestScene0 = class extends Scene {
+    constructor() {
+      super('Rigid2d-0');
+    }
+
+    init(state, counter, game) {
+      const rect = new Rigid2d(PhysicalType.DYNAMIC, new Rect2d(50, 80), new Material(0.01, 0, 1), new Vector2d(game.width / 2, game.height / 2), 0, new Vector2d(0, 0), 0);
+      return State.init({
+        rect,
+        mouseState: State.init({
+          down: false,
+          startPos: new Vector2d(game.width / 2, game.height / 2)
+        })
+      });
+    }
+
+    update(state, action, counter, sound, game) {
+      const mouseState = state.getState('mouseState');
+      return state
+        .modifyState('mouseState', mouseState => {
+          return mouseState.setState('down', action.mouse.isDown(MouseButton.LEFT))
+            .modifyState('startPos', pos => (action.mouse.isPressed(MouseButton.LEFT)) ? action.mouse.position.scalar(1) : pos);
+        })
+        .modifyState('rect', rect => mouseState.getState('down') && !action.mouse.isDown(MouseButton.LEFT) ? rect.applyForce(action.mouse.position.minus(mouseState.getState('startPos')), mouseState.getState('startPos').minus(rect.center)) : rect)
+        .modifyState('rect', rect => rect.step());
+    }
+
+    draw(state, action, counter, painter, game) {
+      const rect = state.getState('rect');
+      const mouseState = state.getState('mouseState');
+
+      painter.background('#fff');
+
+      rect.createPath(painter).outlined("#f66", "#c00", 1);
+
+      if (mouseState.getState('down')) {
+        const mouseStartPos = mouseState.getState('startPos');
+        painter.circle(mouseStartPos.x, mouseStartPos.y, 3).fill('#000');
+        painter.polygon([mouseStartPos, action.mouse.position]).stroke('#000');
+      }
+    }
+
+    transition(state, action, counter, game) {
+      return action.keyboard.isPressed('Space', 'Enter') ? Transition.Trans('title') : Transition.Stay();
     }
   };
 
@@ -976,6 +1027,7 @@ mollit anim id est laborum.`;
     new SoundTestScene0(),
     new SoundTestScene1(),
     new SoundTestScene2(),
+    new RigidTestScene0(),
   ]);
 
   Logger.setLogLevel(LogLevel.DEBUG);
@@ -995,5 +1047,5 @@ mollit anim id est laborum.`;
     ]
     // }).center().autorun(recorder);
     // }).center().run({ displayFPS: true });
-  }).center().debug({ displayFPS: false });
+  }).center().run({ displayFPS: true });
 })();
