@@ -26,7 +26,7 @@
         ['debug', 'info', 'warn', 'error', 'fatal'],
         ['transition', 'end', 'reset'],
         ['cut', 'fade', 'fadeWithColor', 'push', 'wipe', 'stripeIn', 'stripeOut', 'gateIn', 'gateOut', 'silhouetteIn', 'silhouetteOut'],
-        ['no data'],
+        ['linear', 'quad', 'cubic', 'quart', 'quint', 'sinusoidal', 'exp', 'circular', 'elastic', 'softback', 'back'],
         ['Rect2d', 'Circle2d']
       ];
     }
@@ -136,6 +136,17 @@
           });
           break;
         case 6:
+          if (row == 0) return Transition.Trans('title', { transFunc: StdTransFunc.push(60, Directions.S, Tween.in(Tween.linear)) });
+          if (row == 1) return Transition.Trans('title', { transFunc: StdTransFunc.push(60, Directions.S, Tween.in(Tween.quad)) });
+          if (row == 2) return Transition.Trans('title', { transFunc: StdTransFunc.push(60, Directions.S, Tween.in(Tween.cubic)) });
+          if (row == 3) return Transition.Trans('title', { transFunc: StdTransFunc.push(60, Directions.S, Tween.in(Tween.quart)) });
+          if (row == 4) return Transition.Trans('title', { transFunc: StdTransFunc.push(60, Directions.S, Tween.in(Tween.quint)) });
+          if (row == 5) return Transition.Trans('title', { transFunc: StdTransFunc.push(60, Directions.S, Tween.in(Tween.sinusoidal)) });
+          if (row == 6) return Transition.Trans('title', { transFunc: StdTransFunc.push(60, Directions.S, Tween.in(Tween.exp)) });
+          if (row == 7) return Transition.Trans('title', { transFunc: StdTransFunc.push(60, Directions.S, Tween.in(Tween.circular)) });
+          if (row == 8) return Transition.Trans('title', { transFunc: StdTransFunc.push(60, Directions.S, Tween.in(Tween.elastic)) });
+          if (row == 9) return Transition.Trans('title', { transFunc: StdTransFunc.push(60, Directions.S, Tween.in(Tween.softback)) });
+          if (row == 10) return Transition.Trans('title', { transFunc: StdTransFunc.push(60, Directions.S, Tween.in(Tween.back)) });
           break;
         case 7:
           return Transition.Trans(`Rigid2d-${row}`);
