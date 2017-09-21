@@ -1,9 +1,9 @@
 /**
- * Class for rectangle shape.
+ * Class representing rectangle shape.
  * @param {number} width width
  * @param {number} height height
  * @param {Vector2d} [gravityCenter] relative center position of gravity
- * @param {number} [gyradius = 1] radius of gyration
+ * @param {number} [gyradius] radius of gyration
  */
 class Rect2d extends Shape2d {
   constructor(width, height, gravityCenter = new Vector2d(0, 0), gyradius) {
@@ -19,6 +19,11 @@ class Rect2d extends Shape2d {
     this.height = height;
   }
 
+  /**
+   * Create the path of the rectangle.
+   * @param {Painter2d} painter painter
+   * @returns {Object} path operations
+   */
   createPath(painter) {
     return painter.rect(-this.width / 2, -this.height / 2, this.width, this.height);
   }

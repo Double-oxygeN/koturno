@@ -1300,15 +1300,15 @@
                       </a></li>
                       
                       <li><a
-                        href='#scenestostring'
-                        class='regular pre-open'>
-                        #toString
-                      </a></li>
-                      
-                      <li><a
                         href='#scenesscenesforeach'
                         class='regular pre-open'>
                         #Scenes~forEach
+                      </a></li>
+                      
+                      <li><a
+                        href='#scenestostring'
+                        class='regular pre-open'>
+                        #toString
                       </a></li>
                       
                     </ul>
@@ -1717,10 +1717,56 @@
                 
                 <li><a
                   href='#rect2d'
-                  class="">
+                  class=" toggle-sibling">
                   Rect2d
-                  
+                  <span class='icon'>▸</span>
                 </a>
+                
+                <div class='toggle-target display-none'>
+                  
+                  
+                    <ul class='list-reset py1-ul pl1'>
+                      <li class='h5'><span>Instance members</span></li>
+                      
+                      <li><a
+                        href='#rect2dcreatepath'
+                        class='regular pre-open'>
+                        #createPath
+                      </a></li>
+                      
+                    </ul>
+                  
+                  
+                  
+                </div>
+                
+                </li>
+              
+                
+                <li><a
+                  href='#circle2d'
+                  class=" toggle-sibling">
+                  Circle2d
+                  <span class='icon'>▸</span>
+                </a>
+                
+                <div class='toggle-target display-none'>
+                  
+                  
+                    <ul class='list-reset py1-ul pl1'>
+                      <li class='h5'><span>Instance members</span></li>
+                      
+                      <li><a
+                        href='#circle2dcreatepath'
+                        class='regular pre-open'>
+                        #createPath
+                      </a></li>
+                      
+                    </ul>
+                  
+                  
+                  
+                </div>
                 
                 </li>
               
@@ -12614,60 +12660,6 @@ If you want to create new scene, please extend it.</p>
       </div>
     </div>
   
-    <div class='border-bottom' id='scenestostring'>
-      <div class="clearfix small pointer toggle-sibling">
-        <div class="py1 contain">
-            <a class='icon pin-right py1 dark-link caret-right'>▸</a>
-            <span class='code strong strong truncate'>toString()</span>
-        </div>
-      </div>
-      <div class="clearfix display-none toggle-target">
-        <section class='p2 mb2 clearfix bg-white minishadow'>
-
-  
-
-  <p>Convert to string.</p>
-
-
-  <div class='pre p1 fill-light mt0'>toString(): <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></div>
-  
-  
-
-  
-  
-  
-  
-  
-  
-
-  
-
-  
-
-  
-    
-      <div class='py1 quiet mt1 prose-big'>Returns</div>
-      <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></code>:
-        a string
-
-      
-    
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-</section>
-
-      </div>
-    </div>
-  
     <div class='border-bottom' id='scenesscenesforeach'>
       <div class="clearfix small pointer toggle-sibling">
         <div class="py1 contain">
@@ -12723,6 +12715,60 @@ If you want to create new scene, please extend it.</p>
 
   
 
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+      </div>
+    </div>
+  
+    <div class='border-bottom' id='scenestostring'>
+      <div class="clearfix small pointer toggle-sibling">
+        <div class="py1 contain">
+            <a class='icon pin-right py1 dark-link caret-right'>▸</a>
+            <span class='code strong strong truncate'>toString()</span>
+        </div>
+      </div>
+      <div class="clearfix display-none toggle-target">
+        <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+
+  <p>Convert to string.</p>
+
+
+  <div class='pre p1 fill-light mt0'>toString(): <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+
+  
+
+  
+    
+      <div class='py1 quiet mt1 prose-big'>Returns</div>
+      <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></code>:
+        a string
+
+      
+    
   
 
   
@@ -15726,10 +15772,10 @@ For confirmation or testing, use Logger.debug.</p>
   </div>
   
 
-  <p>Class for rectangle shape.</p>
+  <p>Class representing rectangle shape.</p>
 
 
-  <div class='pre p1 fill-light mt0'>new Rect2d(width: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, height: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, gravityCenter: <a href="#vector2d">Vector2d</a>?, gyradius: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>)</div>
+  <div class='pre p1 fill-light mt0'>new Rect2d(width: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, height: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, gravityCenter: <a href="#vector2d">Vector2d</a>?, gyradius: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>?)</div>
   
   
     <p>
@@ -15781,8 +15827,7 @@ For confirmation or testing, use Logger.debug.</p>
       
         <div class='space-bottom0'>
           <div>
-            <span class='code bold'>gyradius</span> <code class='quiet'>(<a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>
-            = <code>1</code>)</code>
+            <span class='code bold'>gyradius</span> <code class='quiet'>(<a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>?)</code>
 	    radius of gyration
 
           </div>
@@ -15801,6 +15846,242 @@ For confirmation or testing, use Logger.debug.</p>
   
 
   
+
+  
+    <div class='py1 quiet mt1 prose-big'>Instance Members</div>
+    <div class="clearfix">
+  
+    <div class='border-bottom' id='rect2dcreatepath'>
+      <div class="clearfix small pointer toggle-sibling">
+        <div class="py1 contain">
+            <a class='icon pin-right py1 dark-link caret-right'>▸</a>
+            <span class='code strong strong truncate'>createPath(painter)</span>
+        </div>
+      </div>
+      <div class="clearfix display-none toggle-target">
+        <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+
+  <p>Create the path of the rectangle.</p>
+
+
+  <div class='pre p1 fill-light mt0'>createPath(painter: <a href="#painter2d">Painter2d</a>): <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a></div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Parameters</div>
+    <div class='prose'>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>painter</span> <code class='quiet'>(<a href="#painter2d">Painter2d</a>)</code>
+	    painter
+
+          </div>
+          
+        </div>
+      
+    </div>
+  
+
+  
+
+  
+    
+      <div class='py1 quiet mt1 prose-big'>Returns</div>
+      <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a></code>:
+        path operations
+
+      
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+      </div>
+    </div>
+  
+</div>
+
+  
+
+  
+</section>
+
+          
+        
+          
+            <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+  <div class='clearfix'>
+    
+    <h3 class='fl m0' id='circle2d'>
+      Circle2d
+    </h3>
+    
+    
+  </div>
+  
+
+  <p>Class representing circle shape.</p>
+
+
+  <div class='pre p1 fill-light mt0'>new Circle2d(radius: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, gravityCenter: <a href="#vector2d">Vector2d</a>, gyradius: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>?)</div>
+  
+  
+    <p>
+      Extends
+      
+        <a href="#shape2d">Shape2d</a>
+      
+    </p>
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Parameters</div>
+    <div class='prose'>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>radius</span> <code class='quiet'>(<a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>)</code>
+	    radius
+
+          </div>
+          
+        </div>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>gravityCenter</span> <code class='quiet'>(<a href="#vector2d">Vector2d</a>
+            = <code>new Vector2d(0,0)</code>)</code>
+	    relative center position of gravity
+
+          </div>
+          
+        </div>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>gyradius</span> <code class='quiet'>(<a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>?
+            = <code>radius</code>)</code>
+	    radius of gyration
+
+          </div>
+          
+        </div>
+      
+    </div>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Instance Members</div>
+    <div class="clearfix">
+  
+    <div class='border-bottom' id='circle2dcreatepath'>
+      <div class="clearfix small pointer toggle-sibling">
+        <div class="py1 contain">
+            <a class='icon pin-right py1 dark-link caret-right'>▸</a>
+            <span class='code strong strong truncate'>createPath(painter)</span>
+        </div>
+      </div>
+      <div class="clearfix display-none toggle-target">
+        <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+
+  <p>Create the path of the circle.</p>
+
+
+  <div class='pre p1 fill-light mt0'>createPath(painter: <a href="#painter2d">Painter2d</a>): <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a></div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Parameters</div>
+    <div class='prose'>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>painter</span> <code class='quiet'>(<a href="#painter2d">Painter2d</a>)</code>
+	    painter
+
+          </div>
+          
+        </div>
+      
+    </div>
+  
+
+  
+
+  
+    
+      <div class='py1 quiet mt1 prose-big'>Returns</div>
+      <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a></code>:
+        path operations
+
+      
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+      </div>
+    </div>
+  
+</div>
 
   
 

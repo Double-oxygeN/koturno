@@ -42,6 +42,7 @@ int main(int argc, char const *argv[]) {
     "./figure/PhysicalType.js",
     "./figure/Shape2d.js",
     "./figure/Rect2d.js",
+    "./figure/Circle2d.js",
     "./figure/Rigid2d.js",
     "./util/KoturnoUtil.js",
     "./util/StdTransFunc.js",

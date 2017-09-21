@@ -27,7 +27,7 @@
         ['transition', 'end', 'reset'],
         ['cut', 'fade', 'fadeWithColor', 'push', 'wipe', 'stripeIn', 'stripeOut', 'gateIn', 'gateOut', 'silhouetteIn', 'silhouetteOut'],
         ['no data'],
-        ['Rect2d']
+        ['Rect2d', 'Circle2d']
       ];
     }
 
@@ -996,7 +996,54 @@ mollit anim id est laborum.`;
 
       painter.background('#fff');
 
-      rect.createPath(painter).outlined("#f66", "#c00", 1);
+      rect.createPath(painter).outlined(painter.createPattern('pattern'), "#c00", 1);
+
+      if (mouseState.getState('down')) {
+        const mouseStartPos = mouseState.getState('startPos');
+        painter.circle(mouseStartPos.x, mouseStartPos.y, 3).fill('#000');
+        painter.polygon([mouseStartPos, action.mouse.position]).stroke('#000');
+      }
+    }
+
+    transition(state, action, counter, game) {
+      return action.keyboard.isPressed('Space', 'Enter') ? Transition.Trans('title') : Transition.Stay();
+    }
+  };
+
+  const RigidTestScene1 = class extends Scene {
+    constructor() {
+      super('Rigid2d-1');
+    }
+
+    init(state, counter, game) {
+      const circle = new Rigid2d(PhysicalType.DYNAMIC, new Circle2d(60), new Material(0.01, 0, 1), new Vector2d(game.width / 2, game.height / 2), 0, new Vector2d(0, 0), 0);
+      return State.init({
+        circle,
+        mouseState: State.init({
+          down: false,
+          startPos: new Vector2d(game.width / 2, game.height / 2)
+        })
+      });
+    }
+
+    update(state, action, counter, sound, game) {
+      const mouseState = state.getState('mouseState');
+      return state
+        .modifyState('mouseState', mouseState => {
+          return mouseState.setState('down', action.mouse.isDown(MouseButton.LEFT))
+            .modifyState('startPos', pos => (action.mouse.isPressed(MouseButton.LEFT)) ? action.mouse.position.scalar(1) : pos);
+        })
+        .modifyState('circle', circle => mouseState.getState('down') && !action.mouse.isDown(MouseButton.LEFT) ? circle.applyForce(action.mouse.position.minus(mouseState.getState('startPos')), mouseState.getState('startPos').minus(circle.center)) : circle)
+        .modifyState('circle', circle => circle.step());
+    }
+
+    draw(state, action, counter, painter, game) {
+      const circle = state.getState('circle');
+      const mouseState = state.getState('mouseState');
+
+      painter.background('#fff');
+
+      circle.createPath(painter).outlined(painter.createPattern('pattern'), "#c00", 1);
 
       if (mouseState.getState('down')) {
         const mouseStartPos = mouseState.getState('startPos');
@@ -1028,6 +1075,7 @@ mollit anim id est laborum.`;
     new SoundTestScene1(),
     new SoundTestScene2(),
     new RigidTestScene0(),
+    new RigidTestScene1(),
   ]);
 
   Logger.setLogLevel(LogLevel.DEBUG);
