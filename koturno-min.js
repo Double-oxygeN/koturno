@@ -1220,6 +1220,7 @@ class Painter2d extends Painter {
       /**
        * Fill the path.
        * @param {(string|CanvasGradient|CanvasPattern)} style fill style
+       * @memberof Painter2d#pathOperations
        */
       fill: (style) => {
         this.context.fillStyle = style;
@@ -1235,6 +1236,7 @@ class Painter2d extends Painter {
        * @param {number} [opt.miterLimit] line miter limit
        * @param {number[]} [opt.dash] line dash
        * @param {number} [opt.dashOffset] line dash offset
+       * @memberof Painter2d#pathOperations
        */
       stroke: (style, opt = {}) => {
         // configuration
@@ -1257,6 +1259,7 @@ class Painter2d extends Painter {
        * @param {(string|CanvasGradient|CanvasPattern)} innerStyle fill style
        * @param {(string|CanvasGradient|CanvasPattern)} outerStyle stroke style
        * @param {number} [lineWidth=1] line width
+       * @memberof Painter2d#pathOperations
        */
       outlined: (innerStyle, outerStyle, lineWidth = 1) => {
         this.context.fillStyle = innerStyle;
@@ -1270,6 +1273,7 @@ class Painter2d extends Painter {
       /**
        * Clip the path and draw.
        * @param {function} cb callback function
+       * @memberof Painter2d#pathOperations
        */
       clipAndDraw: (cb) => {
         this.context.save();
