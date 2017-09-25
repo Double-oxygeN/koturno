@@ -76,19 +76,26 @@ class Game {
       this.painter = new Painter2d(this.canvas, this.imageManager);
       this.action = new ActionManager(this.canvas);
 
-      /**
-       * Canvas width.
-       * @member {number}
-       */
-      this.width = this.canvas.width;
-      /**
-       * Canvas height.
-       * @member {number}
-       */
-      this.height = this.canvas.height;
+      this.timelineCanvasPainter = null;
     } else {
       Logger.fatal("Game must have 'scenes' and 'firstScene'!");
     }
+  }
+
+  /**
+   * Canvas width.
+   * @member {number}
+   */
+  get width() {
+    return this.canvas.width;
+  }
+
+  /**
+   * Canvas height.
+   * @member {number}
+   */
+  get height() {
+    return this.canvas.height;
   }
 
   /**
@@ -141,6 +148,10 @@ class Game {
     this.divElem.ctrl = document.createElement('div');
     this.divElem.log = document.createElement('div');
     this.divElem.timeline = document.createElement('div');
+
+    const timelineCanvas = document.createElement('canvas');
+    this.timelineCanvasPainter = new Painter2d(timelineCanvas, new ImageManager([]));
+    this.divElem.timeline.appendChild(timelineCanvas);
 
     if (this.centering) {
       const onResize = () => {
@@ -211,44 +222,17 @@ class Game {
       `overflow: scroll; background-color: #000; border: 3px #0f0 solid;`);
     this.divElem.timeline.setAttribute('style', `width: ${baseWidth - 3}px; height: ${Math.round(baseHeight / 3) - 3}px; ` +
       `overflow: scroll; background-color: #000; border: 3px #0f0 solid;`);
+    this.timelineCanvasPainter.canvas.width = baseWidth - 3;
+    this.timelineCanvasPainter.canvas.height = Math.round(baseHeight / 3) - 3;
 
     this.canvas.setAttribute('style', `transform: scale(${this.divExpansionRate * 2 / 3}, ${this.divExpansionRate * 2 / 3}); position: relative; ` +
       `left: ${Math.round((this.divExpansionRate * 2 / 3 - 1) * this.canvas.width / 2)}px; ` +
       `top: ${Math.round((this.divExpansionRate * 2 / 3 - 1) * this.canvas.height / 2)}px;`);
   }
 
-  _updateDebugInfo(sceneName, counters) {
+  _updateDebugInfo(counters, recorder) {
     this.divElem.frame.innerHTML = counters.toString();
-
-    // const timelineRow = document.createElement('tr');
-    // for (let i = 0; i < 6; i++) {
-    //   const cell = document.createElement('td');
-    //   cell.setAttribute('style', `border: 1px #0f0 solid; color: #0f0; ` +
-    //     `text-align: ${i === 2 ? 'right' : i === 4 ? 'left' : 'center'}`);
-    //   switch (i) {
-    //   case 0:
-    //     cell.innerHTML = '-';
-    //     break;
-    //   case 1:
-    //     cell.innerHTML = counters.general.toString(10);
-    //     break;
-    //   case 2:
-    //     /* TODO: frame 2 time */
-    //     break;
-    //   case 3:
-    //     cell.innerHTML = sceneName;
-    //     break;
-    //   case 4:
-    //     cell.innerHTML = Array.from(this.action.keyboard.down.values()).join(' ');
-    //     break;
-    //   case 5:
-    //     cell.innerHTML = this.action.mouse.position.toString();
-    //     break;
-    //   }
-    //   timelineRow.appendChild(cell);
-    // }
-    // this.timeTable.appendChild(timelineRow);
-    // this.divElem.timeline.scrollTop = this.divElem.timeline.scrollHeight;
+    recorder.printTimeline(this.timelineCanvasPainter, counters.general);
   }
 
   _displayFPS() {
@@ -329,14 +313,14 @@ class Game {
           }
         });
 
-        if (debug) {
-          this._updateDebugInfo(sceneName, counters);
-        }
         if (displayFPS) {
           this._displayFPS();
         }
         if (recorder !== null) {
           recorder.storeAction(this.action, counters.general);
+        }
+        if (debug) {
+          this._updateDebugInfo(counters, recorder);
         }
 
         this.action.resetAction();
@@ -358,15 +342,15 @@ class Game {
         });
       }
 
-      if (debug) {
-        this._updateDebugInfo(`${prev.name} → ${next.name}`, counters);
-      }
       if (displayFPS) {
         this._displayFPS();
       }
       if (recorder !== null) {
         recorder.readAction(this.action, counters.general);
         recorder.storeAction(this.action, counters.general);
+      }
+      if (debug) {
+        this._updateDebugInfo(counters, recorder);
       }
     };
 

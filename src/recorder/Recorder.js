@@ -22,6 +22,13 @@ class Recorder {
   }
 
   /**
+   * Number of showing log at once.
+   */
+  static get SHOWING_LOG() {
+    return 8;
+  }
+
+  /**
    * Set recorder mode.
    * @param {string} mode `'r'` if reading, `'w'` if writing
    */
@@ -346,6 +353,49 @@ class Recorder {
     });
     action.mouse.position.x = this.data[frame].mousePosition.x;
     action.mouse.position.y = this.data[frame].mousePosition.y;
+  }
+
+  /**
+   * Print timeline.
+   * @param {Painter2d} painter painter
+   * @param {number} frame frame number
+   */
+  printTimeline(painter, frame) {
+    const LOG_HEIGHT = painter.height / Recorder.SHOWING_LOG;
+    const LOG_MARK_WIDTH = painter.width / 20;
+    const LOG_FRAME_WIDTH = painter.width / 5;
+    const LOG_TIME_WIDTH = painter.width / 5;
+    const LOG_KEYBOARD_WIDTH = painter.width * 7 / 20;
+    const LOG_MOUSE_WIDTH = painter.width / 5;
+    const frameToTime = f => {
+      const seconds = (f / 60);
+      if (f < 60 * 60) {
+        return `${seconds.toFixed(2)}s`;
+      } else if (f < 60 * 60 * 60) {
+        return `${Math.floor(seconds / 60).toString(10)}m${(seconds % 60).toFixed(2)}s`;
+      } else if (f < 60 * 60 * 60 * 24) {
+        return `${Math.floor(seconds / 3600).toString(10)}h${(Math.floor(seconds / 60) % 60).toString(10)}m${(seconds % 60).toFixed(2)}s`;
+      } else {
+        return `${Math.floor(seconds / 86400).toString(10)}d${(Math.floor(seconds / 3600) % 24).toString(10)}h${(Math.floor(seconds / 60) % 60).toString(10)}m${(seconds % 60).toFixed(2)}s`;
+      }
+    };
+    painter.background('#000');
+    for (let i = 0; i < Recorder.SHOWING_LOG; i++) {
+      if (i > frame) break;
+      // console.log(this.data);
+      // debugger;
+      const FRAME_DATA = this.data[frame - i];
+      painter.rect(0, painter.height - LOG_HEIGHT * (i + 1), LOG_MARK_WIDTH, LOG_HEIGHT).stroke('#0f0', { width: 1 });
+      painter.rect(LOG_MARK_WIDTH, painter.height - LOG_HEIGHT * (i + 1), LOG_FRAME_WIDTH, LOG_HEIGHT).stroke('#0f0');
+      painter.rect(LOG_MARK_WIDTH + LOG_FRAME_WIDTH, painter.height - LOG_HEIGHT * (i + 1), LOG_TIME_WIDTH, LOG_HEIGHT).stroke('#0f0');
+      painter.rect(LOG_MARK_WIDTH + LOG_FRAME_WIDTH + LOG_TIME_WIDTH, painter.height - LOG_HEIGHT * (i + 1), LOG_KEYBOARD_WIDTH, LOG_HEIGHT).stroke('#0f0');
+      painter.rect(LOG_MARK_WIDTH + LOG_FRAME_WIDTH + LOG_TIME_WIDTH + LOG_KEYBOARD_WIDTH, painter.height - LOG_HEIGHT * (i + 1), LOG_MOUSE_WIDTH, LOG_HEIGHT).stroke('#0f0');
+      painter.text('-', LOG_MARK_WIDTH / 2, painter.height - LOG_HEIGHT * (i + 0.5), { size: LOG_HEIGHT / 2, align: 'center', baseline: 'middle' }).fill('#0f0');
+      painter.text((frame - i).toString(10) + 'f', LOG_MARK_WIDTH + LOG_FRAME_WIDTH / 2, painter.height - LOG_HEIGHT * (i + 0.5)).fill('#0f0');
+      painter.text(frameToTime(frame - i), LOG_MARK_WIDTH + LOG_FRAME_WIDTH + LOG_TIME_WIDTH / 2, painter.height - LOG_HEIGHT * (i + 0.5)).fill('#0f0');
+      painter.text(FRAME_DATA.keyboard.toString(), LOG_MARK_WIDTH + LOG_FRAME_WIDTH + LOG_TIME_WIDTH + LOG_KEYBOARD_WIDTH / 2, painter.height - LOG_HEIGHT * (i + 0.5)).fill('#0f0');
+      painter.text(`(${FRAME_DATA.mousePosition.x}, ${FRAME_DATA.mousePosition.y})`, LOG_MARK_WIDTH + LOG_FRAME_WIDTH + LOG_TIME_WIDTH + LOG_KEYBOARD_WIDTH + LOG_MOUSE_WIDTH / 2, painter.height - LOG_HEIGHT * (i + 0.5)).fill('#0f0');
+    }
   }
 
   /**

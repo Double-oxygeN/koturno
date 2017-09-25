@@ -14,16 +14,22 @@ class Painter {
     this.contextType = contextType;
     /** @member {ImageManager} */
     this.imageManager = imageManager;
-    /**
-     * Canvas width.
-     * @member {number}
-     */
-    this.width = canvas.width;
-    /**
-     * Canvas height.
-     * @member {number}
-     */
-    this.height = canvas.height;
+  }
+
+  /**
+   * Canvas width.
+   * @member {number}
+   */
+  get width() {
+    return this.canvas.width;
+  }
+
+  /**
+   * Canvas height
+   * @member {number}
+   */
+  get height() {
+    return this.canvas.height;
   }
 
   /**

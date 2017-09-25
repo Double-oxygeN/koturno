@@ -1106,5 +1106,5 @@ mollit anim id est laborum.`;
     ]
     // }).center().autorun(recorder);
     // }).center().run({ displayFPS: true });
-  }).center().run({ displayFPS: true });
+  }).center().debug({ displayFPS: true });
 })();

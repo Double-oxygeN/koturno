@@ -1140,16 +1140,22 @@ class Painter {
     this.contextType = contextType;
     /** @member {ImageManager} */
     this.imageManager = imageManager;
-    /**
-     * Canvas width.
-     * @member {number}
-     */
-    this.width = canvas.width;
-    /**
-     * Canvas height.
-     * @member {number}
-     */
-    this.height = canvas.height;
+  }
+
+  /**
+   * Canvas width.
+   * @member {number}
+   */
+  get width() {
+    return this.canvas.width;
+  }
+
+  /**
+   * Canvas height
+   * @member {number}
+   */
+  get height() {
+    return this.canvas.height;
   }
 
   /**
@@ -2255,6 +2261,13 @@ class Recorder {
   }
 
   /**
+   * Number of showing log at once.
+   */
+  static get SHOWING_LOG() {
+    return 8;
+  }
+
+  /**
    * Set recorder mode.
    * @param {string} mode `'r'` if reading, `'w'` if writing
    */
@@ -2582,6 +2595,49 @@ class Recorder {
   }
 
   /**
+   * Print timeline.
+   * @param {Painter2d} painter painter
+   * @param {number} frame frame number
+   */
+  printTimeline(painter, frame) {
+    const LOG_HEIGHT = painter.height / Recorder.SHOWING_LOG;
+    const LOG_MARK_WIDTH = painter.width / 20;
+    const LOG_FRAME_WIDTH = painter.width / 5;
+    const LOG_TIME_WIDTH = painter.width / 5;
+    const LOG_KEYBOARD_WIDTH = painter.width * 7 / 20;
+    const LOG_MOUSE_WIDTH = painter.width / 5;
+    const frameToTime = f => {
+      const seconds = (f / 60);
+      if (f < 60 * 60) {
+        return `${seconds.toFixed(2)}s`;
+      } else if (f < 60 * 60 * 60) {
+        return `${Math.floor(seconds / 60).toString(10)}m${(seconds % 60).toFixed(2)}s`;
+      } else if (f < 60 * 60 * 60 * 24) {
+        return `${Math.floor(seconds / 3600).toString(10)}h${(Math.floor(seconds / 60) % 60).toString(10)}m${(seconds % 60).toFixed(2)}s`;
+      } else {
+        return `${Math.floor(seconds / 86400).toString(10)}d${(Math.floor(seconds / 3600) % 24).toString(10)}h${(Math.floor(seconds / 60) % 60).toString(10)}m${(seconds % 60).toFixed(2)}s`;
+      }
+    };
+    painter.background('#000');
+    for (let i = 0; i < Recorder.SHOWING_LOG; i++) {
+      if (i > frame) break;
+      // console.log(this.data);
+      // debugger;
+      const FRAME_DATA = this.data[frame - i];
+      painter.rect(0, painter.height - LOG_HEIGHT * (i + 1), LOG_MARK_WIDTH, LOG_HEIGHT).stroke('#0f0', { width: 1 });
+      painter.rect(LOG_MARK_WIDTH, painter.height - LOG_HEIGHT * (i + 1), LOG_FRAME_WIDTH, LOG_HEIGHT).stroke('#0f0');
+      painter.rect(LOG_MARK_WIDTH + LOG_FRAME_WIDTH, painter.height - LOG_HEIGHT * (i + 1), LOG_TIME_WIDTH, LOG_HEIGHT).stroke('#0f0');
+      painter.rect(LOG_MARK_WIDTH + LOG_FRAME_WIDTH + LOG_TIME_WIDTH, painter.height - LOG_HEIGHT * (i + 1), LOG_KEYBOARD_WIDTH, LOG_HEIGHT).stroke('#0f0');
+      painter.rect(LOG_MARK_WIDTH + LOG_FRAME_WIDTH + LOG_TIME_WIDTH + LOG_KEYBOARD_WIDTH, painter.height - LOG_HEIGHT * (i + 1), LOG_MOUSE_WIDTH, LOG_HEIGHT).stroke('#0f0');
+      painter.text('-', LOG_MARK_WIDTH / 2, painter.height - LOG_HEIGHT * (i + 0.5), { size: LOG_HEIGHT / 2, align: 'center', baseline: 'middle' }).fill('#0f0');
+      painter.text((frame - i).toString(10) + 'f', LOG_MARK_WIDTH + LOG_FRAME_WIDTH / 2, painter.height - LOG_HEIGHT * (i + 0.5)).fill('#0f0');
+      painter.text(frameToTime(frame - i), LOG_MARK_WIDTH + LOG_FRAME_WIDTH + LOG_TIME_WIDTH / 2, painter.height - LOG_HEIGHT * (i + 0.5)).fill('#0f0');
+      painter.text(FRAME_DATA.keyboard.toString(), LOG_MARK_WIDTH + LOG_FRAME_WIDTH + LOG_TIME_WIDTH + LOG_KEYBOARD_WIDTH / 2, painter.height - LOG_HEIGHT * (i + 0.5)).fill('#0f0');
+      painter.text(`(${FRAME_DATA.mousePosition.x}, ${FRAME_DATA.mousePosition.y})`, LOG_MARK_WIDTH + LOG_FRAME_WIDTH + LOG_TIME_WIDTH + LOG_KEYBOARD_WIDTH + LOG_MOUSE_WIDTH / 2, painter.height - LOG_HEIGHT * (i + 0.5)).fill('#0f0');
+    }
+  }
+
+  /**
    * Convert to string.
    * @returns {string} a string
    */
@@ -2668,19 +2724,26 @@ class Game {
       this.painter = new Painter2d(this.canvas, this.imageManager);
       this.action = new ActionManager(this.canvas);
 
-      /**
-       * Canvas width.
-       * @member {number}
-       */
-      this.width = this.canvas.width;
-      /**
-       * Canvas height.
-       * @member {number}
-       */
-      this.height = this.canvas.height;
+      this.timelineCanvasPainter = null;
     } else {
       Logger.fatal("Game must have 'scenes' and 'firstScene'!");
     }
+  }
+
+  /**
+   * Canvas width.
+   * @member {number}
+   */
+  get width() {
+    return this.canvas.width;
+  }
+
+  /**
+   * Canvas height.
+   * @member {number}
+   */
+  get height() {
+    return this.canvas.height;
   }
 
   /**
@@ -2733,6 +2796,10 @@ class Game {
     this.divElem.ctrl = document.createElement('div');
     this.divElem.log = document.createElement('div');
     this.divElem.timeline = document.createElement('div');
+
+    const timelineCanvas = document.createElement('canvas');
+    this.timelineCanvasPainter = new Painter2d(timelineCanvas, new ImageManager([]));
+    this.divElem.timeline.appendChild(timelineCanvas);
 
     if (this.centering) {
       const onResize = () => {
@@ -2803,44 +2870,17 @@ class Game {
       `overflow: scroll; background-color: #000; border: 3px #0f0 solid;`);
     this.divElem.timeline.setAttribute('style', `width: ${baseWidth - 3}px; height: ${Math.round(baseHeight / 3) - 3}px; ` +
       `overflow: scroll; background-color: #000; border: 3px #0f0 solid;`);
+    this.timelineCanvasPainter.canvas.width = baseWidth - 3;
+    this.timelineCanvasPainter.canvas.height = Math.round(baseHeight / 3) - 3;
 
     this.canvas.setAttribute('style', `transform: scale(${this.divExpansionRate * 2 / 3}, ${this.divExpansionRate * 2 / 3}); position: relative; ` +
       `left: ${Math.round((this.divExpansionRate * 2 / 3 - 1) * this.canvas.width / 2)}px; ` +
       `top: ${Math.round((this.divExpansionRate * 2 / 3 - 1) * this.canvas.height / 2)}px;`);
   }
 
-  _updateDebugInfo(sceneName, counters) {
+  _updateDebugInfo(counters, recorder) {
     this.divElem.frame.innerHTML = counters.toString();
-
-    // const timelineRow = document.createElement('tr');
-    // for (let i = 0; i < 6; i++) {
-    //   const cell = document.createElement('td');
-    //   cell.setAttribute('style', `border: 1px #0f0 solid; color: #0f0; ` +
-    //     `text-align: ${i === 2 ? 'right' : i === 4 ? 'left' : 'center'}`);
-    //   switch (i) {
-    //   case 0:
-    //     cell.innerHTML = '-';
-    //     break;
-    //   case 1:
-    //     cell.innerHTML = counters.general.toString(10);
-    //     break;
-    //   case 2:
-    //     /* TODO: frame 2 time */
-    //     break;
-    //   case 3:
-    //     cell.innerHTML = sceneName;
-    //     break;
-    //   case 4:
-    //     cell.innerHTML = Array.from(this.action.keyboard.down.values()).join(' ');
-    //     break;
-    //   case 5:
-    //     cell.innerHTML = this.action.mouse.position.toString();
-    //     break;
-    //   }
-    //   timelineRow.appendChild(cell);
-    // }
-    // this.timeTable.appendChild(timelineRow);
-    // this.divElem.timeline.scrollTop = this.divElem.timeline.scrollHeight;
+    recorder.printTimeline(this.timelineCanvasPainter, counters.general);
   }
 
   _displayFPS() {
@@ -2921,14 +2961,14 @@ class Game {
           }
         });
 
-        if (debug) {
-          this._updateDebugInfo(sceneName, counters);
-        }
         if (displayFPS) {
           this._displayFPS();
         }
         if (recorder !== null) {
           recorder.storeAction(this.action, counters.general);
+        }
+        if (debug) {
+          this._updateDebugInfo(counters, recorder);
         }
 
         this.action.resetAction();
@@ -2950,15 +2990,15 @@ class Game {
         });
       }
 
-      if (debug) {
-        this._updateDebugInfo(`${prev.name} → ${next.name}`, counters);
-      }
       if (displayFPS) {
         this._displayFPS();
       }
       if (recorder !== null) {
         recorder.readAction(this.action, counters.general);
         recorder.storeAction(this.action, counters.general);
+      }
+      if (debug) {
+        this._updateDebugInfo(counters, recorder);
       }
     };
 
