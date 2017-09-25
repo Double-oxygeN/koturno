@@ -17815,7 +17815,7 @@ For confirmation or testing, use Logger.debug.</p>
       <div class="clearfix small pointer toggle-sibling">
         <div class="py1 contain">
             <a class='icon pin-right py1 dark-link caret-right'>▸</a>
-            <span class='code strong strong truncate'>gateIn(duration, direction, ease)</span>
+            <span class='code strong strong truncate'>gateIn(duration, direction, ease = x=>x)</span>
         </div>
       </div>
       <div class="clearfix display-none toggle-target">
@@ -17823,9 +17823,10 @@ For confirmation or testing, use Logger.debug.</p>
 
   
 
-  
+  <p>Close the gate.</p>
 
-  <div class='pre p1 fill-light mt0'>gateIn(duration: any, direction: any, ease: any)</div>
+
+  <div class='pre p1 fill-light mt0'>gateIn(duration: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, direction: <a href="#directions">Directions</a>, ease: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/function">function</a>?)</div>
   
   
 
@@ -17842,25 +17843,28 @@ For confirmation or testing, use Logger.debug.</p>
       
         <div class='space-bottom0'>
           <div>
-            <span class='code bold'>duration</span> <code class='quiet'>(any)</code>
-	    
+            <span class='code bold'>duration</span> <code class='quiet'>(<a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>)</code>
+	    duration of transition
+
           </div>
           
         </div>
       
         <div class='space-bottom0'>
           <div>
-            <span class='code bold'>direction</span> <code class='quiet'>(any)</code>
-	    
+            <span class='code bold'>direction</span> <code class='quiet'>(<a href="#directions">Directions</a>)</code>
+	    direction of movement
+
           </div>
           
         </div>
       
         <div class='space-bottom0'>
           <div>
-            <span class='code bold'>ease</span> <code class='quiet'>(any
+            <span class='code bold'>ease</span> <code class='quiet'>(<a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/function">function</a>?
             = <code>x=&gt;x</code>)</code>
-	    
+	    easing function
+
           </div>
           
         </div>
@@ -17890,7 +17894,7 @@ For confirmation or testing, use Logger.debug.</p>
       <div class="clearfix small pointer toggle-sibling">
         <div class="py1 contain">
             <a class='icon pin-right py1 dark-link caret-right'>▸</a>
-            <span class='code strong strong truncate'>gateOut(duration, direction, ease)</span>
+            <span class='code strong strong truncate'>gateOut(duration, direction, ease = x=>x)</span>
         </div>
       </div>
       <div class="clearfix display-none toggle-target">
@@ -17898,9 +17902,10 @@ For confirmation or testing, use Logger.debug.</p>
 
   
 
-  
+  <p>Open the gate.</p>
 
-  <div class='pre p1 fill-light mt0'>gateOut(duration: any, direction: any, ease: any)</div>
+
+  <div class='pre p1 fill-light mt0'>gateOut(duration: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, direction: <a href="#directions">Directions</a>, ease: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/function">function</a>?)</div>
   
   
 
@@ -17917,25 +17922,28 @@ For confirmation or testing, use Logger.debug.</p>
       
         <div class='space-bottom0'>
           <div>
-            <span class='code bold'>duration</span> <code class='quiet'>(any)</code>
-	    
+            <span class='code bold'>duration</span> <code class='quiet'>(<a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>)</code>
+	    duration of transition
+
           </div>
           
         </div>
       
         <div class='space-bottom0'>
           <div>
-            <span class='code bold'>direction</span> <code class='quiet'>(any)</code>
-	    
+            <span class='code bold'>direction</span> <code class='quiet'>(<a href="#directions">Directions</a>)</code>
+	    direction of movement
+
           </div>
           
         </div>
       
         <div class='space-bottom0'>
           <div>
-            <span class='code bold'>ease</span> <code class='quiet'>(any
+            <span class='code bold'>ease</span> <code class='quiet'>(<a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/function">function</a>?
             = <code>x=&gt;x</code>)</code>
-	    
+	    easing function
+
           </div>
           
         </div>
@@ -17975,7 +17983,7 @@ For confirmation or testing, use Logger.debug.</p>
 
   
 
-  <div class='pre p1 fill-light mt0'>silhouetteIn(duration: any, focusX: any, focusY: any, draw: any)</div>
+  <div class='pre p1 fill-light mt0'>silhouetteIn(duration: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, focusX: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, focusY: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, draw: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/function">function</a>)</div>
   
   
 
@@ -17992,32 +18000,36 @@ For confirmation or testing, use Logger.debug.</p>
       
         <div class='space-bottom0'>
           <div>
-            <span class='code bold'>duration</span> <code class='quiet'>(any)</code>
-	    
+            <span class='code bold'>duration</span> <code class='quiet'>(<a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>)</code>
+	    duration of transition
+
           </div>
           
         </div>
       
         <div class='space-bottom0'>
           <div>
-            <span class='code bold'>focusX</span> <code class='quiet'>(any)</code>
-	    
+            <span class='code bold'>focusX</span> <code class='quiet'>(<a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>)</code>
+	    x-coordinate of focus
+
           </div>
           
         </div>
       
         <div class='space-bottom0'>
           <div>
-            <span class='code bold'>focusY</span> <code class='quiet'>(any)</code>
-	    
+            <span class='code bold'>focusY</span> <code class='quiet'>(<a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>)</code>
+	    y-coordinate of focus
+
           </div>
           
         </div>
       
         <div class='space-bottom0'>
           <div>
-            <span class='code bold'>draw</span> <code class='quiet'>(any)</code>
-	    
+            <span class='code bold'>draw</span> <code class='quiet'>(<a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/function">function</a>)</code>
+	    draw silhouette
+
           </div>
           
         </div>
@@ -18057,7 +18069,7 @@ For confirmation or testing, use Logger.debug.</p>
 
   
 
-  <div class='pre p1 fill-light mt0'>silhouetteOut(duration: any, focusX: any, focusY: any, draw: any)</div>
+  <div class='pre p1 fill-light mt0'>silhouetteOut(duration: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, focusX: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, focusY: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, draw: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/function">function</a>)</div>
   
   
 
@@ -18074,32 +18086,36 @@ For confirmation or testing, use Logger.debug.</p>
       
         <div class='space-bottom0'>
           <div>
-            <span class='code bold'>duration</span> <code class='quiet'>(any)</code>
-	    
+            <span class='code bold'>duration</span> <code class='quiet'>(<a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>)</code>
+	    duration of transition
+
           </div>
           
         </div>
       
         <div class='space-bottom0'>
           <div>
-            <span class='code bold'>focusX</span> <code class='quiet'>(any)</code>
-	    
+            <span class='code bold'>focusX</span> <code class='quiet'>(<a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>)</code>
+	    x-coordinate of focus
+
           </div>
           
         </div>
       
         <div class='space-bottom0'>
           <div>
-            <span class='code bold'>focusY</span> <code class='quiet'>(any)</code>
-	    
+            <span class='code bold'>focusY</span> <code class='quiet'>(<a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>)</code>
+	    y-coordinate of focus
+
           </div>
           
         </div>
       
         <div class='space-bottom0'>
           <div>
-            <span class='code bold'>draw</span> <code class='quiet'>(any)</code>
-	    
+            <span class='code bold'>draw</span> <code class='quiet'>(<a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/function">function</a>)</code>
+	    draw silhouette
+
           </div>
           
         </div>

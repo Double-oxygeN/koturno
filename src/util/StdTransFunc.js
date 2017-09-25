@@ -139,7 +139,10 @@ const StdTransFunc = {
     };
   },
   /**
-   *
+   * Close the gate.
+   * @param {number} duration duration of transition
+   * @param {Directions} direction direction of movement
+   * @param {function} [ease] easing function
    */
   gateIn: (duration, direction, ease = x => x) => {
     const horizontalRelativeDir = (direction + 4) % 3 - 1;
@@ -161,7 +164,10 @@ const StdTransFunc = {
     };
   },
   /**
-   *
+   * Open the gate.
+   * @param {number} duration duration of transition
+   * @param {Directions} direction direction of movement
+   * @param {function} [ease] easing function
    */
   gateOut: (duration, direction, ease = x => x) => {
     const horizontalRelativeDir = (direction + 4) % 3 - 1;
@@ -180,7 +186,10 @@ const StdTransFunc = {
     };
   },
   /**
-   *
+   * @param {number} duration duration of transition
+   * @param {number} focusX x-coordinate of focus
+   * @param {number} focusY y-coordinate of focus
+   * @param {function} draw draw silhouette
    */
   silhouetteIn: (duration, focusX, focusY, draw) => {
     return (prev, next, counter, painter) => {
@@ -201,7 +210,10 @@ const StdTransFunc = {
     };
   },
   /**
-   *
+   * @param {number} duration duration of transition
+   * @param {number} focusX x-coordinate of focus
+   * @param {number} focusY y-coordinate of focus
+   * @param {function} draw draw silhouette
    */
   silhouetteOut: (duration, focusX, focusY, draw) => {
     return (prev, next, counter, painter) => {
