@@ -1104,7 +1104,7 @@ mollit anim id est laborum.`;
       { name: 'se2', src: 'sound/se02a.mp3', type: SoundType.SE },
       { name: 'theme', src: 'sound/reversible_world.ogg', type: SoundType.BGM, loop: true }
     ]
-    // }).center().autorun(recorder);
-  }).center().run({ displayFPS: true });
+  }).center().autorun(recorder);
+  // }).center().run({ displayFPS: true, recorder });
   // }).center().debug({ displayFPS: true });
 })();

@@ -15,6 +15,13 @@ class Recorder {
   }
 
   /**
+   * Magic number of Recorder.js.
+   */
+  static get MAGIC() {
+    return 0x4b72;
+  }
+
+  /**
    * Version number of Recorder.js.
    */
   static get VERSION() {
@@ -166,7 +173,7 @@ class Recorder {
       }
     };
     // push version
-    binaryData1.push(Recorder.VERSION & 0xff, Recorder.VERSION >>> 8, 0, 0, 0, 0, 0, 0);
+    binaryData1.push(Recorder.MAGIC & 0xff, Recorder.MAGIC >>> 8, Recorder.VERSION & 0xff, Recorder.VERSION >>> 8, 0, 0, 0, 0);
     // push last frames
     pushUint(binaryData1, this.data.length, 4);
     // push revision time
@@ -228,8 +235,11 @@ class Recorder {
         const reader = new FileReader();
         reader.addEventListener('load', ev1 => {
           const result = ev1.target.result;
-          if (new Uint16Array(result, 0, 1)[0] !== Recorder.VERSION) {
-            rej('Save data is wrong or too old!');
+          if (new Uint16Array(result, 0, 2)[0] !== Recorder.MAGIC) {
+            rej('Save data is wrong!');
+          }
+          if (new Uint16Array(result, 0, 2)[1] !== Recorder.VERSION) {
+            rej('Save data is too old!');
           }
           const checkSum = new Uint32Array(result, 0x60, 8);
           const exackHashes = SHA256.digest(new Uint32Array(result, 0x80));
