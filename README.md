@@ -15,6 +15,10 @@ Then add this line to your HTML.
 
     <script src="path/to/lib/Koturno/koturno-all.js" charset="utf-8"></script>
 
+# More information
+
+See [Documentation](http://double-oxygen.net/koturno/).
+
 ## Support browser
 
 * Chrome 60.0–
