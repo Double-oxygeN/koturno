@@ -21,8 +21,8 @@ See [Documentation](http://double-oxygen.net/koturno/).
 
 ## Support browser
 
-* Chrome 60.0–
-* Firefox 57.0–
+* Chrome 61.0–
+* Firefox 57.0– (require flag `dom.moduleScripts.enabled` is true)
 * Safari 11–
 * Vivaldi 1.11–
 * Cốc Cốc 64.4–
