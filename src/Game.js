@@ -1,4 +1,29 @@
 /**
+ * Copyright 2017 Double_oxygeN
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+'use strict';
+
+import State from './State.js';
+import Counters from './Counters.js';
+import Logger from './logger/Logger.js';
+import ImageManager from './resource/ImageManager.js';
+import SoundManager from './resource/SoundManager.js';
+import Painter2d from './painter/Painter2d.js';
+import ActionManager from './action/ActionManager.js';
+
+/**
  * Class representing a game.
  * @param {Object} obj various settings
  * @param {Scenes} obj.scenes game scenes
@@ -11,7 +36,7 @@
  * @param {number} [obj.width=600] canvas width
  * @param {number} [obj.height=600] canvas height
  */
-class Game {
+export default class Game {
   constructor(obj) {
     if (['scenes', 'firstScene'].every(param => param in obj)) {
       this.scenes = obj.scenes;
