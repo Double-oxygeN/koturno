@@ -22,15 +22,204 @@ import ImageManager from './resource/ImageManager.js';
 import SoundManager from './resource/SoundManager.js';
 import Painter2d from './painter/Painter2d.js';
 import ActionManager from './action/ActionManager.js';
+import Recorder from './recorder/Recorder.js';
+
+const _privates = new WeakMap();
+const getPrivates = self => {
+  let p = _privates.get(self);
+  if (!p) _privates.set(self, p = {});
+  return p;
+};
+
+const createFPSManager = () => {
+  const millisecondsBetweenTwoFrame = [0.0, 0.0];
+  return {
+    update: (stamp) => {
+      [millisecondsBetweenTwoFrame[0], millisecondsBetweenTwoFrame[1]] = [millisecondsBetweenTwoFrame[1], stamp];
+    },
+    getFPS: () => 1000.0 / (millisecondsBetweenTwoFrame[1] - millisecondsBetweenTwoFrame[0])
+  };
+};
+const createAnimationState = () => {
+  const flag = {
+    value: false,
+    persist: false
+  };
+  return {
+    getFlag: () => flag.value,
+    reset: () => {
+      if (!flag.persist) flag.value = false;
+    },
+    next: () => {
+      [flag.value, flag.persist] = [true, false];
+    },
+    play: () => {
+      [flag.value, flag.persist] = [true, true];
+    },
+    stop: () => {
+      flag.persist = false;
+    }
+  };
+};
+const createDivManager = (baseID, canvas) => {
+  const divs = {
+    base: document.getElementById(baseID),
+    canvas: document.createElement('div'),
+    frame: null,
+    ctrl: null,
+    log: null,
+    timeline: null
+  };
+  const options = {
+    expansionRate: 1,
+    center: false
+  };
+  let timelineCanvasPainter = null;
+  return {
+    center: () => {
+      const fullScreenCSS = 'margin: 0px; padding: 0px; width: 100%; height: 100%; ' +
+        'overflow: hidden; box-sizing: border-box;';
+      document.body.setAttribute('style', fullScreenCSS);
+      document.getElementsByTagName('html')[0].setAttribute('style', fullScreenCSS);
+      const onResize = () => {
+        const bodyRect = document.body.getBoundingClientRect();
+        options.expansionRate = Math.min(bodyRect.width / canvas.width, bodyRect.height / canvas.height);
+        const w = Math.ceil(canvas.width * options.expansionRate);
+        const h = Math.ceil(canvas.height * options.expansionRate);
+        divs.base.setAttribute('style', `width: ${w}px; height: ${h}px; position: fixed; ` +
+          `left: ${(bodyRect.width - w) / 2}px; top: ${(bodyRect.height - h) / 2}px; ` +
+          `border: 1px #ccc solid; box-sizing: border-box;`
+        );
+      };
+      window.addEventListener('resize', onResize);
+      onResize();
+      options.center = true;
+    },
+    setNormalUI: () => {
+      divs.canvas.appendChild(canvas);
+      divs.base.appendChild(divs.canvas);
+      if (options.center) {
+        const onResize = () => {
+          canvas.setAttribute('style', `transform: scale(${options.expansionRate}, ${options.expansionRate}); position: relative; ` +
+            `left: ${(options.expansionRate - 1) * canvas.width / 2}px; ` +
+            `top: ${(options.expansionRate - 1) * canvas.height / 2}px;`);
+        };
+        window.addEventListener('resize', onResize);
+        onResize();
+      }
+    },
+    setDebugUI: (animationState) => {
+      const backgroundStyle = '#000';
+      const lineStyle = '#0f0';
+      const setDivStyle = (baseWidth, baseHeight) => {
+        divs.canvas.setAttribute('style', `width: ${Math.round(baseWidth * 2 / 3)}px; height: ${Math.round(baseHeight * 2 / 3)}px; float: left; margin: 0px; padding: 0px;`);
+        divs.frame.setAttribute('style', `width: ${Math.round(baseWidth / 3)}px; height: ${Math.round(baseHeight / 9)}px; ` +
+          `text-align: center; vertical-align: middle; display: table-cell; background-color: ${backgroundStyle}; border: 3px ${lineStyle} solid; ` +
+          `color: ${lineStyle}; font-size: 150%; box-sizing: border-box; margin: 0px; padding: 0px;`);
+        divs.ctrl.setAttribute('style', `width: ${Math.round(baseWidth / 3)}px; height: ${Math.round(baseHeight * 2 / 9)}px; ` +
+          `background-color: ${backgroundStyle}; border: 3px ${lineStyle} solid; box-sizing: border-box; margin: 0px; padding: 0px;`);
+        divs.log.setAttribute('style', `width: ${Math.round(baseWidth / 3)}px; height: ${Math.round(baseHeight / 3)}px; ` +
+          `overflow: scroll; background-color: ${backgroundStyle}; border: 3px ${lineStyle} solid; box-sizing: border-box; margin: 0px; padding: 0px;`);
+        divs.timeline.setAttribute('style', `width: ${baseWidth}px; height: ${Math.round(baseHeight / 3)}px; ` +
+          `overflow: scroll; background-color: ${backgroundStyle}; border: 3px ${lineStyle} solid; box-sizing: border-box; margin: 0px; padding: 0px;`);
+        timelineCanvasPainter.canvas.width = baseWidth - 3;
+        timelineCanvasPainter.canvas.height = Math.round(baseHeight / 3) - 3;
+
+        canvas.setAttribute('style', `transform: scale(${options.expansionRate * 2 / 3}, ${options.expansionRate * 2 / 3}); position: relative; ` +
+          `left: ${Math.round((options.expansionRate * 2 / 3 - 1) * canvas.width / 2)}px; ` +
+          `top: ${Math.round((options.expansionRate * 2 / 3 - 1) * canvas.height / 2)}px;`);
+      };
+      const createControlUI = () => {
+        const div0 = document.createElement('div');
+        const div1 = document.createElement('div');
+        div0.setAttribute('style', 'text-align: center; padding: 8px;');
+        div1.setAttribute('style', 'border: 1px #0f0 solid; display: inline-block; margin: auto; font-size: 20px;');
+        div0.appendChild(div1);
+
+        const stepForwardI = document.createElement('i');
+        const playI = document.createElement('i');
+        stepForwardI.setAttribute('style', 'background-color: #000; color: #0f0; width: 25.7px; height: 20px;');
+        stepForwardI.setAttribute('class', 'fa fa-fw fa-step-forward');
+        stepForwardI.setAttribute('title', 'step forward');
+        playI.setAttribute('style', 'background-color: #000; color: #0f0; width: 25.7px; height: 20px;');
+        playI.setAttribute('class', 'fa fa-fw fa-play');
+        playI.setAttribute('title', 'play');
+        stepForwardI.addEventListener('mousedown', () => {
+          animationState.next();
+        });
+        playI.addEventListener('mousedown', () => {
+          if (animationState.getFlag()) {
+            animationState.stop();
+            playI.setAttribute('class', 'fa fa-fw fa-play');
+            playI.setAttribute('title', 'play');
+          } else {
+            animationState.play();
+            playI.setAttribute('class', 'fa fa-fw fa-pause');
+            playI.setAttribute('title', 'pause');
+          }
+        });
+        div1.appendChild(stepForwardI);
+        div1.appendChild(playI);
+
+        return div0;
+      };
+
+      const sideDiv = document.createElement('div');
+      divs.frame = document.createElement('div');
+      divs.ctrl = document.createElement('div');
+      divs.log = document.createElement('div');
+      divs.timeline = document.createElement('div');
+
+      const timelineCanvas = document.createElement('canvas');
+      timelineCanvasPainter = new Painter2d(timelineCanvas, new ImageManager([]));
+      divs.timeline.appendChild(timelineCanvas);
+
+      if (options.center) {
+        const onResize = () => {
+          setDivStyle(Math.ceil(canvas.width * options.expansionRate), Math.ceil(canvas.height * options.expansionRate));
+        };
+        window.addEventListener('resize', onResize);
+        onResize();
+      } else {
+        setDivStyle(canvas.width, canvas.height);
+      }
+
+      divs.ctrl.appendChild(createControlUI());
+
+      sideDiv.setAttribute('style', 'float: left;');
+      sideDiv.appendChild(divs.frame);
+      sideDiv.appendChild(divs.ctrl);
+      sideDiv.appendChild(divs.log);
+
+      divs.canvas.appendChild(canvas);
+      divs.base.appendChild(divs.canvas);
+      divs.base.appendChild(sideDiv);
+      divs.base.appendChild(divs.timeline);
+    },
+    sendLog: (msg, style) => {
+      if (divs.log !== null) {
+        const log = document.createElement('div');
+        log.setAttribute('style', `width: auto; border: 1px #999 solid; overflow-wrap: break-word; ` + style);
+        log.innerHTML = msg.join('<br>').replace(/\n/g, '<br>');
+        divs.log.appendChild(log);
+        divs.log.scrollTop = divs.log.scrollHeight;
+      }
+    },
+    updateDebugInfo: (counters, recorder) => {
+      divs.frame.innerHTML = counters.toString();
+      recorder.printTimeline(timelineCanvasPainter, counters.general);
+    }
+  };
+};
 
 /**
  * Class representing a game.
  * @param {Object} obj various settings
  * @param {Scenes} obj.scenes game scenes
- * @param {string} obj.firstScene the first scene name
- * @param {string} [obj.name] game name
- * @param {string} [obj.divId='koturno-ui'] id name of the {@link https://developer.mozilla.org/en-US/docs/Web/API/HTMLDivElement|HTMLDivElememt} which will be the game content
- * @param {State} [obj.state] the first state
+ * @param {string} obj.firstSceneName the first scene name
+ * @param {string} [obj.name='no name'] game name
+ * @param {string} [obj.divID='koturno-ui'] id name of the {@link https://developer.mozilla.org/en-US/docs/Web/API/HTMLDivElement|HTMLDivElememt} which will be the game content
+ * @param {Object} [obj.state] the first state
  * @param {Object[]} [obj.images] image properties. See {@link ImageManager}
  * @param {Object[]} [obj.sounds] sound properties. See {@link SoundManager}
  * @param {number} [obj.width=600] canvas width
@@ -38,78 +227,55 @@ import ActionManager from './action/ActionManager.js';
  */
 export default class Game {
   constructor(obj) {
-    if (['scenes', 'firstScene'].every(param => param in obj)) {
-      this.scenes = obj.scenes;
-      this.firstScene = obj.firstScene;
-      this.firstState = 'state' in obj ? obj.state : State.init({});
-      this.name = 'name' in obj ? obj.name : null;
+    if (['scenes', 'firstSceneName'].every(param => param in obj)) {
+      const privates = getPrivates(this);
+      /** @private @member {Scenes} */
+      privates.scenes = obj.scenes;
+      /** @private @member {Scene} */
+      privates.firstScene = privates.scenes.getScene(obj.firstSceneName);
+      /** @private @member {String} */
+      privates.firstState = 'state' in obj ? State.init(obj.state) : State.init({});
+      /** @private @member {FPSManager} */
+      privates.fpsManager = createFPSManager();
+      /** @private @member {AnimationState} */
+      privates.animationState = createAnimationState();
 
-      this._fps = (() => {
-        const millisecondsBetweenTwoFrame = [0.0, 0.0];
-        return {
-          update: (stamp) => {
-            millisecondsBetweenTwoFrame.push(stamp);
-            millisecondsBetweenTwoFrame.shift();
-          },
-          getValue: () => 1000.0 / (millisecondsBetweenTwoFrame[1] - millisecondsBetweenTwoFrame[0])
-        };
-      })();
-      this._animationState = (() => {
-        let flag = false;
-        let persist = false;
-        return {
-          getFlag: () => flag,
-          reset: () => {
-            if (!persist) flag = false;
-          },
-          next: () => {
-            persist = false;
-            flag = true;
-          },
-          play: () => {
-            persist = true;
-            flag = true;
-          },
-          stop: () => {
-            persist = false;
-          }
-        };
-      })();
-      Object.freeze(this._fps);
-      Object.freeze(this._animationState);
-
-      this.divElem = {
-        base: document.getElementById('divId' in obj ? obj.divId : 'koturno-ui'),
-        canvas: document.createElement('div'),
-        frame: null,
-        ctrl: null,
-        log: null,
-        timeline: null
-      };
+      /** @member {HTMLCanvasElement} */
       this.canvas = document.createElement('canvas');
-      this.canvas.width = 'width' in obj ? Math.floor(obj.width) : 600;
-      this.canvas.height = 'height' in obj ? Math.floor(obj.height) : 600;
-      this.divElem.base.setAttribute('style', `width: ${this.canvas.width}px; height: ${this.canvas.height}px; border: 1px #ccc solid;`);
-      this.divElem.canvas.appendChild(this.canvas);
-      this.divExpansionRate = 1;
-      this.centering = false;
+      this.canvas.width = 'width' in obj ? obj.width : 600;
+      this.canvas.height = 'height' in obj ? obj.height : 600;
+      /** @private @member {DivManager} */
+      privates.divManager = createDivManager('divID' in obj ? obj.divID : 'koturno-ui', this.canvas);
 
-      /** @member {ImageManager} */
-      this.imageManager = new ImageManager('images' in obj ? obj.images : []);
-      /** @member {SoundManager} */
-      this.soundManager = new SoundManager('sounds' in obj ? obj.sounds : []);
-      this.painter = new Painter2d(this.canvas, this.imageManager);
-      this.action = new ActionManager(this.canvas);
+      /** @private @member {ImageManager} */
+      privates.imageManager = new ImageManager('images' in obj ? obj.images : []);
+      /** @private @member {SoundManager} */
+      privates.soundManager = new SoundManager('sounds' in obj ? obj.sounds : []);
+      /** @private @member {Painter} */
+      privates.painter = /* 'context' in obj ? createPainter(obj.context) : */ new Painter2d(this.canvas, privates.imageManager);
+      /** @private @member {ActionManager} */
+      privates.action = new ActionManager(this.canvas);
 
-      this.timelineCanvasPainter = null;
+      /** @member {String} */
+      this.name = 'name' in obj ? obj.name : 'no name';
+
+      privates.displayFPS = () => {
+        const textOptions = Object.assign({}, privates.painter.recentTextOptions);
+        privates.painter.setGlobalAlphaAndDraw(0.8, () => {
+          const textMetrics = privates.painter.measureText('FPS ' + Math.round(this.fps), { size: 10, font: 'monospace' });
+          privates.painter.rect(0, this.height - 10, textMetrics.width + 3, 10).fill('#fff');
+          privates.painter.text('FPS ' + Math.round(this.fps), 0, this.height, { align: 'start', baseline: 'bottom' }).fill('#000');
+        });
+        privates.painter.recentTextOptions = textOptions;
+      };
     } else {
-      Logger.fatal("Game must have 'scenes' and 'firstScene'!");
+      Logger.fatal("Game must have 'scenes' and 'firstSceneName'!");
     }
   }
 
   /**
    * Canvas width.
-   * @member {number}
+   * @member {Number}
    */
   get width() {
     return this.canvas.width;
@@ -128,7 +294,7 @@ export default class Game {
    * @member {number}
    */
   get fps() {
-    return this._fps.getValue();
+    return getPrivates(this).fpsManager.getFPS();
   }
 
   /**
@@ -136,138 +302,8 @@ export default class Game {
    * @returns {Game} this
    */
   center() {
-    const fullScreenCSS = 'margin: 0px; padding: 0px; width: 100%; height: 100%; overflow: hidden;';
-    document.body.setAttribute('style', fullScreenCSS);
-    document.getElementsByTagName('html')[0].setAttribute('style', fullScreenCSS);
-    const onResize = () => {
-      const bodyRect = document.body.getBoundingClientRect();
-      this.divExpansionRate = Math.min(bodyRect.width / this.canvas.width, bodyRect.height / this.canvas.height);
-      const w = Math.ceil(this.canvas.width * this.divExpansionRate);
-      const h = Math.ceil(this.canvas.height * this.divExpansionRate);
-      this.divElem.base.setAttribute('style', `width: ${w}px; height: ${h}px; position: fixed; ` +
-        `left: ${(bodyRect.width - w) / 2}px; top: ${(bodyRect.height - h) / 2}px; border: 1px #ccc solid;`
-      );
-    };
-    window.addEventListener('resize', onResize);
-    onResize();
-    this.centering = true;
+    getPrivates(this).divManager.center();
     return this;
-  }
-
-  _setNormalUI() {
-    this.divElem.base.appendChild(this.divElem.canvas);
-    if (this.centering) {
-      const onResize = () => {
-        this.canvas.setAttribute('style', `transform: scale(${this.divExpansionRate}, ${this.divExpansionRate}); position: relative; ` +
-          `left: ${(this.divExpansionRate - 1) * this.canvas.width / 2}px; ` +
-          `top: ${(this.divExpansionRate - 1) * this.canvas.height / 2}px;`);
-      };
-      window.addEventListener('resize', onResize);
-      onResize();
-    }
-  }
-
-  _setDebugUI() {
-    const sideDiv = document.createElement('div');
-    this.divElem.frame = document.createElement('div');
-    this.divElem.ctrl = document.createElement('div');
-    this.divElem.log = document.createElement('div');
-    this.divElem.timeline = document.createElement('div');
-
-    const timelineCanvas = document.createElement('canvas');
-    this.timelineCanvasPainter = new Painter2d(timelineCanvas, new ImageManager([]));
-    this.divElem.timeline.appendChild(timelineCanvas);
-
-    if (this.centering) {
-      const onResize = () => {
-        this._setDivStyle(Math.ceil(this.canvas.width * this.divExpansionRate), Math.ceil(this.canvas.height * this.divExpansionRate))
-      };
-      window.addEventListener('resize', onResize);
-      onResize();
-    } else {
-      this._setDivStyle(this.canvas.width, this.canvas.height);
-    }
-
-    this.divElem.ctrl.appendChild(this._createCtrlUI());
-
-    sideDiv.setAttribute('style', 'float: left;');
-    sideDiv.appendChild(this.divElem.frame);
-    sideDiv.appendChild(this.divElem.ctrl);
-    sideDiv.appendChild(this.divElem.log);
-
-    this.divElem.canvas.appendChild(this.canvas);
-    this.divElem.base.appendChild(this.divElem.canvas);
-    this.divElem.base.appendChild(sideDiv);
-    this.divElem.base.appendChild(this.divElem.timeline);
-  }
-
-  _createCtrlUI() {
-    const div0 = document.createElement('div');
-    const div1 = document.createElement('div');
-    div0.setAttribute('style', 'text-align: center; padding: 8px;');
-    div1.setAttribute('style', 'border: 1px #0f0 solid; display: inline-block; margin: auto; font-size: 20px;');
-    div0.appendChild(div1);
-
-    const stepForwardI = document.createElement('i');
-    const playI = document.createElement('i');
-    stepForwardI.setAttribute('style', 'background-color: #000; color: #0f0; width: 25.7px; height: 20px;');
-    stepForwardI.setAttribute('class', 'fa fa-fw fa-step-forward');
-    stepForwardI.setAttribute('title', 'step forward');
-    playI.setAttribute('style', 'background-color: #000; color: #0f0; width: 25.7px; height: 20px;');
-    playI.setAttribute('class', 'fa fa-fw fa-play');
-    playI.setAttribute('title', 'play');
-    stepForwardI.addEventListener('mousedown', () => {
-      this._animationState.next();
-    });
-    playI.addEventListener('mousedown', () => {
-      if (this._animationState.getFlag()) {
-        this._animationState.stop();
-        playI.setAttribute('class', 'fa fa-fw fa-play');
-        playI.setAttribute('title', 'play');
-      } else {
-        this._animationState.play();
-        playI.setAttribute('class', 'fa fa-fw fa-pause');
-        playI.setAttribute('title', 'pause');
-      }
-    });
-    div1.appendChild(stepForwardI);
-    div1.appendChild(playI);
-
-    return div0;
-  }
-
-  _setDivStyle(baseWidth, baseHeight) {
-    this.divElem.canvas.setAttribute('style', `width: ${Math.round(baseWidth * 2 / 3)}px; height: ${Math.round(baseHeight * 2 / 3)}px; float: left;`);
-    this.divElem.frame.setAttribute('style', `width: ${Math.round(baseWidth / 3) - 6}px; height: ${Math.round(baseHeight / 9) - 6}px; ` +
-      `text-align: center; vertical-align: middle; display: table-cell; background-color: #000; border: 3px #0f0 solid; ` +
-      `color: #0f0; font-size: 150%;`);
-    this.divElem.ctrl.setAttribute('style', `width: ${Math.round(baseWidth / 3) - 6}px; height: ${Math.round(baseHeight * 2 / 9) - 6}px; ` +
-      `background-color: #000; border: 3px #0f0 solid;`);
-    this.divElem.log.setAttribute('style', `width: ${Math.round(baseWidth / 3) - 6}px; height: ${Math.round(baseHeight / 3) - 6}px; ` +
-      `overflow: scroll; background-color: #000; border: 3px #0f0 solid;`);
-    this.divElem.timeline.setAttribute('style', `width: ${baseWidth - 3}px; height: ${Math.round(baseHeight / 3) - 3}px; ` +
-      `overflow: scroll; background-color: #000; border: 3px #0f0 solid;`);
-    this.timelineCanvasPainter.canvas.width = baseWidth - 3;
-    this.timelineCanvasPainter.canvas.height = Math.round(baseHeight / 3) - 3;
-
-    this.canvas.setAttribute('style', `transform: scale(${this.divExpansionRate * 2 / 3}, ${this.divExpansionRate * 2 / 3}); position: relative; ` +
-      `left: ${Math.round((this.divExpansionRate * 2 / 3 - 1) * this.canvas.width / 2)}px; ` +
-      `top: ${Math.round((this.divExpansionRate * 2 / 3 - 1) * this.canvas.height / 2)}px;`);
-  }
-
-  _updateDebugInfo(counters, recorder) {
-    this.divElem.frame.innerHTML = counters.toString();
-    recorder.printTimeline(this.timelineCanvasPainter, counters.general);
-  }
-
-  _displayFPS() {
-    const textOptions = Object.assign({}, this.painter.recentTextOptions);
-    this.painter.setGlobalAlphaAndDraw(0.8, () => {
-      const textMetrics = this.painter.measureText('FPS ' + Math.round(this.fps), { size: 10, font: 'monospace' });
-      this.painter.rect(0, this.height - 10, textMetrics.width + 3, 10).fill('#fff');
-      this.painter.text('FPS ' + Math.round(this.fps), 0, this.height, { align: 'start', baseline: 'bottom' }).fill('#000');
-    });
-    this.painter.recentTextOptions = textOptions;
   }
 
   /**
@@ -277,49 +313,49 @@ export default class Game {
    * @param {Recorder} [recorder]
    */
   start(debug, displayFPS, recorder) {
+    const privates = getPrivates(this);
     const requestNextFrame = f => {
       window.requestAnimationFrame(stamp => {
-        if (debug && !this._animationState.getFlag()) {
+        if (debug && !privates.animationState.getFlag()) {
           requestNextFrame(f);
         } else {
-          this._animationState.reset();
-          this._fps.update(stamp);
+          privates.animationState.reset();
+          privates.fpsManager.update(stamp);
           f();
         }
       });
     };
-    const mainLoop = (sceneName, initState, initCounters) => {
-      const currentScene = this.scenes.getScene(sceneName);
+    const mainLoop = (currentScene, initState, initCounters) => {
       const loop = (currentState, counters) => {
-        if (recorder !== null) recorder.readAction(this.action, counters.general);
-        currentScene.draw(currentState, this.action, counters, this.painter, this);
+        if (recorder !== null) recorder.readAction(privates.action, counters.general);
+        currentScene.draw(currentState, privates.action, counters, privates.painter, this);
 
-        const nextState = currentScene.update(currentState, this.action, counters, this.soundManager, this);
+        const nextState = currentScene.update(currentState, privates.action, counters, privates.soundManager, this);
 
-        currentScene.transition(currentState, this.action, counters, this).match({
+        currentScene.transition(currentState, privates.action, counters, this).match({
           stay: () => {
             requestNextFrame(() => {
               loop(nextState, counters.count());
             });
           },
           trans: (nextSceneName, nextSceneCounter, transFunc) => {
-            const nextScene = this.scenes.getScene(nextSceneName);
-            const prevPainter = this.painter.createAnotherPainter();
-            const nextPainter = this.painter.createAnotherPainter();
+            const nextScene = privates.scenes.getScene(nextSceneName);
+            const prevPainter = privates.painter.createAnotherPainter();
+            const nextPainter = privates.painter.createAnotherPainter();
             const nextCounter = counters.reset(nextSceneCounter);
 
             if (nextScene !== null) {
               // draw two scenes on unvisible canvases
-              currentScene.draw(currentState, this.action, counters, prevPainter, this);
-              nextScene.draw(nextScene.init(currentState, nextCounter, this), this.action, nextCounter, nextPainter, this);
+              currentScene.draw(currentState, privates.action, counters, prevPainter, this);
+              nextScene.draw(nextScene.init(currentState, nextCounter, this), privates.action, nextCounter, nextPainter, this);
 
               requestNextFrame(() => {
                 transLoop({
-                  name: sceneName,
+                  scene: currentScene,
                   img: prevPainter.canvas,
                   state: currentState
                 }, {
-                  name: nextSceneName,
+                  scene: nextScene,
                   img: nextPainter.canvas,
                   counter: nextSceneCounter
                 }, counters.count().reset(), transFunc);
@@ -328,27 +364,27 @@ export default class Game {
           },
           end: () => {
             Logger.debug(`Game ended.\ntotal frame: ${counters.general}f`);
-            this.soundManager.finalize();
+            privates.soundManager.finalize();
           },
           reset: () => {
-            this.soundManager.reset();
+            privates.soundManager.reset();
             requestNextFrame(() => {
-              mainLoop(this.firstScene, this.firstState, counters.hardReset());
+              mainLoop(privates.firstScene, privates.firstState, counters.hardReset());
             });
           }
         });
 
         if (displayFPS) {
-          this._displayFPS();
+          privates.displayFPS();
         }
         if (recorder !== null) {
-          recorder.storeAction(this.action, counters.general);
+          recorder.storeAction(privates.action, counters.general);
         }
         if (debug) {
-          this._updateDebugInfo(counters, recorder);
+          privates.divManager.updateDebugInfo(counters, recorder);
         }
 
-        this.action.resetAction();
+        privates.action.resetAction();
       };
 
       if (currentScene !== null) {
@@ -357,9 +393,9 @@ export default class Game {
     };
 
     const transLoop = (prev, next, counters, transFunc) => {
-      if (transFunc(prev.img, next.img, counters.scene, this.painter)) {
+      if (transFunc(prev.img, next.img, counters.scene, privates.painter)) {
         requestNextFrame(() => {
-          mainLoop(next.name, prev.state, counters.count().reset(next.counter));
+          mainLoop(next.scene, prev.state, counters.count().reset(next.counter));
         });
       } else {
         requestNextFrame(() => {
@@ -368,33 +404,33 @@ export default class Game {
       }
 
       if (displayFPS) {
-        this._displayFPS();
+        privates.displayFPS();
       }
       if (recorder !== null) {
-        recorder.readAction(this.action, counters.general);
-        recorder.storeAction(this.action, counters.general);
+        recorder.readAction(privates.action, counters.general);
+        recorder.storeAction(privates.action, counters.general);
       }
       if (debug) {
-        this._updateDebugInfo(counters, recorder);
+        privates.divManager.updateDebugInfo(counters, recorder);
       }
     };
 
     // set UI
     if (debug) {
-      this._setDebugUI();
+      privates.divManager.setDebugUI(privates.animationState);
     } else {
-      this._setNormalUI();
+      privates.divManager.setNormalUI();
     }
     // blackout
-    this.painter.background("#000000");
+    privates.painter.background("#000000");
 
     // loading resources
-    this.imageManager.load()
-      .then(() => this.soundManager.load(), () => {
+    privates.imageManager.load()
+      .then(() => privates.soundManager.load(), () => {
         Logger.fatal('Image load error!');
       }).then(() => {
         if (recorder !== null) recorder.startRecord(this.name);
-        mainLoop(this.firstScene, this.firstState, new Counters());
+        mainLoop(privates.firstScene, privates.firstState, new Counters());
       }, () => {
         Logger.fatal('Sound load error!');
       });
@@ -409,7 +445,7 @@ export default class Game {
   run(opt = {}) {
     const recorder = 'recorder' in opt ? opt.recorder : null;
     if (recorder !== null) recorder.setMode('w');
-    this.action.listen();
+    getPrivates(this).action.listen();
     this.start(false, 'displayFPS' in opt ? opt.displayFPS : false, recorder);
   }
 
@@ -422,9 +458,9 @@ export default class Game {
   debug(opt = {}) {
     const recorder = 'recorder' in opt ? opt.recorder : new Recorder();
     recorder.setMode('w');
-    this.action.listen();
+    getPrivates(this).action.listen();
     Logger.setGame(this);
-    this.soundManager.setDebugMode(true);
+    getPrivates(this).soundManager.setDebugMode(true);
     this.start(true, 'displayFPS' in opt ? opt.displayFPS : false, recorder);
   }
 
@@ -448,13 +484,7 @@ export default class Game {
    * @param {string} style style of log
    */
   sendLog(msg, style) {
-    if (this.divElem.log !== null) {
-      const log = document.createElement('div');
-      log.setAttribute('style', `width: auto; border: 1px #999 solid; overflow-wrap: break-word; ` + style);
-      log.innerHTML = msg.join('<br>').replace(/\n/g, '<br>');
-      this.divElem.log.appendChild(log);
-      this.divElem.log.scrollTop = this.divElem.log.scrollHeight;
-    }
+    getPrivates(this).divManager.sendLog(msg, style);
   }
 
   /**
