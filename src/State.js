@@ -75,11 +75,13 @@ export default class State {
 
   /**
    * Get the state.
+   * If there is no state of the name, it returns the default value.
    * @param {string} name state name
-   * @returns {} state or null
+   * @param {} [defaultValue=null] default value
+   * @returns {} state or default value
    */
-  getState(name) {
-    return this.hasState(name) ? this.data.get(name) : null;
+  getState(name, defaultValue = null) {
+    return this.hasState(name) ? this.data.get(name) : defaultValue;
   }
 
   /**
