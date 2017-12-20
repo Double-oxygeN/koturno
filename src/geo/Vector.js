@@ -22,7 +22,7 @@ import Logger from '../logger/Logger.js';
  * @param {number[]} vector vector
  */
 export default class Vector {
-  constructor(vector) {
+  constructor(...vector) {
     /** @member {number[]} */
     this.vector = vector;
   }
@@ -44,7 +44,7 @@ export default class Vector {
    */
   plus(another) {
     if (this.dimension === another.dimension) {
-      return new Vector(this.vector.map((v0, i) => v0 + another.vector[i]));
+      return new Vector(...this.vector.map((v0, i) => v0 + another.vector[i]));
     } else {
       Logger.error(`Cannot calculate sum with different dimension!\nthis: ${this.dimension}\nanother: ${another.dimension}`);
       return null;
@@ -58,7 +58,7 @@ export default class Vector {
    */
   minus(another) {
     if (this.dimension === another.dimension) {
-      return new Vector(this.vector.map((v0, i) => v0 - another.vector[i]));
+      return new Vector(...this.vector.map((v0, i) => v0 - another.vector[i]));
     } else {
       Logger.error(`Cannot calculate difference with different dimension!\nthis: ${this.dimension}\nanother: ${another.dimension}`);
       return null;
@@ -95,6 +95,15 @@ export default class Vector {
    */
   innerProd(another) {
     return this.vector.map((v0, i) => v0 * another.vector[i]).reduce((a, b) => a + b);
+  }
+
+  /**
+   * Hadamard product.
+   * @param {Vector} another another vector
+   * @returns {Vector}
+   */
+  hadamard(another) {
+    return new Vector(...this.vector.map((v0, i) => v0 * another.vector[i]));
   }
 
   /**

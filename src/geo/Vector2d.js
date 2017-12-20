@@ -25,7 +25,7 @@ import Vector from './Vector.js';
  */
 export default class Vector2d extends Vector {
   constructor(x, y) {
-    super([x, y]);
+    super(x, y);
     /** @member {number} */
     this.x = x;
     /** @member {number} */
@@ -75,6 +75,15 @@ export default class Vector2d extends Vector {
    */
   scalar(k) {
     return new Vector2d(k * this.x, k * this.y);
+  }
+
+  /**
+   * Hadamard product.
+   * @param {Vector2d} another another vector
+   * @returns {Vector2d}
+   */
+  hadamard(another) {
+    return new Vector2d(this.x * another.x, this.y * another.y);
   }
 
   /**
