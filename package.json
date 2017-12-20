@@ -1,8 +1,11 @@
 {
   "name": "Koturno",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "JavaScript game library",
   "main": "koturno-all.js",
+  "scripts": {
+    "docs": "documentation build src/** -f html -o docs && sed -i -e '11s/undefined/this/' docs/assets/split.js && sed -i -e '29s/undefined/this/' docs/assets/anchor.js && echo ./docs updated!"
+  },
   "directories": {
     "doc": "docs"
   },
