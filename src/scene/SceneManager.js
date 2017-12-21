@@ -17,23 +17,27 @@
 
 import Logger from '../logger/Logger.js';
 
+const _privates = new WeakMap();
+const getPrivates = self => {
+  let p = _privates.get(self);
+  if (!p) _privates.set(self, p = {});
+  return p;
+};
+
 /**
  * Class representing game scenes.
  * @param {Scene[]} scenes an array of scenes
  */
 export default class SceneManager {
   constructor(scenes) {
-    this._scenes = new Map();
+    const privates = getPrivates(this);
+    privates.scenes = new Map();
     scenes.forEach(scene => this.scenes.set(scene.name, scene));
   }
 
   /** @member {Map.<string, Scene>} */
   get scenes() {
-    return this._scenes;
-  }
-
-  set scenes(scenes) {
-    Logger.fatal("Cannot set SceneManager.scenes directly.\nIf you want to set a scene, please use SceneManager#addScene(scene).");
+    return getPrivates(this).scenes;
   }
 
   /**
@@ -45,7 +49,7 @@ export default class SceneManager {
     if (this.hasScene(scene.name)) {
       return false;
     } else {
-      this.scenes.set(scene.name, scene);
+      getPrivates(this).scenes.set(scene.name, scene);
       return true;
     }
   }
@@ -56,7 +60,7 @@ export default class SceneManager {
    * @returns {boolean} `true` if this has the scene
    */
   hasScene(name) {
-    return this.scenes.has(name);
+    return getPrivates(this).scenes.has(name);
   }
 
   /**
@@ -66,7 +70,7 @@ export default class SceneManager {
    */
   getScene(name) {
     if (this.hasScene(name)) {
-      return this.scenes.get(name);
+      return getPrivates(this).scenes.get(name);
     } else {
       Logger.error(`SceneManager has no scene of name ${name}!`);
       return null;
@@ -78,7 +82,7 @@ export default class SceneManager {
    * @param {SceneManager~forEach} f callback function
    */
   forEach(f) {
-    this.scenes.forEach(f);
+    getPrivates(this).scenes.forEach(f);
   }
   /**
    * @callback SceneManager~forEach
