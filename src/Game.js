@@ -215,7 +215,7 @@ const createDivManager = (baseID, canvas) => {
 /**
  * Class representing a game.
  * @param {Object} obj various settings
- * @param {Scenes} obj.scenes game scenes
+ * @param {SceneManager} obj.scenes game scenes
  * @param {string} obj.firstSceneName the first scene name
  * @param {string} [obj.name='no name'] game name
  * @param {string} [obj.divID='koturno-ui'] id name of the {@link https://developer.mozilla.org/en-US/docs/Web/API/HTMLDivElement|HTMLDivElememt} which will be the game content
@@ -229,7 +229,7 @@ export default class Game {
   constructor(obj) {
     if (['scenes', 'firstSceneName'].every(param => param in obj)) {
       const privates = getPrivates(this);
-      /** @private @member {Scenes} */
+      /** @private @member {SceneManager} */
       privates.scenes = obj.scenes;
       /** @private @member {Scene} */
       privates.firstScene = privates.scenes.getScene(obj.firstSceneName);

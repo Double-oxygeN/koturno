@@ -21,7 +21,7 @@ export { KoturnoUtil } from './src/util/KoturnoUtil.js';
 export { StdTransFunc } from './src/util/StdTransFunc.js';
 export { Tween } from './src/util/Tween.js';
 import Scene from './src/scene/Scene.js';
-import Scenes from './src/scene/Scenes.js';
+import SceneManager from './src/scene/SceneManager.js';
 import Transition from './src/scene/Transition.js';
 import Recorder from './src/recorder/Recorder.js';
 import Logger from './src/logger/Logger.js';
@@ -36,4 +36,4 @@ import Material from './src/figure/Material.js';
 import Circle2d from './src/figure/Circle2d.js';
 import Rect2d from './src/figure/Rect2d.js';
 
-export { Game, State, Scene, Scenes, Transition, Recorder, Logger, Vector, Vector2d, Shape2d, Rigid2d, Material, Circle2d, Rect2d };
+export { Game, State, Scene, SceneManager, Transition, Recorder, Logger, Vector, Vector2d, Shape2d, Rigid2d, Material, Circle2d, Rect2d };

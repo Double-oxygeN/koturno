@@ -21,7 +21,7 @@ import Logger from '../logger/Logger.js';
  * Class representing game scenes.
  * @param {Scene[]} scenes an array of scenes
  */
-export default class Scenes {
+export default class SceneManager {
   constructor(scenes) {
     this._scenes = new Map();
     scenes.forEach(scene => this.scenes.set(scene.name, scene));
@@ -33,7 +33,7 @@ export default class Scenes {
   }
 
   set scenes(scenes) {
-    Logger.fatal("Cannot set Scenes.scenes directly.\nIf you want to set a scene, please use Scenes#addScene(scene).");
+    Logger.fatal("Cannot set SceneManager.scenes directly.\nIf you want to set a scene, please use SceneManager#addScene(scene).");
   }
 
   /**
@@ -68,20 +68,20 @@ export default class Scenes {
     if (this.hasScene(name)) {
       return this.scenes.get(name);
     } else {
-      Logger.error(`Scenes has no scene of name ${name}!`);
+      Logger.error(`SceneManager has no scene of name ${name}!`);
       return null;
     }
   }
 
   /**
    * Execute function for each scenes.
-   * @param {Scenes~forEach} f callback function
+   * @param {SceneManager~forEach} f callback function
    */
   forEach(f) {
     this.scenes.forEach(f);
   }
   /**
-   * @callback Scenes~forEach
+   * @callback SceneManager~forEach
    * @param {string} key
    * @param {Scene} value
    */
@@ -91,6 +91,6 @@ export default class Scenes {
    * @returns {string} a string
    */
   toString() {
-    return `[Scenes]`;
+    return `[SceneManager]`;
   }
 }
