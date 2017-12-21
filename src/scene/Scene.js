@@ -30,37 +30,40 @@ export default class Scene {
 
   /**
    * Initialize the state.
-   * @param {State} state previous state
-   * @param {Counters} counters counters
-   * @param {Game} game game itself
+   * @param {Object} ev scene event
+   * @param {State} ev.state previous state
+   * @param {Counters} ev.counters counters
+   * @param {Game} ev.game game itself
    * @returns {State} initialized state
    */
-  init(state, counters, game) {
+  init({ state, counters, game }) {
     return state;
   }
 
   /**
    * Update the state.
-   * @param {State} state previous state
-   * @param {ActionManager} action user inputs
-   * @param {Counters} counters counters
-   * @param {SoundManager} sound sound manager
-   * @param {Game} game game itself
+   * @param {Object} ev scene event
+   * @param {State} ev.state previous state
+   * @param {ActionManager} ev.action user inputs
+   * @param {Counters} ev.counters counters
+   * @param {SoundManager} ev.sound sound manager
+   * @param {Game} ev.game game itself
    * @returns {State} updated state
    */
-  update(state, action, counters, sound, game) {
+  update({ state, action, counters, sound, game }) {
     return state;
   }
 
   /**
    * Draw on the canvas.
-   * @param {State} state previous state
-   * @param {ActionManager} action user inputs
-   * @param {Counters} counters counters
-   * @param {Painter} painter graphics controller
-   * @param {Game} game game itself
+   * @param {Object} ev scene event
+   * @param {State} ev.state previous state
+   * @param {ActionManager} ev.action user inputs
+   * @param {Counters} ev.counters counters
+   * @param {Painter} ev.painter graphics controller
+   * @param {Game} ev.game game itself
    */
-  draw(state, action, counters, painter, game) {
+  draw({ state, action, counters, painter, game }) {
     if (painter.contextType === '2d') {
       painter.background("#ffffff");
       painter.text(this.name, painter.width / 2, painter.height / 2, { size: 64, align: 'center', baseline: 'middle' }).fill("#000000");
@@ -69,13 +72,14 @@ export default class Scene {
 
   /**
    * Transition to the next scene.
-   * @param {State} state previous state
-   * @param {ActionManager} action user inputs
-   * @param {Counters} counters counters
-   * @param {Game} game game itself
+   * @param {Object} ev scene event
+   * @param {State} ev.state previous state
+   * @param {ActionManager} ev.action user inputs
+   * @param {Counters} ev.counters counters
+   * @param {Game} ev.game game itself
    * @returns {Transition} transition
    */
-  transition(state, action, counters, game) {
+  transition({ state, action, counters, game }) {
     return Transition.Stay();
   }
 

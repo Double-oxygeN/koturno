@@ -328,11 +328,28 @@ export default class Game {
     const mainLoop = (currentScene, initState, initCounters) => {
       const loop = (currentState, counters) => {
         if (recorder !== null) recorder.readAction(privates.action, counters.general);
-        currentScene.draw(currentState, privates.action, counters, privates.painter, this);
+        currentScene.draw({
+          state: currentState,
+          action: privates.action,
+          counters,
+          painter: privates.painter,
+          game: this
+        });
 
-        const nextState = currentScene.update(currentState, privates.action, counters, privates.soundManager, this);
+        const nextState = currentScene.update({
+          state: currentState,
+          action: privates.action,
+          counters,
+          sound: privates.soundManager,
+          game: this
+        });
 
-        currentScene.transition(currentState, privates.action, counters, this).match({
+        currentScene.transition({
+          state: currentState,
+          action: privates.action,
+          counters,
+          game: this
+        }).match({
           stay: () => {
             requestNextFrame(() => {
               loop(nextState, counters.count());
@@ -346,8 +363,20 @@ export default class Game {
 
             if (nextScene !== null) {
               // draw two scenes on unvisible canvases
-              currentScene.draw(currentState, privates.action, counters, prevPainter, this);
-              nextScene.draw(nextScene.init(currentState, nextCounter, this), privates.action, nextCounter, nextPainter, this);
+              currentScene.draw({
+                state: currentState,
+                action: privates.action,
+                counters,
+                painter: prevPainter,
+                game: this
+              });
+              nextScene.draw({
+                state: nextScene.init({ state: currentState, counters: nextCounter, game: this }),
+                action: privates.action,
+                counters: nextCounter,
+                painter: nextPainter,
+                game: this
+              });
 
               requestNextFrame(() => {
                 transLoop({
@@ -388,7 +417,7 @@ export default class Game {
       };
 
       if (currentScene !== null) {
-        loop(currentScene.init(initState, initCounters, this), initCounters);
+        loop(currentScene.init({ state: initState, counters: initCounters, game: this }), initCounters);
       }
     };
 

@@ -16771,7 +16771,7 @@ If you want to create new scene, please extend it.</p>
       <div class="clearfix small pointer toggle-sibling">
         <div class="py1 contain">
             <a class='icon pin-right py1 dark-link caret-right'>▸</a>
-            <span class='code strong strong truncate'>init(state, counters, game)</span>
+            <span class='code strong strong truncate'>init(ev)</span>
         </div>
       </div>
       <div class="clearfix display-none toggle-target">
@@ -16782,7 +16782,7 @@ If you want to create new scene, please extend it.</p>
   <p>Initialize the state.</p>
 
 
-  <div class='pre p1 fill-light mt0'>init(state: <a href="#state">State</a>, counters: <a href="#counters">Counters</a>, game: <a href="#game">Game</a>): <a href="#state">State</a></div>
+  <div class='pre p1 fill-light mt0'>init(ev: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a>): <a href="#state">State</a></div>
   
   
 
@@ -16799,28 +16799,47 @@ If you want to create new scene, please extend it.</p>
       
         <div class='space-bottom0'>
           <div>
-            <span class='code bold'>state</span> <code class='quiet'>(<a href="#state">State</a>)</code>
-	    previous state
+            <span class='code bold'>ev</span> <code class='quiet'>(<a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a>)</code>
+	    scene event
 
           </div>
           
-        </div>
-      
-        <div class='space-bottom0'>
-          <div>
-            <span class='code bold'>counters</span> <code class='quiet'>(<a href="#counters">Counters</a>)</code>
-	    counters
-
-          </div>
-          
-        </div>
-      
-        <div class='space-bottom0'>
-          <div>
-            <span class='code bold'>game</span> <code class='quiet'>(<a href="#game">Game</a>)</code>
-	    game itself
-
-          </div>
+          <table class='mt1 mb2 fixed-table h5 col-12'>
+            <colgroup>
+              <col width='30%' />
+              <col width='70%' />
+            </colgroup>
+            <thead>
+              <tr class='bold fill-light'>
+                <th>Name</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody class='mt1'>
+              
+                <tr>
+                  <td class='break-word'><span class='code bold'>ev.state</span> <code class='quiet'><a href="#state">State</a></code>
+                  </td>
+                  <td class='break-word'><span>previous state
+</span></td>
+                </tr>
+              
+                <tr>
+                  <td class='break-word'><span class='code bold'>ev.counters</span> <code class='quiet'><a href="#counters">Counters</a></code>
+                  </td>
+                  <td class='break-word'><span>counters
+</span></td>
+                </tr>
+              
+                <tr>
+                  <td class='break-word'><span class='code bold'>ev.game</span> <code class='quiet'><a href="#game">Game</a></code>
+                  </td>
+                  <td class='break-word'><span>game itself
+</span></td>
+                </tr>
+              
+            </tbody>
+          </table>
           
         </div>
       
@@ -16857,7 +16876,7 @@ If you want to create new scene, please extend it.</p>
       <div class="clearfix small pointer toggle-sibling">
         <div class="py1 contain">
             <a class='icon pin-right py1 dark-link caret-right'>▸</a>
-            <span class='code strong strong truncate'>update(state, action, counters, sound, game)</span>
+            <span class='code strong strong truncate'>update(ev)</span>
         </div>
       </div>
       <div class="clearfix display-none toggle-target">
@@ -16868,7 +16887,7 @@ If you want to create new scene, please extend it.</p>
   <p>Update the state.</p>
 
 
-  <div class='pre p1 fill-light mt0'>update(state: <a href="#state">State</a>, action: <a href="#actionmanager">ActionManager</a>, counters: <a href="#counters">Counters</a>, sound: <a href="#soundmanager">SoundManager</a>, game: <a href="#game">Game</a>): <a href="#state">State</a></div>
+  <div class='pre p1 fill-light mt0'>update(ev: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a>): <a href="#state">State</a></div>
   
   
 
@@ -16885,46 +16904,61 @@ If you want to create new scene, please extend it.</p>
       
         <div class='space-bottom0'>
           <div>
-            <span class='code bold'>state</span> <code class='quiet'>(<a href="#state">State</a>)</code>
-	    previous state
+            <span class='code bold'>ev</span> <code class='quiet'>(<a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a>)</code>
+	    scene event
 
           </div>
           
-        </div>
-      
-        <div class='space-bottom0'>
-          <div>
-            <span class='code bold'>action</span> <code class='quiet'>(<a href="#actionmanager">ActionManager</a>)</code>
-	    user inputs
-
-          </div>
-          
-        </div>
-      
-        <div class='space-bottom0'>
-          <div>
-            <span class='code bold'>counters</span> <code class='quiet'>(<a href="#counters">Counters</a>)</code>
-	    counters
-
-          </div>
-          
-        </div>
-      
-        <div class='space-bottom0'>
-          <div>
-            <span class='code bold'>sound</span> <code class='quiet'>(<a href="#soundmanager">SoundManager</a>)</code>
-	    sound manager
-
-          </div>
-          
-        </div>
-      
-        <div class='space-bottom0'>
-          <div>
-            <span class='code bold'>game</span> <code class='quiet'>(<a href="#game">Game</a>)</code>
-	    game itself
-
-          </div>
+          <table class='mt1 mb2 fixed-table h5 col-12'>
+            <colgroup>
+              <col width='30%' />
+              <col width='70%' />
+            </colgroup>
+            <thead>
+              <tr class='bold fill-light'>
+                <th>Name</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody class='mt1'>
+              
+                <tr>
+                  <td class='break-word'><span class='code bold'>ev.state</span> <code class='quiet'><a href="#state">State</a></code>
+                  </td>
+                  <td class='break-word'><span>previous state
+</span></td>
+                </tr>
+              
+                <tr>
+                  <td class='break-word'><span class='code bold'>ev.action</span> <code class='quiet'><a href="#actionmanager">ActionManager</a></code>
+                  </td>
+                  <td class='break-word'><span>user inputs
+</span></td>
+                </tr>
+              
+                <tr>
+                  <td class='break-word'><span class='code bold'>ev.counters</span> <code class='quiet'><a href="#counters">Counters</a></code>
+                  </td>
+                  <td class='break-word'><span>counters
+</span></td>
+                </tr>
+              
+                <tr>
+                  <td class='break-word'><span class='code bold'>ev.sound</span> <code class='quiet'><a href="#soundmanager">SoundManager</a></code>
+                  </td>
+                  <td class='break-word'><span>sound manager
+</span></td>
+                </tr>
+              
+                <tr>
+                  <td class='break-word'><span class='code bold'>ev.game</span> <code class='quiet'><a href="#game">Game</a></code>
+                  </td>
+                  <td class='break-word'><span>game itself
+</span></td>
+                </tr>
+              
+            </tbody>
+          </table>
           
         </div>
       
@@ -16961,7 +16995,7 @@ If you want to create new scene, please extend it.</p>
       <div class="clearfix small pointer toggle-sibling">
         <div class="py1 contain">
             <a class='icon pin-right py1 dark-link caret-right'>▸</a>
-            <span class='code strong strong truncate'>draw(state, action, counters, painter, game)</span>
+            <span class='code strong strong truncate'>draw(ev)</span>
         </div>
       </div>
       <div class="clearfix display-none toggle-target">
@@ -16972,7 +17006,7 @@ If you want to create new scene, please extend it.</p>
   <p>Draw on the canvas.</p>
 
 
-  <div class='pre p1 fill-light mt0'>draw(state: <a href="#state">State</a>, action: <a href="#actionmanager">ActionManager</a>, counters: <a href="#counters">Counters</a>, painter: <a href="#painter">Painter</a>, game: <a href="#game">Game</a>)</div>
+  <div class='pre p1 fill-light mt0'>draw(ev: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a>)</div>
   
   
 
@@ -16989,46 +17023,61 @@ If you want to create new scene, please extend it.</p>
       
         <div class='space-bottom0'>
           <div>
-            <span class='code bold'>state</span> <code class='quiet'>(<a href="#state">State</a>)</code>
-	    previous state
+            <span class='code bold'>ev</span> <code class='quiet'>(<a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a>)</code>
+	    scene event
 
           </div>
           
-        </div>
-      
-        <div class='space-bottom0'>
-          <div>
-            <span class='code bold'>action</span> <code class='quiet'>(<a href="#actionmanager">ActionManager</a>)</code>
-	    user inputs
-
-          </div>
-          
-        </div>
-      
-        <div class='space-bottom0'>
-          <div>
-            <span class='code bold'>counters</span> <code class='quiet'>(<a href="#counters">Counters</a>)</code>
-	    counters
-
-          </div>
-          
-        </div>
-      
-        <div class='space-bottom0'>
-          <div>
-            <span class='code bold'>painter</span> <code class='quiet'>(<a href="#painter">Painter</a>)</code>
-	    graphics controller
-
-          </div>
-          
-        </div>
-      
-        <div class='space-bottom0'>
-          <div>
-            <span class='code bold'>game</span> <code class='quiet'>(<a href="#game">Game</a>)</code>
-	    game itself
-
-          </div>
+          <table class='mt1 mb2 fixed-table h5 col-12'>
+            <colgroup>
+              <col width='30%' />
+              <col width='70%' />
+            </colgroup>
+            <thead>
+              <tr class='bold fill-light'>
+                <th>Name</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody class='mt1'>
+              
+                <tr>
+                  <td class='break-word'><span class='code bold'>ev.state</span> <code class='quiet'><a href="#state">State</a></code>
+                  </td>
+                  <td class='break-word'><span>previous state
+</span></td>
+                </tr>
+              
+                <tr>
+                  <td class='break-word'><span class='code bold'>ev.action</span> <code class='quiet'><a href="#actionmanager">ActionManager</a></code>
+                  </td>
+                  <td class='break-word'><span>user inputs
+</span></td>
+                </tr>
+              
+                <tr>
+                  <td class='break-word'><span class='code bold'>ev.counters</span> <code class='quiet'><a href="#counters">Counters</a></code>
+                  </td>
+                  <td class='break-word'><span>counters
+</span></td>
+                </tr>
+              
+                <tr>
+                  <td class='break-word'><span class='code bold'>ev.painter</span> <code class='quiet'><a href="#painter">Painter</a></code>
+                  </td>
+                  <td class='break-word'><span>graphics controller
+</span></td>
+                </tr>
+              
+                <tr>
+                  <td class='break-word'><span class='code bold'>ev.game</span> <code class='quiet'><a href="#game">Game</a></code>
+                  </td>
+                  <td class='break-word'><span>game itself
+</span></td>
+                </tr>
+              
+            </tbody>
+          </table>
           
         </div>
       
@@ -17057,7 +17106,7 @@ If you want to create new scene, please extend it.</p>
       <div class="clearfix small pointer toggle-sibling">
         <div class="py1 contain">
             <a class='icon pin-right py1 dark-link caret-right'>▸</a>
-            <span class='code strong strong truncate'>transition(state, action, counters, game)</span>
+            <span class='code strong strong truncate'>transition(ev)</span>
         </div>
       </div>
       <div class="clearfix display-none toggle-target">
@@ -17068,7 +17117,7 @@ If you want to create new scene, please extend it.</p>
   <p>Transition to the next scene.</p>
 
 
-  <div class='pre p1 fill-light mt0'>transition(state: <a href="#state">State</a>, action: <a href="#actionmanager">ActionManager</a>, counters: <a href="#counters">Counters</a>, game: <a href="#game">Game</a>): <a href="#transition">Transition</a></div>
+  <div class='pre p1 fill-light mt0'>transition(ev: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a>): <a href="#transition">Transition</a></div>
   
   
 
@@ -17085,37 +17134,54 @@ If you want to create new scene, please extend it.</p>
       
         <div class='space-bottom0'>
           <div>
-            <span class='code bold'>state</span> <code class='quiet'>(<a href="#state">State</a>)</code>
-	    previous state
+            <span class='code bold'>ev</span> <code class='quiet'>(<a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a>)</code>
+	    scene event
 
           </div>
           
-        </div>
-      
-        <div class='space-bottom0'>
-          <div>
-            <span class='code bold'>action</span> <code class='quiet'>(<a href="#actionmanager">ActionManager</a>)</code>
-	    user inputs
-
-          </div>
-          
-        </div>
-      
-        <div class='space-bottom0'>
-          <div>
-            <span class='code bold'>counters</span> <code class='quiet'>(<a href="#counters">Counters</a>)</code>
-	    counters
-
-          </div>
-          
-        </div>
-      
-        <div class='space-bottom0'>
-          <div>
-            <span class='code bold'>game</span> <code class='quiet'>(<a href="#game">Game</a>)</code>
-	    game itself
-
-          </div>
+          <table class='mt1 mb2 fixed-table h5 col-12'>
+            <colgroup>
+              <col width='30%' />
+              <col width='70%' />
+            </colgroup>
+            <thead>
+              <tr class='bold fill-light'>
+                <th>Name</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody class='mt1'>
+              
+                <tr>
+                  <td class='break-word'><span class='code bold'>ev.state</span> <code class='quiet'><a href="#state">State</a></code>
+                  </td>
+                  <td class='break-word'><span>previous state
+</span></td>
+                </tr>
+              
+                <tr>
+                  <td class='break-word'><span class='code bold'>ev.action</span> <code class='quiet'><a href="#actionmanager">ActionManager</a></code>
+                  </td>
+                  <td class='break-word'><span>user inputs
+</span></td>
+                </tr>
+              
+                <tr>
+                  <td class='break-word'><span class='code bold'>ev.counters</span> <code class='quiet'><a href="#counters">Counters</a></code>
+                  </td>
+                  <td class='break-word'><span>counters
+</span></td>
+                </tr>
+              
+                <tr>
+                  <td class='break-word'><span class='code bold'>ev.game</span> <code class='quiet'><a href="#game">Game</a></code>
+                  </td>
+                  <td class='break-word'><span>game itself
+</span></td>
+                </tr>
+              
+            </tbody>
+          </table>
           
         </div>
       
