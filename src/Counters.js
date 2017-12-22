@@ -15,6 +15,13 @@
  */
 'use strict';
 
+const _privates = new WeakMap();
+const getPrivates = (self) => {
+  let p = _privates.get(self);
+  if (!p) _privates.set(self, p = {});
+  return p;
+}
+
 /**
  * Class representing two counters.
  * @param {number} [general=0] general counter
@@ -22,17 +29,25 @@
  */
 export default class Counters {
   constructor(general = 0, scene = 0) {
-    /**
-     * General counter.
-     * @member {number}
-     */
-    this.general = general;
-    /**
-     * Scene counter.
-     * @member {number}
-     */
-    this.scene = scene;
-    Object.freeze(this);
+    const privates = getPrivates(this);
+    privates.general = general;
+    privates.scene = scene;
+  }
+
+  /**
+   * General counter.
+   * @member {number}
+   */
+  get general() {
+    return getPrivates(this).general;
+  }
+
+  /**
+   * Scene counter.
+   * @member {number}
+   */
+  get scene() {
+    return getPrivates(this).scene;
   }
 
   /**
