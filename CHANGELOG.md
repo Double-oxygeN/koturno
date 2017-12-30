@@ -4,6 +4,7 @@
 - Use ES6 module
 - Change State#getState
 - Add Vector#hadamard and Vector2d#hadamard
+- Use Web Audio API
 
 ## v0.1.0
 - Release first product
