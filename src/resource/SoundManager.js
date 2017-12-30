@@ -15,7 +15,15 @@
  */
 'use strict';
 
+import { SoundType } from './SoundType.js';
 import Logger from '../logger/Logger.js';
+
+const _privates = new WeakMap();
+const getPrivates = (self) => {
+  let p = _privates.get(self);
+  if (!p) _privates.set(self, p = {});
+  return p;
+};
 
 /**
  * Class for manageing BGMs and SEs.
@@ -29,45 +37,54 @@ import Logger from '../logger/Logger.js';
 export default class SoundManager {
   constructor(sounds, maxPlaySE = 32) {
     if (sounds.every(sound => ['name', 'src', 'type'].every(param => param in sound))) {
-      this.sounds = new Map();
-      this.BGMs = new Map();
-      this.SEs = new Map();
+      const privates = getPrivates(this);
+      privates.audioContext = new(AudioContext || webkitAudioContext)();
+      privates.bgms = new Map();
+      privates.ses = new Map();
 
-      /** @member {string[]} */
-      this.BGMList = sounds.filter(sound => sound.type === SoundType.BGM).map(sound => sound.name);
-      /** @member {string[]} */
-      this.SEList = sounds.filter(sound => sound.type === SoundType.SE).map(sound => sound.name);
+      privates.maxPlaySE = maxPlaySE;
+      privates.currentPlaySE = 0;
+      privates.currentPlayBGM = null;
 
-      this.maxPlaySE = maxPlaySE;
-      this.currentPlaySE = 0;
-      this.currentPlayBGM = null;
+      privates.bgmVolume = 1.0;
+      privates.seVolume = 1.0;
 
-      /** @member {number} */
-      this.BGMVolume = 1.0;
-      /** @member {number} */
-      this.SEVolume = 1.0;
-
-      this._debugMode = false;
-      this._silent = null;
+      privates.debug = false;
 
       sounds.forEach(sound => {
-        const soundProp = {
-          name: sound.name,
-          src: sound.src,
-          audio: null,
-          loop: 'loop' in sound ? sound.loop : false,
-          playing: 0
-        };
-        this.sounds.set(sound.name, soundProp);
         if (sound.type === SoundType.BGM) {
-          this.BGMs.set(sound.name, soundProp);
+          privates.bgms.set(sound.name, {
+            name: sound.name,
+            src: sound.src,
+            loop: 'loop' in sound ? sound.loop : false,
+            audio: null,
+            sourceNode: null,
+            gainNode: null
+          });
         } else if (sound.type === SoundType.SE) {
-          this.SEs.set(sound.name, soundProp);
+          privates.ses.set(sound.name, {
+            name: sound.name,
+            src: sound.src,
+            buffer: null,
+            playingAudioSources: []
+          });
         }
       });
     } else {
       Logger.fatal("SoundManager requires sound properties of 'name', 'src' and 'type'");
     }
+  }
+
+  /** @member {string[]} */
+  get bgmList() {
+    // return sounds.filter(sound => sound.type === SoundType.BGM).map(sound => sound.name);
+    return Array.from(getPrivates(this).bgms.values()).map(bgm => bgm.name);
+  }
+
+  /** @member {string[]} */
+  get seList() {
+    // return sounds.filter(sound => sound.type === SoundType.SE).map(sound => sound.name);
+    return Array.from(getPrivates(this).ses.values()).map(se => se.name);
   }
 
   /**
@@ -77,9 +94,9 @@ export default class SoundManager {
    */
   getVolume(type) {
     if (type === SoundType.BGM) {
-      return this.BGMVolume;
+      return getPrivates(this).bgmVolume;
     } else if (type === SoundType.SE) {
-      return this.SEVolume;
+      return getPrivates(this).seVolume;
     } else {
       return -1;
     }
@@ -93,9 +110,9 @@ export default class SoundManager {
    */
   setVolume(type, vol) {
     if (type === SoundType.BGM) {
-      return this.BGMVolume = Math.min(1.0, Math.max(0.0, vol));
+      return getPrivates(this).bgmVolume = Math.min(1.0, Math.max(0.0, vol));
     } else if (type === SoundType.SE) {
-      return this.SEVolume = Math.min(1.0, Math.max(0.0, vol));
+      return getPrivates(this).seVolume = Math.min(1.0, Math.max(0.0, vol));
     } else {
       return -1;
     }
@@ -106,7 +123,7 @@ export default class SoundManager {
    * @param {boolean} flag
    */
   setDebugMode(flag) {
-    this._debugMode = flag;
+    getPrivates(this).debug = flag;
   }
 
   /**
@@ -114,23 +131,28 @@ export default class SoundManager {
    * @returns {Promise}
    */
   load() {
-    return Promise.all(Array.from(this.sounds.values()).map(soundProp => new Promise((res, rej) => {
-      if (soundProp.audio === null) {
-        soundProp.audio = new Audio(soundProp.src);
-        soundProp.audio.loop = soundProp.loop;
-        soundProp.audio.load();
-      }
-      res(null);
-    }))).then(() => new Promise((res, rej) => {
-      let tmp = __SCRIPT_PATH__.split('/');
-      tmp[tmp.length - 1] = 'silent.wav';
-      this._silent = new Audio(tmp.join('/'));
-      this._silent.loop = true;
-      this._silent.load();
-      this._silent.volume = 0.1;
-      this._silent.play();
-      res(null);
-    }));
+    const privates = getPrivates(this);
+    return Promise.all(Array.from(privates.bgms.values()).map(bgmProp => {
+      return new Promise((res, rej) => {
+        const audio = new Audio(bgmProp.src);
+        audio.loop = bgmProp.loop;
+        audio.addEventListener('canplay', () => {
+          bgmProp.audio = audio;
+          res('ok');
+        });
+        audio.addEventListener('error', () => {
+          rej('ng');
+        });
+        audio.load();
+      });
+    }).concat(Array.from(privates.ses.values()).map(seProp => {
+      return fetch(seProp.src).then(r => r.arrayBuffer()).then(buffer =>
+        privates.audioContext.decodeAudioData(buffer)
+      ).then(data => {
+        seProp.buffer = data;
+        return Promise.resolve('ok');
+      });
+    })));
   }
 
   /**
@@ -143,35 +165,36 @@ export default class SoundManager {
    * @param {number} [opt.maxPlay] maximum number of simultaneously playing this SE
    */
   playSE(name, opt = {}) {
-    if (this.SEs.has(name)) {
-      const se = this.SEs.get(name);
-      const maxPlayTheSE = 'maxPlay' in opt ? opt.maxPlay : this.maxPlaySE;
-      if (se.audio === null) {
+    const privates = getPrivates(this);
+    if (privates.ses.has(name)) {
+      const se = privates.ses.get(name);
+      const maxPlayTheSE = 'maxPlay' in opt ? opt.maxPlay : privates.maxPlaySE;
+      if (se.data === null) {
         Logger.fatal('Please load before playing!');
-      } else if (this.currentPlaySE >= this.maxPlaySE || se.playing >= maxPlayTheSE) {
+      } else if (privates.currentPlaySE >= privates.maxPlaySE || se.playingAudioSources.length >= maxPlayTheSE) {
         Logger.warn(`Too many SEs are playing!\nSE: ${name}`);
+      } else if (privates.debug) {
+        Logger.debug(`play se: ${name}`);
       } else {
-        const se0 = new Audio(se.src);
+        const gainNode = privates.audioContext.createGain();
+        gainNode.gain.value = 'volume' in opt ? Math.min(1.0, Math.max(0.0, opt.volume)) : privates.seVolume;
 
-        se0.currentTime = 'time' in opt ? opt.time : 0.0;
-        se0.volume = 'volume' in opt ? Math.min(1.0, Math.max(0.0, opt.volume)) : this.SEVolume;
-        se0.playbackRate = 'speed' in opt ? opt.speed : 1.0;
+        const source = privates.audioContext.createBufferSource();
+        source.buffer = se.buffer;
+        source.loop = false;
+        source.connect(gainNode);
+        gainNode.connect(privates.audioContext.destination);
+        if ('speed' in opt) source.playbackRate = opt.speed;
 
-        this.currentPlaySE++;
-        se.playing++;
-
-        se0.addEventListener('loadedmetadata', () => {
-          if (this._debugMode) {
-            Logger.debug(`play se: ${name}`);
-          } else {
-            se0.play();
-          }
-          window.setTimeout(() => {
-            this.currentPlaySE--;
-            se.playing--;
-          }, se0.duration * 1000 + 96);
+        privates.currentPlaySE++;
+        se.playingAudioSources.push(source);
+        source.addEventListener('ended', () => {
+          privates.currentPlaySE--;
+          se.playingAudioSources.shift();
+          gainNode.disconnect();
         });
-        se0.load();
+
+        source.start(0, 'time' in opt ? opt.time : 0.0);
       }
     } else {
       Logger.error(`There is no SE of name ${name}!`);
@@ -187,21 +210,35 @@ export default class SoundManager {
    * @param {number} [opt.speed=1.0] playing speed
    */
   playBGM(name, opt = {}) {
-    if (this.BGMs.has(name)) {
-      const bgm = this.BGMs.get(name);
+    const privates = getPrivates(this);
+    if (privates.bgms.has(name)) {
+      const bgm = privates.bgms.get(name);
       if (bgm.audio === null) {
         Logger.fatal('Please load before playing!');
-      } else if (this.currentPlayBGM === null || this.currentPlayBGM.name !== name) {
+      } else if (privates.currentPlayBGM === null || privates.currentPlayBGM.name !== name) {
+        bgm.sourceNode = privates.audioContext.createMediaElementSource(bgm.audio);
+        bgm.gainNode = privates.audioContext.createGain();
+
+        bgm.sourceNode.connect(bgm.gainNode);
+        bgm.gainNode.connect(privates.audioContext.destination);
+
+        bgm.gainNode.gain.setValueAtTime('volume' in opt ? Math.min(1.0, Math.max(0.0, opt.volume)) : privates.bgmVolume, privates.audioContext.currentTime);
+
         bgm.audio.currentTime = 'time' in opt ? opt.time : bgm.audio.currentTime;
-        bgm.audio.volume = 'volume' in opt ? Math.min(1.0, Math.max(0.0, opt.volume)) : this.BGMVolume;
-        bgm.audio.playbackRate = 'speed' in opt ? opt.speed : 1.0;
+        bgm.audio.playbackRate = 'speed' in opt ? opt.speed : 1;
 
         this.stopBGM();
-        this.currentPlayBGM = bgm;
-        if (this._debugMode) {
+        privates.currentPlayBGM = bgm;
+        if (privates.debug) {
           Logger.debug(`play bgm: ${name}`);
         } else {
-          bgm.audio.play();
+          bgm.audio.play().catch(error => {
+            Logger.error(`Error when play the BGM ${name}: ${error}`);
+          });
+          bgm.audio.addEventListener('ended', () => {
+            bgm.audio.currentTime = 0;
+            privates.currentPlayBGM = null;
+          });
         }
       }
     } else {
@@ -217,13 +254,17 @@ export default class SoundManager {
    * @param {number} [param.speed] playing speed
    */
   changeBGMParams(param) {
+    const privates = getPrivates(this);
     if (this.isPlayingBGM()) {
       if ('time' in param)
-        this.currentPlayBGM.audio.currentTime = param.time;
+        privates.currentPlayBGM.audio.currentTime = param.time;
       if ('volume' in param)
-        this.currentPlayBGM.audio.volume = Math.min(1.0, Math.max(0.0, param.volume))
-      if ('speed' in param)
-        this.currentPlayBGM.audio.playbackRate = param.speed;
+        privates.currentPlayBGM.gainNode.gain.setValueAtTime(Math.min(1.0, Math.max(0.0, param.volume)), privates.audioContext.currentTime);
+      if ('speed' in param) {
+        Logger.warn('Changing BGM speed is not implemented yet.');
+        // Logger.info(`${privates.currentPlayBGM.audio.playbackRate}`);
+        // privates.currentPlayBGM.audio.playbackRate = param.speed;
+      }
     }
   }
 
@@ -232,13 +273,18 @@ export default class SoundManager {
    * @param {string} [name] BGM name. If it is blank, then pause playing BGM.
    */
   pauseBGM(name) {
-    if (this.isPlayingBGM() && (!name || this.currentPlayBGM.name === name)) {
-      if (this._debugMode) {
+    const privates = getPrivates(this);
+    if (this.isPlayingBGM() && (!name || privates.currentPlayBGM.name === name)) {
+      if (privates.debug) {
         Logger.debug('pause bgm');
       } else {
-        this.currentPlayBGM.audio.pause();
+        privates.currentPlayBGM.audio.pause();
       }
-      this.currentPlayBGM = null;
+      privates.currentPlayBGM.gainNode.disconnect();
+      privates.currentPlayBGM.sourceNode.disconnect();
+      privates.currentPlayBGM.gainNode = null;
+      privates.currentPlayBGM.sourceNode = null;
+      privates.currentPlayBGM = null;
     }
   }
 
@@ -247,29 +293,34 @@ export default class SoundManager {
    * @param {string} [name] BGM name. If it is blank, then stop playing BGM.
    */
   stopBGM(name) {
-    if (this.isPlayingBGM() && (!name || this.currentPlayBGM.name === name)) {
-      if (this._debugMode) {
+    const privates = getPrivates(this);
+    if (this.isPlayingBGM() && (!name || privates.currentPlayBGM.name === name)) {
+      if (privates.debug) {
         Logger.debug('stop bgm');
       } else {
-        this.currentPlayBGM.audio.pause();
+        privates.currentPlayBGM.audio.pause();
       }
-      this.currentPlayBGM.audio.currentTime = 0.0;
-      this.currentPlayBGM = null;
+      privates.currentPlayBGM.gainNode.disconnect();
+      privates.currentPlayBGM.sourceNode.disconnect();
+      privates.currentPlayBGM.gainNode = null;
+      privates.currentPlayBGM.sourceNode = null;
+      privates.currentPlayBGM.audio.currentTime = 0.0;
+      privates.currentPlayBGM = null;
     }
   }
 
   /**
    * Fade playing BGM.
-   * @param {number} duration fading duration
-   * @param {number} time current time from start fading
+   * @param {number} duration fading duration (frames)
    * @param {boolean} [out=true] `true` if fading out
-   * @returns {number} current BGM volume
    */
-  fadeBGM(duration, time, out = true) {
-    const volume = this.BGMVolume * (out ? 1 - time / duration : time / duration);
-    this.changeBGMParams({ volume });
-    if (volume <= 0) this.stopBGM();
-    return Math.min(1.0, Math.max(0.0, volume));
+  fadeBGM(duration, out = true) {
+    const privates = getPrivates(this);
+    if (this.isPlayingBGM()) {
+      const target = out ? 0 : privates.bgmVolume;
+      privates.currentPlayBGM.gainNode.gain.cancelScheduledValues(privates.audioContext.currentTime);
+      privates.currentPlayBGM.gainNode.gain.setTargetAtTime(target, privates.audioContext.currentTime, duration / 240);
+    }
   }
 
   /**
@@ -277,7 +328,7 @@ export default class SoundManager {
    * @returns {boolean} `true` if any BGM is playing now
    */
   isPlayingBGM() {
-    return this.currentPlayBGM !== null;
+    return getPrivates(this).currentPlayBGM !== null;
   }
 
   /**
@@ -288,9 +339,9 @@ export default class SoundManager {
    */
   getNameFromID(id, type) {
     if (type === SoundType.BGM) {
-      return this.BGMList[id - Math.floor(id / this.BGMList.length)];
+      return this.bgmList[id - Math.floor(id / this.bgmList.length)];
     } else if (type === SoundType.SE) {
-      return this.SEList[id - Math.floor(id / this.SEList.length)];
+      return this.seList[id - Math.floor(id / this.seList.length)];
     } else {
       return '';
     }
@@ -301,8 +352,8 @@ export default class SoundManager {
    */
   reset() {
     this.stopBGM();
-    this.BGMVolume = 1.0;
-    this.SEVolume = 1.0;
+    getPrivates(this).bgmVolume = 1.0;
+    getPrivates(this).seVolume = 1.0;
   }
 
   /**
@@ -310,7 +361,6 @@ export default class SoundManager {
    */
   finalize() {
     this.stopBGM();
-    if (this._silent !== null) this._silent.pause();
   }
 
   /**
@@ -318,13 +368,6 @@ export default class SoundManager {
    * @returns {string} a string
    */
   toString() {
-    return `[SoundManager (${this.BGMs.size}, ${this.SEs.size})]`;
+    return `[SoundManager (${getPrivates(this).bgms.size}, ${getPrivates(this).ses.size})]`;
   }
 }
-
-const __SCRIPT_PATH__ = (() => {
-  if (document.currentScript) return document.currentScript.src;
-  const scripts = document.getElementsByTagName('script');
-  const script = scripts[scripts.length - 1];
-  if (script.src) return script.src;
-})();

@@ -17,6 +17,7 @@
 
 import Game from './src/Game.js';
 import State from './src/State.js';
+export { SoundType } from './src/resource/SoundType.js';
 export { KoturnoUtil } from './src/util/KoturnoUtil.js';
 export { StdTransFunc } from './src/util/StdTransFunc.js';
 export { Tween } from './src/util/Tween.js';
