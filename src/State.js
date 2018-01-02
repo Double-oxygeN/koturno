@@ -15,13 +15,20 @@
  */
 'use strict';
 
+const _privates = new WeakMap();
+const getPrivates = self => {
+  let p = _privates.get(self);
+  if (!p) _privates.set(self, p = {});
+  return p;
+};
+
 /**
  * Class representing a state.
  * @param {any[]} [data=[]] pairs of state name and value
  */
 export default class State {
   constructor(data) {
-    this.data = new Map(data);
+    getPrivates(this).data = new Map(data);
   }
 
   /**
@@ -29,7 +36,7 @@ export default class State {
    * @returns {State} clone
    */
   clone() {
-    return new State(this.data.entries());
+    return new State(getPrivates(this).data.entries());
   }
 
   /**
@@ -48,9 +55,7 @@ export default class State {
    * @returns {State} new state
    */
   setState(name, state) {
-    const clone = this.clone();
-    clone.data.set(name, state);
-    return clone;
+    return new State(new Map(getPrivates(this).data.entries()).set(name, state).entries());
   }
 
   /**
@@ -59,9 +64,7 @@ export default class State {
    * @returns {State} new state
    */
   setStates(obj) {
-    const clone = this.clone();
-    Object.keys(obj).forEach(key => clone.data.set(key, obj[key]));
-    return clone;
+    return new State(Object.keys(obj).reduce((m, key) => m.set(key, obj[key]), new Map(getPrivates(this).data.entries())).entries());
   }
 
   /**
@@ -100,28 +103,24 @@ export default class State {
    * @returns {State} new state
    */
   modifyStates(obj) {
-    const clone = this.clone();
-    Object.keys(obj).forEach(key => this.hasState(key) && clone.data.set(key, obj[key](this.getState(key))));
-    return clone;
+    return new State(Object.keys(obj).reduce((m, key) => m.has(key) ? m.set(key, obj[key](m.get(key))) : m, new Map(getPrivates(this).data.entries())).entries());
   }
 
   /**
    * Remove the state.
-   * @param {string} name state name
+   * @param {...string} names state names
    * @returns {State}
    */
-  removeState(name) {
-    const clone = this.clone();
-    clone.data.delete(name);
-    return clone;
+  removeState(...names) {
+    return new State(names.reduce((m, key) => m.delete(key), new Map(getPrivates(this).data.entries())).entries());
   }
 
   /**
    * Return state name list.
-   * @returns {string[]} state names lisr
+   * @returns {string[]} state names list
    */
   names() {
-    return Array.from(this.data.keys());
+    return Array.from(getPrivates(this).data.keys());
   }
 
   /**
