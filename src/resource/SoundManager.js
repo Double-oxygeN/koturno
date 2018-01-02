@@ -38,7 +38,7 @@ export default class SoundManager {
   constructor(sounds, maxPlaySE = 32) {
     if (sounds.every(sound => ['name', 'src', 'type'].every(param => param in sound))) {
       const privates = getPrivates(this);
-      privates.audioContext = new(AudioContext || webkitAudioContext)();
+      privates.audioContext = new(window.AudioContext || window.webkitAudioContext)();
       privates.bgms = new Map();
       privates.ses = new Map();
 
@@ -136,22 +136,23 @@ export default class SoundManager {
       return new Promise((res, rej) => {
         const audio = new Audio(bgmProp.src);
         audio.loop = bgmProp.loop;
-        audio.addEventListener('canplay', () => {
+        audio.addEventListener('loadeddata', () => {
           bgmProp.audio = audio;
+          bgmProp.sourceNode = privates.audioContext.createMediaElementSource(audio);
           res('ok');
         });
-        audio.addEventListener('error', () => {
+        audio.addEventListener('error', error => {
           rej('ng');
         });
         audio.load();
       });
     }).concat(Array.from(privates.ses.values()).map(seProp => {
       return fetch(seProp.src).then(r => r.arrayBuffer()).then(buffer =>
-        privates.audioContext.decodeAudioData(buffer)
-      ).then(data => {
-        seProp.buffer = data;
-        return Promise.resolve('ok');
-      });
+        privates.audioContext.decodeAudioData(buffer, data => {
+          seProp.buffer = data;
+          return Promise.resolve('ok');
+        })
+      );
     })));
   }
 
@@ -177,7 +178,7 @@ export default class SoundManager {
         Logger.debug(`play se: ${name}`);
       } else {
         const gainNode = privates.audioContext.createGain();
-        gainNode.gain.value = 'volume' in opt ? Math.min(1.0, Math.max(0.0, opt.volume)) : privates.seVolume;
+        gainNode.gain.setValueAtTime('volume' in opt ? Math.min(1.0, Math.max(0.0, opt.volume)) : privates.seVolume, privates.audioContext.currentTime);
 
         const source = privates.audioContext.createBufferSource();
         source.buffer = se.buffer;
@@ -216,7 +217,6 @@ export default class SoundManager {
       if (bgm.audio === null) {
         Logger.fatal('Please load before playing!');
       } else if (privates.currentPlayBGM === null || privates.currentPlayBGM.name !== name) {
-        bgm.sourceNode = privates.audioContext.createMediaElementSource(bgm.audio);
         bgm.gainNode = privates.audioContext.createGain();
 
         bgm.sourceNode.connect(bgm.gainNode);
@@ -283,7 +283,6 @@ export default class SoundManager {
       privates.currentPlayBGM.gainNode.disconnect();
       privates.currentPlayBGM.sourceNode.disconnect();
       privates.currentPlayBGM.gainNode = null;
-      privates.currentPlayBGM.sourceNode = null;
       privates.currentPlayBGM = null;
     }
   }
@@ -303,7 +302,6 @@ export default class SoundManager {
       privates.currentPlayBGM.gainNode.disconnect();
       privates.currentPlayBGM.sourceNode.disconnect();
       privates.currentPlayBGM.gainNode = null;
-      privates.currentPlayBGM.sourceNode = null;
       privates.currentPlayBGM.audio.currentTime = 0.0;
       privates.currentPlayBGM = null;
     }
