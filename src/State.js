@@ -73,7 +73,7 @@ export default class State {
    * @returns {boolean} `true` if exists
    */
   hasState(name) {
-    return this.data.has(name);
+    return getPrivates(this).data.has(name);
   }
 
   /**
@@ -84,7 +84,7 @@ export default class State {
    * @returns {} state or default value
    */
   getState(name, defaultValue = null) {
-    return this.hasState(name) ? this.data.get(name) : defaultValue;
+    return this.hasState(name) ? getPrivates(this).data.get(name) : defaultValue;
   }
 
   /**
@@ -112,7 +112,7 @@ export default class State {
    * @returns {State}
    */
   removeState(...names) {
-    return new State(names.reduce((m, key) => m.delete(key), new Map(getPrivates(this).data.entries())).entries());
+    return new State(names.reduce((m, key) => { m.delete(key); return m; }, new Map(getPrivates(this).data.entries())).entries());
   }
 
   /**
