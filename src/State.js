@@ -68,6 +68,17 @@ export default class State {
   }
 
   /**
+   * Set state if `condition` is true.
+   * @param {String} name state name
+   * @param {} state state value
+   * @param {boolean} condition condition
+   * @returns {State} new state
+   */
+  setStateIfTrue(name, state, condition) {
+    return condition ? this.setState(name, state) : this;
+  }
+
+  /**
    * Check whether the state of the name exists or not.
    * @param {string} name state name
    * @returns {boolean} `true` if exists
