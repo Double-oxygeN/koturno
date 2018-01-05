@@ -26,7 +26,7 @@ const getPrivates = (self) => {
 };
 
 /**
- * Class for manageing BGMs and SEs.
+ * Class for managing BGMs and SEs.
  * @param {Object[]} sounds sound properties
  * @param {string} sounds[].name name of sound
  * @param {string} sounds[].src source path of sound

@@ -18,7 +18,7 @@
 import Logger from '../logger/Logger.js';
 
 /**
- * Class for manageing images.
+ * Class for managing images.
  * @param {Object[]} images image properties
  * @param {string} images[].name name of an image
  * @param {string} images[].src source path of an image

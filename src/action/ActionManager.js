@@ -19,7 +19,7 @@ import Keyboard from './Keyboard.js';
 import Mouse from './Mouse.js';
 
 /**
- * Class for manageing several inputs.
+ * Class for managing several inputs.
  * @param {EventTarget} target mouse event target
  */
 export default class ActionManager {
