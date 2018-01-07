@@ -4,7 +4,8 @@
   "description": "JavaScript game library",
   "main": "koturno-all.js",
   "scripts": {
-    "docs": "documentation build src/** -f html -o docs && sed -i -e '11s/undefined/this/' docs/assets/split.js && sed -i -e '29s/undefined/this/' docs/assets/anchor.js && echo ./docs updated!"
+    "docs": "documentation build src/** -f html -o docs && sed -i -e '11s/undefined/this/' docs/assets/split.js && sed -i -e '29s/undefined/this/' docs/assets/anchor.js && echo ./docs updated!",
+    "lint": "eslint"
   },
   "directories": {
     "doc": "docs"
@@ -18,5 +19,8 @@
   "bugs": {
     "url": "https://github.com/Double-oxygeN/koturno/issues"
   },
-  "homepage": "https://github.com/Double-oxygeN/koturno"
+  "homepage": "https://github.com/Double-oxygeN/koturno",
+  "devDependencies": {
+    "eslint": "^4.15.0"
+  }
 }
