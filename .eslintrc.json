@@ -5,7 +5,8 @@
   },
   "extends": "eslint:recommended",
   "parserOptions": {
-    "sourceType": "module"
+    "sourceType": "module",
+    "ecmaVersion": 2017
   },
   "rules": {
     "for-direction": "error",
@@ -39,7 +40,7 @@
     "default-case": "error",
     "dot-location": [
       "error",
-      "object"
+      "property"
     ],
     "dot-notation": "error",
     "eqeqeq": "error",
@@ -48,10 +49,11 @@
     "no-implicit-coercion": "warn",
     "no-invalid-this": "error",
     "no-magic-numbers": [
-      "error",
+      "warn",
       {
         "ignoreArrayIndexes": true,
-        "enforceConst": true
+        "enforceConst": true,
+        "ignore": [-1, 0, 1, 2, 10]
       }
     ],
     "no-multi-spaces": "error",
@@ -69,6 +71,12 @@
       "global"
     ],
     "no-restricted-globals": "error",
+    "no-unused-vars": [
+      "error",
+      {
+        "args": "none"
+      }
+    ],
     "array-bracket-newline": [
       "error",
       "consistent"
@@ -123,18 +131,6 @@
         "allowTemplateLiterals": true
       }
     ],
-    "require-jsdoc": [
-      "error",
-      {
-        "require": {
-          "FunctionDeclaration": false,
-          "MethodDefinition": true,
-          "ClassDeclaration": true,
-          "ArrowFunctionExpression": false,
-          "FunctionExpression": false
-        }
-      }
-    ],
     "semi": [
       "error",
       "always"
@@ -187,7 +183,7 @@
         "before": true
       }
     ],
-    "no-duplicate-exports": [
+    "no-duplicate-imports": [
       "error",
       {
         "includeExports": true
