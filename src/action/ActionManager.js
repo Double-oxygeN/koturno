@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright 2017 Double_oxygeN
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-'use strict';
 
 import Keyboard from './Keyboard.js';
 import Mouse from './Mouse.js';
@@ -41,6 +40,7 @@ export default class ActionManager {
 
   /**
    * Reset pressed keys and buttons.
+   * @returns {void}
    */
   resetAction() {
     this.keyboard.resetAction();

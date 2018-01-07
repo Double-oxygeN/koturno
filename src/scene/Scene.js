@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright 2017 Double_oxygeN
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-'use strict';
 
 import Transition from './Transition.js';
 
@@ -62,11 +61,12 @@ export default class Scene {
    * @param {Counters} ev.counters counters
    * @param {Painter} ev.painter graphics controller
    * @param {Game} ev.game game itself
+   * @returns {void}
    */
   draw({ state, action, counters, painter, game }) {
     if (painter.contextType === '2d') {
-      painter.background("#ffffff");
-      painter.text(this.name, painter.width / 2, painter.height / 2, { size: 64, align: 'center', baseline: 'middle' }).fill("#000000");
+      painter.background('#ffffff');
+      painter.text(this.name, painter.width / 2, painter.height / 2, { size: 64, align: 'center', baseline: 'middle' }).fill('#000000');
     }
   }
 

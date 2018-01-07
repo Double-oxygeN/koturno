@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright 2017 Double_oxygeN
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-'use strict';
 
 import Logger from '../logger/Logger.js';
 
@@ -46,7 +45,7 @@ export default class ImageManager {
 
   /**
    * Load images.
-   * @returns {Promise}
+   * @returns {Promise} resolve if loading is completed
    */
   load() {
     return Promise.all(Array.from(this.images.values()).map(imageProp => new Promise((res, rej) => {
@@ -62,7 +61,7 @@ export default class ImageManager {
           res(null);
         };
         imageProp.image.onerror = e => {
-          rej(null);
+          rej(new Error(`Something wrong with loading image ${imageProp.name}`));
         };
         imageProp.image.src = imageProp.src;
       } else {
@@ -79,10 +78,10 @@ export default class ImageManager {
   getImage(name) {
     if (this.images.has(name)) {
       return this.images.get(name).image;
-    } else {
-      Logger.fatal(`ImageManager has no image of name ${name}. Please preload before use.`);
-      return null;
     }
+    Logger.fatal(`ImageManager has no image of name ${name}. Please preload before use.`);
+    return null;
+
   }
 
   /**
@@ -93,10 +92,10 @@ export default class ImageManager {
   getImageProperties(name) {
     if (this.images.has(name)) {
       return this.images.get(name);
-    } else {
-      Logger.fatal(`ImageManager has no image of name ${name}. Please preload before use.`);
-      return null;
     }
+    Logger.fatal(`ImageManager has no image of name ${name}. Please preload before use.`);
+    return null;
+
   }
 
   /**

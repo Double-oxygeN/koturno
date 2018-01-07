@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright 2017 Double_oxygeN
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-'use strict';
 
 import Logger from '../logger/Logger.js';
 
@@ -48,10 +47,10 @@ export default class SceneManager {
   addScene(scene) {
     if (this.hasScene(scene.name)) {
       return false;
-    } else {
-      getPrivates(this).scenes.set(scene.name, scene);
-      return true;
     }
+    getPrivates(this).scenes.set(scene.name, scene);
+    return true;
+
   }
 
   /**
@@ -71,15 +70,16 @@ export default class SceneManager {
   getScene(name) {
     if (this.hasScene(name)) {
       return getPrivates(this).scenes.get(name);
-    } else {
-      Logger.error(`SceneManager has no scene of name ${name}!`);
-      return null;
     }
+    Logger.error(`SceneManager has no scene of name ${name}!`);
+    return null;
+
   }
 
   /**
    * Execute function for each scenes.
    * @param {SceneManager~forEach} f callback function
+   * @returns {void}
    */
   forEach(f) {
     getPrivates(this).scenes.forEach(f);

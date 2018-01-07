@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright 2017 Double_oxygeN
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,13 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-'use strict';
 
 import { SoundType } from './SoundType.js';
 import Logger from '../logger/Logger.js';
 
 const _privates = new WeakMap();
-const getPrivates = (self) => {
+const getPrivates = self => {
   let p = _privates.get(self);
   if (!p) _privates.set(self, p = {});
   return p;
@@ -97,9 +96,9 @@ export default class SoundManager {
       return getPrivates(this).bgmVolume;
     } else if (type === SoundType.SE) {
       return getPrivates(this).seVolume;
-    } else {
-      return -1;
     }
+    return -1;
+
   }
 
   /**
@@ -113,47 +112,44 @@ export default class SoundManager {
       return getPrivates(this).bgmVolume = Math.min(1.0, Math.max(0.0, vol));
     } else if (type === SoundType.SE) {
       return getPrivates(this).seVolume = Math.min(1.0, Math.max(0.0, vol));
-    } else {
-      return -1;
     }
+    return -1;
+
   }
 
   /**
    * Switch to debug mode.
-   * @param {boolean} flag
+   * @param {boolean} flag `true` or `false`
+   * @returns {boolean} the flag
    */
   setDebugMode(flag) {
-    getPrivates(this).debug = flag;
+    return getPrivates(this).debug = flag;
   }
 
   /**
    * Load all sounds.
-   * @returns {Promise}
+   * @returns {Promise} resolve if loading is completed
    */
   load() {
     const privates = getPrivates(this);
-    return Promise.all(Array.from(privates.bgms.values()).map(bgmProp => {
-      return new Promise((res, rej) => {
-        const audio = new Audio(bgmProp.src);
-        audio.loop = bgmProp.loop;
-        audio.addEventListener('loadeddata', () => {
-          bgmProp.audio = audio;
-          bgmProp.sourceNode = privates.audioContext.createMediaElementSource(audio);
-          res('ok');
-        });
-        audio.addEventListener('error', error => {
-          rej('ng');
-        });
-        audio.load();
+    return Promise.all(Array.from(privates.bgms.values()).map(bgmProp => new Promise((res, rej) => {
+      const audio = new Audio(bgmProp.src);
+      audio.loop = bgmProp.loop;
+      audio.addEventListener('loadeddata', () => {
+        bgmProp.audio = audio;
+        bgmProp.sourceNode = privates.audioContext.createMediaElementSource(audio);
+        res('ok');
       });
-    }).concat(Array.from(privates.ses.values()).map(seProp => {
-      return fetch(seProp.src).then(r => r.arrayBuffer()).then(buffer =>
-        privates.audioContext.decodeAudioData(buffer, data => {
-          seProp.buffer = data;
-          return Promise.resolve('ok');
-        })
-      );
-    })));
+      audio.addEventListener('error', error => {
+        rej(new Error(`Something wrong with loading sound ${bgmProp.name}`));
+      });
+      audio.load();
+    })).concat(Array.from(privates.ses.values()).map(seProp => fetch(seProp.src).then(r => r.arrayBuffer()).then(buffer =>
+      privates.audioContext.decodeAudioData(buffer, data => {
+        seProp.buffer = data;
+        return Promise.resolve('ok');
+      })
+    ))));
   }
 
   /**
@@ -164,6 +160,7 @@ export default class SoundManager {
    * @param {number} [opt.volume] volume
    * @param {number} [opt.speed=1.0] playing speed
    * @param {number} [opt.maxPlay] maximum number of simultaneously playing this SE
+   * @returns {void}
    */
   playSE(name, opt = {}) {
     const privates = getPrivates(this);
@@ -209,6 +206,7 @@ export default class SoundManager {
    * @param {number} [opt.time] start time
    * @param {number} [opt.volume] volume
    * @param {number} [opt.speed=1.0] playing speed
+   * @returns {void}
    */
   playBGM(name, opt = {}) {
     const privates = getPrivates(this);
@@ -252,6 +250,7 @@ export default class SoundManager {
    * @param {number} [param.time] start time
    * @param {number} [param.volume] volume
    * @param {number} [param.speed] playing speed
+   * @returns {void}
    */
   changeBGMParams(param) {
     const privates = getPrivates(this);
@@ -262,8 +261,10 @@ export default class SoundManager {
         privates.currentPlayBGM.gainNode.gain.setValueAtTime(Math.min(1.0, Math.max(0.0, param.volume)), privates.audioContext.currentTime);
       if ('speed' in param) {
         Logger.warn('Changing BGM speed is not implemented yet.');
-        // Logger.info(`${privates.currentPlayBGM.audio.playbackRate}`);
-        // privates.currentPlayBGM.audio.playbackRate = param.speed;
+        /*
+         * Logger.info(`${privates.currentPlayBGM.audio.playbackRate}`);
+         * privates.currentPlayBGM.audio.playbackRate = param.speed;
+         */
       }
     }
   }
@@ -271,6 +272,7 @@ export default class SoundManager {
   /**
    * Pause playing BGM.
    * @param {string} [name] BGM name. If it is blank, then pause playing BGM.
+   * @returns {void}
    */
   pauseBGM(name) {
     const privates = getPrivates(this);
@@ -290,6 +292,7 @@ export default class SoundManager {
   /**
    * Stop playing BGM.
    * @param {string} [name] BGM name. If it is blank, then stop playing BGM.
+   * @returns {void}
    */
   stopBGM(name) {
     const privates = getPrivates(this);
@@ -311,6 +314,7 @@ export default class SoundManager {
    * Fade playing BGM.
    * @param {number} duration fading duration (frames)
    * @param {boolean} [out=true] `true` if fading out
+   * @returns {void}
    */
   fadeBGM(duration, out = true) {
     const privates = getPrivates(this);
@@ -340,13 +344,14 @@ export default class SoundManager {
       return this.bgmList[id - Math.floor(id / this.bgmList.length)];
     } else if (type === SoundType.SE) {
       return this.seList[id - Math.floor(id / this.seList.length)];
-    } else {
-      return '';
     }
+    return '';
+
   }
 
   /**
    * Reset
+   * @returns {void}
    */
   reset() {
     this.stopBGM();
@@ -356,6 +361,7 @@ export default class SoundManager {
 
   /**
    * Finalize sound manager.
+   * @returns {void}
    */
   finalize() {
     this.stopBGM();

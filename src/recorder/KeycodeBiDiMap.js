@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright 2017 Double_oxygeN
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-'use strict';
 
 import Logger from '../logger/Logger.js';
 
@@ -118,12 +117,8 @@ export const KeycodeBiDiMap = (() => {
   });
 
   return {
-    getName: (num) => {
-      return codeToName.get(num);
-    },
-    getCodes: (names) => {
-      return names.filter(name => nameToCode.has(name)).map(name => nameToCode.get(name));
-    }
+    getName: num => codeToName.get(num),
+    getCodes: names => names.filter(name => nameToCode.has(name)).map(name => nameToCode.get(name))
   };
 })();
 Object.freeze(KeycodeBiDiMap);

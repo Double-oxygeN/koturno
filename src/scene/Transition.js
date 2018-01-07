@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright 2017 Double_oxygeN
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,11 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-'use strict';
 
 /**
  * Class for scene transition.
- * @param {function} data
+ * @param {function} data data
  */
 export default class Transition {
   constructor(data) {
@@ -31,6 +30,7 @@ export default class Transition {
    * @param {function} pattern.trans if Transition.Trans then do this
    * @param {function} pattern.end if Transition.End then do this
    * @param {function} pattern.reset if Transition.Reset then do this
+   * @returns {void}
    */
   match(pattern) {
     return this.data(pattern);
@@ -38,7 +38,7 @@ export default class Transition {
 
   /**
    * Stay the scene.
-   * @returns {Transition}
+   * @returns {Transition} transition
    */
   static Stay() {
     return new Transition(pattern => pattern.stay());
@@ -50,7 +50,7 @@ export default class Transition {
    * @param {Object} [opt] options
    * @param {number} [opt.counter=0] scene counter when the next scene start
    * @param {function} [opt.transFunc] transition function
-   * @returns {Transition}
+   * @returns {Transition} transition
    */
   static Trans(nextScene, opt = {}) {
     const nextCounter = 'counter' in opt ? opt.counter : 0;
@@ -60,7 +60,7 @@ export default class Transition {
 
   /**
    * End the game.
-   * @returns {Transition}
+   * @returns {Transition} transition
    */
   static End() {
     return new Transition(pattern => pattern.end());
@@ -68,7 +68,7 @@ export default class Transition {
 
   /**
    * Reset the game.
-   * @returns {Transition}
+   * @returns {Transition} transition
    */
   static Reset() {
     return new Transition(pattern => pattern.reset());

@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright 2017 Double_oxygeN
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-'use strict';
 
 import State from './State.js';
 import Counters from './Counters.js';
@@ -34,7 +33,7 @@ const getPrivates = self => {
 const createFPSManager = () => {
   const millisecondsBetweenTwoFrame = [0.0, 0.0];
   return {
-    update: (stamp) => {
+    update: stamp => {
       [millisecondsBetweenTwoFrame[0], millisecondsBetweenTwoFrame[1]] = [millisecondsBetweenTwoFrame[1], stamp];
     },
     getFPS: () => 1000.0 / (millisecondsBetweenTwoFrame[1] - millisecondsBetweenTwoFrame[0])
@@ -108,7 +107,7 @@ const createDivManager = (baseID, canvas) => {
         onResize();
       }
     },
-    setDebugUI: (animationState) => {
+    setDebugUI: animationState => {
       const backgroundStyle = '#000';
       const lineStyle = '#0f0';
       const setDivStyle = (baseWidth, baseHeight) => {
@@ -199,7 +198,7 @@ const createDivManager = (baseID, canvas) => {
     sendLog: (msg, style) => {
       if (divs.log !== null) {
         const log = document.createElement('div');
-        log.setAttribute('style', `width: auto; border: 1px #999 solid; overflow-wrap: break-word; ` + style);
+        log.setAttribute('style', `width: auto; border: 1px #999 solid; overflow-wrap: break-word; ${style}`);
         log.innerHTML = msg.join('<br>').replace(/\n/g, '<br>');
         divs.log.appendChild(log);
         divs.log.scrollTop = divs.log.scrollHeight;
@@ -262,9 +261,9 @@ export default class Game {
       privates.displayFPS = () => {
         const textOptions = Object.assign({}, privates.painter.recentTextOptions);
         privates.painter.setGlobalAlphaAndDraw(0.8, () => {
-          const textMetrics = privates.painter.measureText('FPS ' + Math.round(this.fps), { size: 10, font: 'monospace' });
+          const textMetrics = privates.painter.measureText(`FPS ${Math.round(this.fps)}`, { size: 10, font: 'monospace' });
           privates.painter.rect(0, this.height - 10, textMetrics.width + 3, 10).fill('#fff');
-          privates.painter.text('FPS ' + Math.round(this.fps), 0, this.height, { align: 'start', baseline: 'bottom' }).fill('#000');
+          privates.painter.text(`FPS ${Math.round(this.fps)}`, 0, this.height, { align: 'start', baseline: 'bottom' }).fill('#000');
         });
         privates.painter.recentTextOptions = textOptions;
       };
@@ -275,7 +274,7 @@ export default class Game {
 
   /**
    * Canvas width.
-   * @member {Number}
+   * @member {number}
    */
   get width() {
     return this.canvas.width;
@@ -310,7 +309,8 @@ export default class Game {
    * Start the game.
    * @param {boolean} debug if `true`, then start as debug mode
    * @param {boolean} displayFPS if `true`, then display current FPS
-   * @param {Recorder} [recorder]
+   * @param {Recorder} [recorder] recorder
+   * @returns {void}
    */
   start(debug, displayFPS, recorder) {
     const privates = getPrivates(this);
@@ -428,7 +428,7 @@ export default class Game {
         });
       } else {
         requestNextFrame(() => {
-          transLoop(prev, next, counters.count(), transFunc)
+          transLoop(prev, next, counters.count(), transFunc);
         });
       }
 
@@ -451,7 +451,7 @@ export default class Game {
       privates.divManager.setNormalUI();
     }
     // blackout
-    privates.painter.background("#000000");
+    privates.painter.background('#000000');
 
     // loading resources
     privates.imageManager.load()
@@ -468,8 +468,9 @@ export default class Game {
   /**
    * Run as normal mode.
    * @param {Object} [opt] options
-   * @param {boolean} [opt.displayFPS=false]
+   * @param {boolean} [opt.displayFPS=false] whether game displays fpd or not
    * @param {Recorder} [opt.recorder] recorder
+   * @returns {void}
    */
   run(opt = {}) {
     const recorder = 'recorder' in opt ? opt.recorder : null;
@@ -481,8 +482,9 @@ export default class Game {
   /**
    * Run as debug mode.
    * @param {Object} [opt] options
-   * @param {boolean} [opt.displayFPS]
+   * @param {boolean} [opt.displayFPS] whether game displays fpd or not
    * @param {Recorder} [opt.recorder] recorder
+   * @returns {void}
    */
   debug(opt = {}) {
     const recorder = 'recorder' in opt ? opt.recorder : new Recorder();
@@ -497,7 +499,8 @@ export default class Game {
    * Run automatically.
    * @param {Recorder} recorder recorder
    * @param {Object} [opt] options
-   * @param {boolean} [opt.displayFPS]
+   * @param {boolean} [opt.displayFPS]  whether game displays fpd or not
+   * @returns {void}
    */
   autorun(recorder, opt = {}) {
     recorder.setMode('r');
@@ -511,6 +514,7 @@ export default class Game {
   /**
    * @param {string[]} msg messages
    * @param {string} style style of log
+   * @returns {void}
    */
   sendLog(msg, style) {
     getPrivates(this).divManager.sendLog(msg, style);

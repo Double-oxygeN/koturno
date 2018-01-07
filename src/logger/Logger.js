@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright 2017 Double_oxygeN
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-'use strict';
 
 import { LogLevel } from './LogLevel.js';
 
@@ -35,9 +34,11 @@ const Logger = (() => {
 
   const logSender = (logLevelMask, logTypeStr, logStyle) => (...msg) => {
     if (_level & logLevelMask) {
+      /* eslint-disable no-console */
       console.groupCollapsed(`%c[${logTypeStr}]%c${msg.join('\n')}`, BOLD_STYLE + logStyle, NORMAL_STYLE + logStyle);
       console.trace('%cstack trace:', ITALIC_STYLE);
       console.groupEnd();
+      /* eslint-enable no-console */
       if (_game !== null) {
         _game.sendLog(msg, logStyle);
       }
@@ -48,6 +49,7 @@ const Logger = (() => {
     /**
      * Log fatal error and force to exit.
      * @param {...string} msg messages
+     * @returns {void}
      */
     fatal: (...msg) => {
       logSender(0b00001, 'Fatal', FATAL_STYLE)(...msg);
@@ -76,16 +78,18 @@ const Logger = (() => {
     debug: logSender(0b10000, 'Debug', DEBUG_STYLE),
     /**
      * Set game to cooperate each other.
-     * @param {Game} game
+     * @param {Game} game game
+     * @returns {void}
      */
-    setGame: (game) => {
+    setGame: game => {
       _game = game;
     },
     /**
      * Set log level.
-     * @param {LogLevel} level
+     * @param {LogLevel} level level of this logger
+     * @returns {void}
      */
-    setLogLevel: (level) => {
+    setLogLevel: level => {
       _level = level;
     }
   };

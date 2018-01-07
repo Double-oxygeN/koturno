@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright 2017 Double_oxygeN
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,14 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-'use strict';
 
 import Painter from './Painter.js';
+import Directions from './geo/Directions.js';
 
 /**
  * Class of 2-dimentional graphics.
- * @param {HTMLCanvasElement} canvas
- * @param {ImageManager} imageManager
+ * @param {HTMLCanvasElement} canvas canvas element to paint
+ * @param {ImageManager} imageManager image manager
  */
 export default class Painter2d extends Painter {
   constructor(canvas, imageManager) {
@@ -77,8 +77,9 @@ export default class Painter2d extends Painter {
        * Fill the path.
        * @param {(string|CanvasGradient|CanvasPattern)} style fill style
        * @memberof Painter2d#pathOperations
+       * @returns {void}
        */
-      fill: (style) => {
+      fill: style => {
         this.context.fillStyle = style;
         this.context.fill();
       },
@@ -93,6 +94,7 @@ export default class Painter2d extends Painter {
        * @param {number[]} [opt.dash] line dash
        * @param {number} [opt.dashOffset] line dash offset
        * @memberof Painter2d#pathOperations
+       * @returns {void}
        */
       stroke: (style, opt = {}) => {
         // configuration
@@ -116,6 +118,7 @@ export default class Painter2d extends Painter {
        * @param {(string|CanvasGradient|CanvasPattern)} outerStyle stroke style
        * @param {number} [lineWidth=1] line width
        * @memberof Painter2d#pathOperations
+       * @returns {void}
        */
       outlined: (innerStyle, outerStyle, lineWidth = 1) => {
         this.context.fillStyle = innerStyle;
@@ -130,8 +133,9 @@ export default class Painter2d extends Painter {
        * Clip the path and draw.
        * @param {function} cb callback function
        * @memberof Painter2d#pathOperations
+       * @returns {void}
        */
-      clipAndDraw: (cb) => {
+      clipAndDraw: cb => {
         this.context.save();
         this.context.clip();
         cb();
@@ -142,6 +146,7 @@ export default class Painter2d extends Painter {
 
   /**
    * Clear the canvas.
+   * @returns {void}
    */
   clear() {
     this.context.clearRect(0, 0, this.width, this.height);
@@ -150,6 +155,7 @@ export default class Painter2d extends Painter {
   /**
    * Fill the canvas.
    * @param {(string|CanvasGradient|CanvasPattern)} style fill style
+   * @returns {void}
    */
   background(style) {
     this.rect(0, 0, this.width, this.height).fill(style);
@@ -225,9 +231,10 @@ export default class Painter2d extends Painter {
 
   /**
    * Create polygon path.
-   * @param {Object[]} vertices
+   * @param {Object[]} vertices vertices of the polygon
    * @param {number} vertices[].x x-coordinate of a vertex
    * @param {number} vertices[].y y-coordinate of a vertex
+   * @returns {void}
    */
   polygon(vertices) {
     this.context.beginPath();
@@ -286,7 +293,7 @@ export default class Painter2d extends Painter {
     }
 
     return {
-      fill: (style) => {
+      fill: style => {
         this.context.fillStyle = style;
         str.split('\n').forEach((line, lineNum) => {
           this.context.fillText(line, x, y + lineHeight * lineNum);
@@ -310,9 +317,9 @@ export default class Painter2d extends Painter {
           this.context.strokeText(line, x, y + lineHeight * lineNum);
         });
       },
-      outlined: (inner_style, outer_style, width = 1) => {
-        this.context.fillStyle = inner_style;
-        this.context.strokeStyle = outer_style;
+      outlined: (innerStyle, outerStyle, width = 1) => {
+        this.context.fillStyle = innerStyle;
+        this.context.strokeStyle = outerStyle;
         this.context.lineCap = 'round';
         this.context.lineJoin = 'round';
         this.context.lineWidth = width * 2;
@@ -340,6 +347,7 @@ export default class Painter2d extends Painter {
    * @param {boolean} [opt.keepAspectRatio=false] if `true`, aspect ratio of an image is kept
    * @param {number} [opt.spriteID=0] sprite ID
    * @param {Directions} [opt.relativeOrigin=Directions.NW] relative origin position
+   * @returns {void}
    */
   image(img, x, y, opt = {}) {
     let imageProps;
@@ -352,7 +360,7 @@ export default class Painter2d extends Painter {
     const spriteCols = Math.floor(imageProps.image.width / imageProps.size.width);
     const spriteRows = Math.floor(imageProps.image.height / imageProps.size.height);
     const id = 'spriteID' in opt ? opt.spriteID % (spriteCols * spriteRows) : 0;
-    const spriteX = (id % spriteCols) * imageProps.size.width;
+    const spriteX = id % spriteCols * imageProps.size.width;
     const spriteY = Math.floor(id / spriteCols) * imageProps.size.height;
     const relativeOrigin = 'relativeOrigin' in opt ? opt.relativeOrigin : Directions.NW;
     const horizontalRelativeDiff = (relativeOrigin + 4) % 3;
@@ -391,6 +399,7 @@ export default class Painter2d extends Painter {
    * Set global alpha value and draw.
    * @param {number} alpha global alpha value
    * @param {function} cb callback function
+   * @returns {void}
    */
   setGlobalAlphaAndDraw(alpha, cb) {
     const _prevAlpha = this.context.globalAlpha;
@@ -403,6 +412,7 @@ export default class Painter2d extends Painter {
    * Set global composite operation and draw.
    * @param {string} operation global composite operation
    * @param {function} cb callback function
+   * @returns {void}
    */
   setGlobalCompositeOperationAndDraw(operation, cb) {
     const _prevOperation = this.context.globalCompositeOperation;
@@ -420,6 +430,7 @@ export default class Painter2d extends Painter {
    * @param {number} dx horizontal moving
    * @param {number} dy vertical moving
    * @param {function} cb callback function
+   * @returns {void}
    */
   transformAndDraw(m11, m12, m21, m22, dx, dy, cb) {
     this.context.save();
@@ -434,6 +445,7 @@ export default class Painter2d extends Painter {
    * @param {number} y y-coordinate of the center of rotation
    * @param {number} angle rotation angle, expressed in radians
    * @param {function} cb callback function
+   * @returns {void}
    */
   rotateAndDraw(x, y, angle, cb) {
     const cosVal = Math.cos(angle);
@@ -448,6 +460,7 @@ export default class Painter2d extends Painter {
    * @param {number} scaleX scaling factor in the horizontal direction
    * @param {number} scaleY scaling factor in the vertical direction
    * @param {function} cb callback function
+   * @returns {void}
    */
   scaleAndDraw(focusX, focusY, scaleX, scaleY, cb) {
     this.transformAndDraw(scaleX, 0, 0, scaleY, focusX * (1 - scaleX), focusY * (1 - scaleY), cb);
@@ -469,7 +482,7 @@ export default class Painter2d extends Painter {
    * @param {Object} [opt] options
    * @param {number} [opt.size] font size [px]
    * @param {string} [opt.font] font name
-   * @returns {TextMetrics}
+   * @returns {TextMetrics} text metrics
    */
   measureText(text, opt = {}) {
     if ('size' in opt) this.context.font = `${(this.recentTextOptions.size = opt.size).toString(10)}px ${this.recentTextOptions.font}`;

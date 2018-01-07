@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright 2017 Double_oxygeN
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,14 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-'use strict';
+
 
 import Action from './Action.js';
 import Vector2d from '../geo/Vector2d.js';
 
 /**
  * Class representing a mouse.
- * @param {EventTarget} target
+ * @param {EventTarget} target event target
  */
 export default class Mouse extends Action {
   constructor(target) {
@@ -47,8 +47,8 @@ export default class Mouse extends Action {
       }],
       ['mousemove', e => {
         const rect = this.target.getBoundingClientRect();
-        const transform_str = this.target.style.transform;
-        const scale = transform_str === '' ? 1 : +transform_str.split('(')[1].split(',')[0];
+        const transformString = this.target.style.transform;
+        const scale = transformString === '' ? 1 : Number(transformString.split('(')[1].split(',')[0]);
         this.position.x = Math.trunc((e.clientX - rect.left) / scale);
         this.position.y = Math.trunc((e.clientY - rect.top) / scale);
       }],

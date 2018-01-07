@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright 2017 Double_oxygeN
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,14 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-'use strict';
+
 
 const _privates = new WeakMap();
-const getPrivates = (self) => {
+const getPrivates = self => {
   let p = _privates.get(self);
   if (!p) _privates.set(self, p = {});
   return p;
-}
+};
 
 /**
  * Class representing two counters.
@@ -53,7 +53,7 @@ export default class Counters {
   /**
    * Reset the scene counter.
    * @param {number} [scene=0] initial scene counter value
-   * @returns {Counters}
+   * @returns {Counters} resetted counters
    */
   reset(scene = 0) {
     return new Counters(this.general, scene);
@@ -61,7 +61,7 @@ export default class Counters {
 
   /**
    * Reset all counters.
-   * @returns {Counters}
+   * @returns {Counters} resetted counters
    */
   hardReset() {
     return new Counters(0, 0);
@@ -69,7 +69,7 @@ export default class Counters {
 
   /**
    * Count up.
-   * @returns {Counters}
+   * @returns {Counters} next counters
    */
   count() {
     return new Counters(this.general + 1, this.scene + 1);

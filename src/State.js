@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-'use strict';
+
 
 const _privates = new WeakMap();
 const getPrivates = self => {
@@ -51,7 +51,7 @@ export default class State {
   /**
    * Set state of the name.
    * @param {string} name state name
-   * @param {} state state value
+   * @param {any} state state value
    * @returns {State} new state
    */
   setState(name, state) {
@@ -69,8 +69,8 @@ export default class State {
 
   /**
    * Set state if `condition` is true.
-   * @param {String} name state name
-   * @param {} state state value
+   * @param {string} name state name
+   * @param {any} state state value
    * @param {boolean} condition condition
    * @returns {State} new state
    */
@@ -91,8 +91,8 @@ export default class State {
    * Get the state.
    * If there is no state of the name, it returns the default value.
    * @param {string} name state name
-   * @param {} [defaultValue=null] default value
-   * @returns {} state or default value
+   * @param {any} [defaultValue=null] default value
+   * @returns {any} state or default value
    */
   getState(name, defaultValue = null) {
     return this.hasState(name) ? getPrivates(this).data.get(name) : defaultValue;
@@ -120,10 +120,13 @@ export default class State {
   /**
    * Remove the state.
    * @param {...string} names state names
-   * @returns {State}
+   * @returns {State} new state
    */
   removeState(...names) {
-    return new State(names.reduce((m, key) => { m.delete(key); return m; }, new Map(getPrivates(this).data.entries())).entries());
+    return new State(names.reduce((m, key) => {
+      m.delete(key);
+      return m;
+    }, new Map(getPrivates(this).data.entries())).entries());
   }
 
   /**

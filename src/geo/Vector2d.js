@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright 2017 Double_oxygeN
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,9 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-'use strict';
 
-import Logger from '../logger/Logger.js';
 import Vector from './Vector.js';
 
 /**
@@ -53,7 +51,7 @@ export default class Vector2d extends Vector {
   /**
    * Plus.
    * @param {Vector2d} another another vector
-   * @returns {Vector2d}
+   * @returns {Vector2d} added vector
    */
   plus(another) {
     return new Vector2d(this.x + another.x, this.y + another.y);
@@ -62,7 +60,7 @@ export default class Vector2d extends Vector {
   /**
    * Minus.
    * @param {Vector2d} another another vector
-   * @returns {Vector2d}
+   * @returns {Vector2d} subtracted vector
    */
   minus(another) {
     return new Vector2d(this.x - another.x, this.y - another.y);
@@ -71,7 +69,7 @@ export default class Vector2d extends Vector {
   /**
    * Scalar product.
    * @param {number} k scalar
-   * @returns {Vector2d}
+   * @returns {Vector2d} multiplied vector
    */
   scalar(k) {
     return new Vector2d(k * this.x, k * this.y);
@@ -80,7 +78,7 @@ export default class Vector2d extends Vector {
   /**
    * Hadamard product.
    * @param {Vector2d} another another vector
-   * @returns {Vector2d}
+   * @returns {Vector2d} multiplied vector
    */
   hadamard(another) {
     return new Vector2d(this.x * another.x, this.y * another.y);

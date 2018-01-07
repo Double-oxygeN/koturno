@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright 2017 Double_oxygeN
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-'use strict';
 
 import Logger from '../logger/Logger.js';
 
@@ -40,29 +39,29 @@ export default class Vector {
   /**
    * Plus.
    * @param {Vector} another another vector
-   * @returns {Vector}
+   * @returns {Vector} added vector
    */
   plus(another) {
     if (this.dimension === another.dimension) {
       return new Vector(...this.vector.map((v0, i) => v0 + another.vector[i]));
-    } else {
-      Logger.error(`Cannot calculate sum with different dimension!\nthis: ${this.dimension}\nanother: ${another.dimension}`);
-      return null;
     }
+    Logger.error(`Cannot calculate sum with different dimension!\nthis: ${this.dimension}\nanother: ${another.dimension}`);
+    return null;
+
   }
 
   /**
    * Minus.
    * @param {Vector} another another vector
-   * @returns {Vector}
+   * @returns {Vector} subtracted vector
    */
   minus(another) {
     if (this.dimension === another.dimension) {
       return new Vector(...this.vector.map((v0, i) => v0 - another.vector[i]));
-    } else {
-      Logger.error(`Cannot calculate difference with different dimension!\nthis: ${this.dimension}\nanother: ${another.dimension}`);
-      return null;
     }
+    Logger.error(`Cannot calculate difference with different dimension!\nthis: ${this.dimension}\nanother: ${another.dimension}`);
+    return null;
+
   }
 
   /**
@@ -73,16 +72,16 @@ export default class Vector {
   distanceTo(another) {
     if (this.dimension === another.dimension) {
       return another.minus(this).norm;
-    } else {
-      Logger.error(`Cannot calculate distance to different dimension!\nthis: ${this.dimension}\nanother: ${another.dimension}`);
-      return Number.NaN;
     }
+    Logger.error(`Cannot calculate distance to different dimension!\nthis: ${this.dimension}\nanother: ${another.dimension}`);
+    return Number.NaN;
+
   }
 
   /**
    * Scalar product.
    * @param {number} k scalar
-   * @returns {Vector}
+   * @returns {Vector} multiplied vector
    */
   scalar(k) {
     return new Vector(...this.vector.map(v => k * v));
@@ -91,7 +90,7 @@ export default class Vector {
   /**
    * Inner product.
    * @param {Vector} another another vector
-   * @returns {number}
+   * @returns {number} multiplied vector
    */
   innerProd(another) {
     return this.vector.map((v0, i) => v0 * another.vector[i]).reduce((a, b) => a + b);
@@ -100,7 +99,7 @@ export default class Vector {
   /**
    * Hadamard product.
    * @param {Vector} another another vector
-   * @returns {Vector}
+   * @returns {Vector} multiplied vector
    */
   hadamard(another) {
     return new Vector(...this.vector.map((v0, i) => v0 * another.vector[i]));
@@ -115,10 +114,10 @@ export default class Vector {
   isInNBall(center, radius) {
     if (this.dimension === center.dimension) {
       return center.distanceTo(this) < radius;
-    } else {
-      Logger.error(`Cannot calculate distance to different dimension!\nthis: ${this.dimension}\ncenter: ${center.dimension}`);
-      return false;
     }
+    Logger.error(`Cannot calculate distance to different dimension!\nthis: ${this.dimension}\ncenter: ${center.dimension}`);
+    return false;
+
   }
 
   /**
@@ -132,10 +131,10 @@ export default class Vector {
   isInNBox(p1, p2) {
     if (this.dimension === p1.dimension && this.dimension === p2.dimension) {
       return this.vector.every((p, i) => (p1.vector[i] - p) * (p2.vector[i] - p) < 0);
-    } else {
-      Logger.error(`Dimension of the points must be the same each other!\nthis: ${this.dimension}\np1: ${p1.dimension}\np2: ${p2.dimension}`);
-      return false;
     }
+    Logger.error(`Dimension of the points must be the same each other!\nthis: ${this.dimension}\np1: ${p1.dimension}\np2: ${p2.dimension}`);
+    return false;
+
   }
 
   /**

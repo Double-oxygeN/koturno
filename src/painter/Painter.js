@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright 2017 Double_oxygeN
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,13 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-'use strict';
 
 /**
  * Class of graphics.
- * @param {HTMLCanvasElement} canvas
- * @param {ImageManager} imageManager
- * @param {string} contextType
+ * @param {HTMLCanvasElement} canvas canvas element to paint
+ * @param {ImageManager} imageManager image manager
+ * @param {string} contextType context type
  */
 export default class Painter {
   constructor(canvas, imageManager, contextType) {

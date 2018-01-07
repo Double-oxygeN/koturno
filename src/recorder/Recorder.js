@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright 2017 Double_oxygeN
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,8 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-'use strict';
 
+import KeycodeBiDiMap from './KeycodeBiDiMap.js';
+import SHA256 from './SHA256.js';
 import Logger from '../logger/Logger.js';
 
 /**
@@ -57,6 +58,7 @@ export default class Recorder {
   /**
    * Set recorder mode.
    * @param {string} mode `'r'` if reading, `'w'` if writing
+   * @returns {void}
    */
   setMode(mode) {
     this.mode = mode;
@@ -65,6 +67,7 @@ export default class Recorder {
   /**
    * Start recording.
    * @param {string} [title] game title
+   * @returns {void}
    */
   startRecord(title = null) {
     if (this.mode === 'r') return;
@@ -75,8 +78,9 @@ export default class Recorder {
 
   /**
    * Store action as data.
-   * @param {ActionManager} action
-   * @param {number} frame
+   * @param {ActionManager} action action manager
+   * @param {number} frame current frame number
+   * @returns {void}
    */
   storeAction(action, frame) {
     if (this.mode === 'r') return;
@@ -93,7 +97,8 @@ export default class Recorder {
 
   /**
    * Reset data after the frame.
-   * @param {number} frame
+   * @param {number} frame the frame number
+   * @returns {void}
    */
   resetAfter(frame) {
     if (this.mode === 'r') return;
@@ -105,6 +110,7 @@ export default class Recorder {
   /**
    * Save as a file.
    * @param {string} [fileName='savedata'] name of save file
+   * @returns {void}
    */
   save(fileName = 'savedata') {
     if (this.mode === 'r') return;
@@ -127,8 +133,8 @@ export default class Recorder {
       const keyboardMinus = prevData.keyboard.filter(prevKey => !frameData.keyboard.includes(prevKey));
       const mouseButtonPlus = frameData.mouseButton.filter(frameButton => !prevData.mouseButton.includes(frameButton));
       const mouseButtonMinus = prevData.mouseButton.filter(prevButton => !frameData.mouseButton.includes(prevButton));
-      const mouseMove = (prevData.mousePosition.x !== frameData.mousePosition.x && (!Number.isNaN(prevData.mousePosition.x) || !Number.isNaN(frameData.mousePosition.x))) ||
-        (prevData.mousePosition.y !== frameData.mousePosition.y && (!Number.isNaN(prevData.mousePosition.y) || !Number.isNaN(frameData.mousePosition.y)));
+      const mouseMove = prevData.mousePosition.x !== frameData.mousePosition.x && (!Number.isNaN(prevData.mousePosition.x) || !Number.isNaN(frameData.mousePosition.x)) ||
+        prevData.mousePosition.y !== frameData.mousePosition.y && (!Number.isNaN(prevData.mousePosition.y) || !Number.isNaN(frameData.mousePosition.y));
       if (keyboardPlus.length + keyboardMinus.length + mouseButtonPlus.length + mouseButtonMinus.length === 0 && !mouseMove) {
         waitFrames++;
       } else {
@@ -188,7 +194,7 @@ export default class Recorder {
     const binaryData1 = [];
     const pushUint = (array, number, length) => {
       for (let i = 0; i < length; i++) {
-        array.push(Math.floor((number / 2 ** (8 * i)) & 0xff));
+        array.push(Math.floor(number / 2 ** (8 * i) & 0xff));
       }
     };
     // push version
@@ -229,13 +235,13 @@ export default class Recorder {
 
   /**
    * Load a record data.
-   * @param {EventTarget} target
-   * @returns {Promise}
+   * @param {EventTarget} target event target
+   * @returns {Promise} resolve if loading is completed
    */
   load(target) {
-    if (this.mode === 'w') return Promise.reject('Please set recorder in reading mode.');
+    if (this.mode === 'w') return Promise.reject(new Error('Please set recorder in reading mode.'));
     if (!window.File || !window.FileReader) {
-      return Promise.reject('The File APIs are not fully supported in this browser.');
+      return Promise.reject(new Error('The File APIs are not fully supported in this browser.'));
     }
 
     const inputElem = document.createElement('input');
@@ -255,22 +261,22 @@ export default class Recorder {
         reader.addEventListener('load', ev1 => {
           const result = ev1.target.result;
           if (new Uint16Array(result, 0, 2)[0] !== Recorder.MAGIC) {
-            rej('Save data is wrong!');
+            rej(new Error('Save data is wrong!'));
           }
           if (new Uint16Array(result, 0, 2)[1] !== Recorder.VERSION) {
-            rej('Save data is too old!');
+            rej(new Error('Save data is too old!'));
           }
           const checkSum = new Uint32Array(result, 0x60, 8);
           const exackHashes = SHA256.digest(new Uint32Array(result, 0x80));
           if (!checkSum.every((hash, i) => hash === exackHashes[i])) {
-            rej('Save data is broken!');
+            rej(new Error('Save data is broken!'));
           }
 
           this._detail.revision = new Uint32Array(result, 0x0c, 1)[0];
           this._detail.title = String.fromCharCode(...new Uint8Array(result, 0x20, 32).filter(byte => byte !== 0));
           const timeBinary = new Uint32Array(result, 0x10, 4);
-          this._detail.startTime = timeBinary[0] + (timeBinary[1] * 2 ** 32);
-          this._detail.endTime = timeBinary[2] + (timeBinary[3] * 2 ** 32);
+          this._detail.startTime = timeBinary[0] + timeBinary[1] * 2 ** 32;
+          this._detail.endTime = timeBinary[2] + timeBinary[3] * 2 ** 32;
 
           const dataBinary = new Uint8Array(result, 0x80);
           this.parseData(dataBinary);
@@ -285,7 +291,8 @@ export default class Recorder {
 
   /**
    * Parse binary to data.
-   * @param {Uint8Array} binary
+   * @param {Uint8Array} binary binary data
+   * @returns {void}
    */
   parseData(binary) {
     let _tmpData = {
@@ -316,7 +323,7 @@ export default class Recorder {
         _end = true;
         break;
       case 0x1a:
-        const skipFrames = binary[readingByte + 1] | (binary[readingByte + 2] << 8);
+        const skipFrames = binary[readingByte + 1] | binary[readingByte + 2] << 8;
         for (let i = 0; i < skipFrames; i++)
           this.data.push({
             keyboard: [..._tmpData.keyboard],
@@ -330,7 +337,7 @@ export default class Recorder {
         readingByte += 1;
         break;
       case 0x21:
-        _tmpData.keyboard = _tmpData.keyboard.filter(key => key != KeycodeBiDiMap.getName(binary[readingByte + 1]));
+        _tmpData.keyboard = _tmpData.keyboard.filter(key => key !== KeycodeBiDiMap.getName(binary[readingByte + 1]));
         readingByte += 1;
         break;
       case 0x30:
@@ -338,12 +345,12 @@ export default class Recorder {
         readingByte += 1;
         break;
       case 0x31:
-        _tmpData.mouseButton = _tmpData.mouseButton.filter(button => button != binary[readingByte + 1]);
+        _tmpData.mouseButton = _tmpData.mouseButton.filter(button => button !== binary[readingByte + 1]);
         readingByte += 1;
         break;
       case 0x38:
-        _tmpData.mousePosition.x = binary[readingByte + 1] | (binary[readingByte + 2] << 8);
-        _tmpData.mousePosition.y = binary[readingByte + 3] | (binary[readingByte + 4] << 8);
+        _tmpData.mousePosition.x = binary[readingByte + 1] | binary[readingByte + 2] << 8;
+        _tmpData.mousePosition.y = binary[readingByte + 3] | binary[readingByte + 4] << 8;
         if (_tmpData.mousePosition.x === 0xffff)
           _tmpData.mousePosition = { x: Number.NaN, y: Number.NaN };
         readingByte += 4;
@@ -357,8 +364,9 @@ export default class Recorder {
 
   /**
    * Read action from record data.
-   * @param {ActionManager} action
-   * @param {number} frame
+   * @param {ActionManager} action action manager to input
+   * @param {number} frame reading frame number
+   * @returns {void}
    */
   readAction(action, frame) {
     if (this.mode === 'w') return;
@@ -388,6 +396,7 @@ export default class Recorder {
    * Print timeline.
    * @param {Painter2d} painter painter
    * @param {number} frame frame number
+   * @returns {void}
    */
   printTimeline(painter, frame) {
     const LOG_HEIGHT = painter.height / Recorder.SHOWING_LOG;
@@ -397,22 +406,24 @@ export default class Recorder {
     const LOG_KEYBOARD_WIDTH = painter.width * 7 / 20;
     const LOG_MOUSE_WIDTH = painter.width / 5;
     const frameToTime = f => {
-      const seconds = (f / 60);
+      const seconds = f / 60;
       if (f < 60 * 60) {
         return `${seconds.toFixed(2)}s`;
       } else if (f < 60 * 60 * 60) {
         return `${Math.floor(seconds / 60).toString(10)}m${(seconds % 60).toFixed(2)}s`;
       } else if (f < 60 * 60 * 60 * 24) {
         return `${Math.floor(seconds / 3600).toString(10)}h${(Math.floor(seconds / 60) % 60).toString(10)}m${(seconds % 60).toFixed(2)}s`;
-      } else {
-        return `${Math.floor(seconds / 86400).toString(10)}d${(Math.floor(seconds / 3600) % 24).toString(10)}h${(Math.floor(seconds / 60) % 60).toString(10)}m${(seconds % 60).toFixed(2)}s`;
       }
+      return `${Math.floor(seconds / 86400).toString(10)}d${(Math.floor(seconds / 3600) % 24).toString(10)}h${(Math.floor(seconds / 60) % 60).toString(10)}m${(seconds % 60).toFixed(2)}s`;
+
     };
     painter.background('#000');
     for (let i = 0; i < Recorder.SHOWING_LOG; i++) {
       if (i > frame) break;
-      // console.log(this.data);
-      // debugger;
+      /*
+       * console.log(this.data);
+       * debugger;
+       */
       const FRAME_DATA = this.data[frame - i];
       painter.rect(0, painter.height - LOG_HEIGHT * (i + 1), LOG_MARK_WIDTH, LOG_HEIGHT).stroke('#0f0', { width: 1 });
       painter.rect(LOG_MARK_WIDTH, painter.height - LOG_HEIGHT * (i + 1), LOG_FRAME_WIDTH, LOG_HEIGHT).stroke('#0f0');
@@ -420,7 +431,7 @@ export default class Recorder {
       painter.rect(LOG_MARK_WIDTH + LOG_FRAME_WIDTH + LOG_TIME_WIDTH, painter.height - LOG_HEIGHT * (i + 1), LOG_KEYBOARD_WIDTH, LOG_HEIGHT).stroke('#0f0');
       painter.rect(LOG_MARK_WIDTH + LOG_FRAME_WIDTH + LOG_TIME_WIDTH + LOG_KEYBOARD_WIDTH, painter.height - LOG_HEIGHT * (i + 1), LOG_MOUSE_WIDTH, LOG_HEIGHT).stroke('#0f0');
       painter.text('-', LOG_MARK_WIDTH / 2, painter.height - LOG_HEIGHT * (i + 0.5), { size: LOG_HEIGHT / 2, align: 'center', baseline: 'middle' }).fill('#0f0');
-      painter.text((frame - i).toString(10) + 'f', LOG_MARK_WIDTH + LOG_FRAME_WIDTH / 2, painter.height - LOG_HEIGHT * (i + 0.5)).fill('#0f0');
+      painter.text(`${(frame - i).toString(10)}f`, LOG_MARK_WIDTH + LOG_FRAME_WIDTH / 2, painter.height - LOG_HEIGHT * (i + 0.5)).fill('#0f0');
       painter.text(frameToTime(frame - i), LOG_MARK_WIDTH + LOG_FRAME_WIDTH + LOG_TIME_WIDTH / 2, painter.height - LOG_HEIGHT * (i + 0.5)).fill('#0f0');
       painter.text(FRAME_DATA.keyboard.toString(), LOG_MARK_WIDTH + LOG_FRAME_WIDTH + LOG_TIME_WIDTH + LOG_KEYBOARD_WIDTH / 2, painter.height - LOG_HEIGHT * (i + 0.5)).fill('#0f0');
       painter.text(`(${FRAME_DATA.mousePosition.x}, ${FRAME_DATA.mousePosition.y})`, LOG_MARK_WIDTH + LOG_FRAME_WIDTH + LOG_TIME_WIDTH + LOG_KEYBOARD_WIDTH + LOG_MOUSE_WIDTH / 2, painter.height - LOG_HEIGHT * (i + 0.5)).fill('#0f0');

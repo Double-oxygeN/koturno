@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright 2017 Double_oxygeN
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-'use strict';
 
 /**
  * Class representing an input.
@@ -26,8 +25,9 @@ export default class Action {
 
   /**
    * Set action.
-   * @param {...(string|number)} actions
+   * @param {...(string|number)} actions some actions
    * @protected
+   * @returns {void}
    */
   _down(...actions) {
     actions.forEach(action => {
@@ -40,8 +40,9 @@ export default class Action {
 
   /**
    * Remove action.
-   * @param {...(string|number)} actions
+   * @param {...(string|number)} actions some actions
    * @protected
+   * @returns {void}
    */
   _up(...actions) {
     actions.forEach(action => {
@@ -53,6 +54,7 @@ export default class Action {
   /**
    * Clear action.
    * @protected
+   * @returns {void}
    */
   _clear() {
     this.pressed.clear();
@@ -61,7 +63,7 @@ export default class Action {
 
   /**
    * Check if the action is being done.
-   * @param {...(string|number)} actions
+   * @param {...(string|number)} actions some actions
    * @returns {boolean} `true` if some actions are being done.
    */
   isDown(...actions) {
@@ -70,7 +72,7 @@ export default class Action {
 
   /**
    * Check if the action begins to be done now.
-   * @param {...(string|number)} actions
+   * @param {...(string|number)} actions some actions
    * @returns {boolean} `true` if some actions begin to be done now.
    */
   isPressed(...actions) {
@@ -79,6 +81,7 @@ export default class Action {
 
   /**
    * Reset pressed actions.
+   * @returns {void}
    */
   resetAction() {
     this.pressed.clear();

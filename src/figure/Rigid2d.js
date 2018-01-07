@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright 2017 Double_oxygeN
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,7 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-'use strict';
+
+import PhysicalType from './PhysicalType.js';
+import Vector2d from '../geo/Vector2d.js';
 
 /**
  * Class for 2-dimensional figures.
@@ -55,15 +57,14 @@ export default class Rigid2d {
   applyForce(force, from = new Vector2d(0, 0)) {
     if (this.physicalType === PhysicalType.DYNAMIC) {
       const R = this.shape.gravityCenter.minus(from);
-      const F_g = R.norm === 0 ? force : R.scalar(force.innerProd(R) / R.norm ** 2);
-      const N_h = R.crossProd(force);
+      const Fg = R.norm === 0 ? force : R.scalar(force.innerProd(R) / R.norm ** 2);
+      const Nh = R.crossProd(force);
 
-      const nextVelocity = this.velocity.plus(F_g.scalar(1 / this.mass));
-      const nextAngular = this.angularVelocity + N_h / this.inertia;
+      const nextVelocity = this.velocity.plus(Fg.scalar(1 / this.mass));
+      const nextAngular = this.angularVelocity + Nh / this.inertia;
       return new Rigid2d(this.physicalType, this.shape, this.material, this.center, this.rotation, nextVelocity, nextAngular);
-    } else {
-      return this;
     }
+    return this;
   }
 
   /**

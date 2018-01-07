@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright 2017 Double_oxygeN
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,9 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-'use strict';
 
 import Shape2d from './Shape2d.js';
+import Vector2d from '../geo/Vector2d.js';
 
 /**
  * Class representing rectangle shape.
