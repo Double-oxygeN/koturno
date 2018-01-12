@@ -13,10 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-'use strict';
 
 import Game from './src/Game.js';
 import State from './src/State.js';
+export { MouseButton } from './src/action/MouseButton.js';
 export { SoundType } from './src/resource/SoundType.js';
 export { KoturnoUtil } from './src/util/KoturnoUtil.js';
 export { StdTransFunc } from './src/util/StdTransFunc.js';
