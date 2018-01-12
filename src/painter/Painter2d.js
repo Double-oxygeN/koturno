@@ -15,7 +15,7 @@
  */
 
 import Painter from './Painter.js';
-import Directions from './geo/Directions.js';
+import { Directions } from '../geo/Directions.js';
 
 /**
  * Class of 2-dimentional graphics.

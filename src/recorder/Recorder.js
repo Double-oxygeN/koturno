@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import KeycodeBiDiMap from './KeycodeBiDiMap.js';
-import SHA256 from './SHA256.js';
+import { KeycodeBiDiMap } from './KeycodeBiDiMap.js';
+import { SHA256 } from './SHA256.js';
 import Logger from '../logger/Logger.js';
 
 /**

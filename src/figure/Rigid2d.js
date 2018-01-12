@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import PhysicalType from './PhysicalType.js';
+import { PhysicalType } from './PhysicalType.js';
 import Vector2d from '../geo/Vector2d.js';
 
 /**
