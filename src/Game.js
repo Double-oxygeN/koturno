@@ -123,6 +123,8 @@ export default class Game {
 
       /** @member {HTMLCanvasElement} */
       this.canvas = privates.htmlManager.getMainCanvas();
+      /** @private @member {HTMLCanvasElement} */
+      privates.subCanvas = privates.htmlManager.getSubCanvas();
 
       /** @private @member {ImageManager} */
       privates.imageManager = new ImageManager('images' in obj ? obj.images : []);
@@ -130,20 +132,20 @@ export default class Game {
       privates.soundManager = new SoundManager('sounds' in obj ? obj.sounds : []);
       /** @private @member {Painter} */
       privates.painter = /* 'context' in obj ? createPainter(obj.context) : */ new Painter2d(this.canvas, privates.imageManager);
+      /** @private @member {Painter} */
+      privates.subPainter = new Painter2d(privates.subCanvas, new ImageManager([]));
       /** @private @member {ActionManager} */
-      privates.action = new ActionManager(this.canvas);
+      privates.action = new ActionManager(privates.subCanvas);
 
       /** @member {String} */
       this.name = 'name' in obj ? obj.name : 'no name';
 
       privates.displayFPS = () => {
-        const textOptions = Object.assign({}, privates.painter.recentTextOptions);
-        privates.painter.setGlobalAlphaAndDraw(0.8, () => {
-          const textMetrics = privates.painter.measureText(`FPS ${Math.round(this.fps)}`, { size: 10, font: 'monospace' });
-          privates.painter.rect(0, this.height - 10, textMetrics.width + 3, 10).fill('#fff');
-          privates.painter.text(`FPS ${Math.round(this.fps)}`, 0, this.height, { align: 'start', baseline: 'bottom' }).fill('#000');
+        privates.subPainter.setGlobalAlphaAndDraw(0.8, () => {
+          const textMetrics = privates.subPainter.measureText(`FPS ${Math.round(this.fps)}`, { size: 10, font: 'monospace' });
+          privates.subPainter.rect(0, this.height - 10, textMetrics.width + 3, 10).fill('#fff');
+          privates.subPainter.text(`FPS ${Math.round(this.fps)}`, 0, this.height, { align: 'start', baseline: 'bottom' }).fill('#000');
         });
-        privates.painter.recentTextOptions = textOptions;
       };
     } else {
       Logger.fatal("Game must have 'scenes' and 'firstSceneName'!");
@@ -282,6 +284,7 @@ export default class Game {
           }
         });
 
+        privates.subPainter.clear();
         if (displayFPS) {
           privates.displayFPS();
         }
@@ -312,6 +315,7 @@ export default class Game {
         });
       }
 
+      privates.subPainter.clear();
       if (displayFPS) {
         privates.displayFPS();
       }
