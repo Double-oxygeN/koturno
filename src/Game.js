@@ -17,6 +17,7 @@
 import State from './State.js';
 import Counters from './Counters.js';
 import HtmlManager from './HtmlManager.js';
+import AnimationState from './AnimationState.js';
 import Logger from './logger/Logger.js';
 import ImageManager from './resource/ImageManager.js';
 import SoundManager from './resource/SoundManager.js';
@@ -38,27 +39,6 @@ const createFPSManager = () => {
       [millisecondsBetweenTwoFrame[0], millisecondsBetweenTwoFrame[1]] = [millisecondsBetweenTwoFrame[1], stamp];
     },
     getFPS: () => 1000.0 / (millisecondsBetweenTwoFrame[1] - millisecondsBetweenTwoFrame[0])
-  };
-};
-const createAnimationState = () => {
-  const flag = {
-    value: false,
-    persist: false
-  };
-  return {
-    getFlag: () => flag.value,
-    reset: () => {
-      if (!flag.persist) flag.value = false;
-    },
-    next: () => {
-      [flag.value, flag.persist] = [true, false];
-    },
-    play: () => {
-      [flag.value, flag.persist] = [true, true];
-    },
-    stop: () => {
-      flag.persist = false;
-    }
   };
 };
 
@@ -88,14 +68,8 @@ export default class Game {
       /** @private @member {FPSManager} */
       privates.fpsManager = createFPSManager();
       /** @private @member {AnimationState} */
-      privates.animationState = createAnimationState();
+      privates.animationState = new AnimationState();
 
-      // /** @member {HTMLCanvasElement} */
-      // this.canvas = document.createElement('canvas');
-      // this.canvas.width = 'width' in obj ? obj.width : 600;
-      // this.canvas.height = 'height' in obj ? obj.height : 600;
-      // /** @private @member {DivManager} */
-      // privates.divManager = createDivManager('divID' in obj ? obj.divID : 'koturno-ui', this.canvas);
       /** @private @member {HtmlManager} */
       privates.htmlManager = new HtmlManager('divID' in obj ? obj.divID : 'koturno-ui', 'width' in obj ? obj.width : 600, 'height' in obj ? obj.height : 600);
 
@@ -106,10 +80,10 @@ export default class Game {
         Logger.error('pin is not implemented!');
       });
       privates.htmlManager.onPressedPlayButton((e, interval) => {
-        privates.animationState.play();
+        privates.animationState.play(interval);
       });
       privates.htmlManager.onPressedPauseButton(e => {
-        privates.animationState.stop();
+        privates.animationState.pause();
       });
       privates.htmlManager.onPressedNextButton(e => {
         privates.animationState.next();
@@ -197,7 +171,8 @@ export default class Game {
     const privates = getPrivates(this);
     const requestNextFrame = f => {
       window.requestAnimationFrame(stamp => {
-        if (debug && !privates.animationState.getFlag()) {
+        if (!privates.animationState.getFlag()) {
+          privates.animationState.reset();
           requestNextFrame(f);
         } else {
           privates.animationState.reset();
@@ -379,6 +354,7 @@ export default class Game {
     getPrivates(this).action.listen();
     Logger.setGame(this);
     getPrivates(this).soundManager.setDebugMode(true);
+    getPrivates(this).animationState.pause();
     this.start(true, 'displayFPS' in opt ? opt.displayFPS : false, recorder);
   }
 
