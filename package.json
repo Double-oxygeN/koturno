@@ -4,7 +4,7 @@
   "description": "JavaScript game library",
   "main": "koturno-all.js",
   "scripts": {
-    "docs": "documentation build src/** -f html -o docs && sed -i -e '11s/undefined/this/' docs/assets/split.js && sed -i -e '29s/undefined/this/' docs/assets/anchor.js && echo ./docs updated!",
+    "docs": "documentation build src/** -f html -o docs && echo ./docs updated!",
     "lint": "eslint"
   },
   "directories": {

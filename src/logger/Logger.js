@@ -50,6 +50,7 @@ const Logger = (() => {
      * Log fatal error and force to exit.
      * @param {...string} msg messages
      * @returns {void}
+     * @memberof Logger
      */
     fatal: (...msg) => {
       logSender(0b00001, 'Fatal', FATAL_STYLE)(...msg);
@@ -58,28 +59,33 @@ const Logger = (() => {
     /**
      * Log error but do nothing else.
      * @param {...string} msg messages
+     * @memberof Logger
      */
     error: logSender(0b00010, 'Error', ERROR_STYLE),
     /**
      * Log warning.
      * @param {...string} msg messages
+     * @memberof Logger
      */
     warn: logSender(0b00100, 'Warning', WARNING_STYLE),
     /**
      * Log information.
      * For confirmation or testing, use Logger.debug.
      * @param {...string} msg messages
+     * @memberof Logger
      */
     info: logSender(0b01000, 'Info', INFO_STYLE),
     /**
      * Log debug message.
      * @param {...string} msg messages
+     * @memberof Logger
      */
     debug: logSender(0b10000, 'Debug', DEBUG_STYLE),
     /**
      * Set game to cooperate each other.
      * @param {Game} game game
      * @returns {void}
+     * @memberof Logger
      */
     setGame: game => {
       _game = game;
@@ -88,6 +94,7 @@ const Logger = (() => {
      * Set log level.
      * @param {LogLevel} level level of this logger
      * @returns {void}
+     * @memberof Logger
      */
     setLogLevel: level => {
       _level = level;

@@ -16,6 +16,7 @@
 
 import State from './State.js';
 import Counters from './Counters.js';
+import HtmlManager from './HtmlManager.js';
 import Logger from './logger/Logger.js';
 import ImageManager from './resource/ImageManager.js';
 import SoundManager from './resource/SoundManager.js';
@@ -60,156 +61,6 @@ const createAnimationState = () => {
     }
   };
 };
-const createDivManager = (baseID, canvas) => {
-  const divs = {
-    base: document.getElementById(baseID),
-    canvas: document.createElement('div'),
-    frame: null,
-    ctrl: null,
-    log: null,
-    timeline: null
-  };
-  const options = {
-    expansionRate: 1,
-    center: false
-  };
-  let timelineCanvasPainter = null;
-  return {
-    center: () => {
-      const fullScreenCSS = 'margin: 0px; padding: 0px; width: 100%; height: 100%; ' +
-        'overflow: hidden; box-sizing: border-box;';
-      document.body.setAttribute('style', fullScreenCSS);
-      document.getElementsByTagName('html')[0].setAttribute('style', fullScreenCSS);
-      const onResize = () => {
-        const bodyRect = document.body.getBoundingClientRect();
-        options.expansionRate = Math.min(bodyRect.width / canvas.width, bodyRect.height / canvas.height);
-        const w = Math.ceil(canvas.width * options.expansionRate);
-        const h = Math.ceil(canvas.height * options.expansionRate);
-        divs.base.setAttribute('style', `width: ${w}px; height: ${h}px; position: fixed; ` +
-          `left: ${(bodyRect.width - w) / 2}px; top: ${(bodyRect.height - h) / 2}px; ` +
-          `border: 1px #ccc solid; box-sizing: border-box;`
-        );
-      };
-      window.addEventListener('resize', onResize);
-      onResize();
-      options.center = true;
-    },
-    setNormalUI: () => {
-      divs.canvas.appendChild(canvas);
-      divs.base.appendChild(divs.canvas);
-      if (options.center) {
-        const onResize = () => {
-          canvas.setAttribute('style', `transform: scale(${options.expansionRate}, ${options.expansionRate}); position: relative; ` +
-            `left: ${(options.expansionRate - 1) * canvas.width / 2}px; ` +
-            `top: ${(options.expansionRate - 1) * canvas.height / 2}px;`);
-        };
-        window.addEventListener('resize', onResize);
-        onResize();
-      }
-    },
-    setDebugUI: animationState => {
-      const backgroundStyle = '#000';
-      const lineStyle = '#0f0';
-      const setDivStyle = (baseWidth, baseHeight) => {
-        divs.canvas.setAttribute('style', `width: ${Math.round(baseWidth * 2 / 3)}px; height: ${Math.round(baseHeight * 2 / 3)}px; float: left; margin: 0px; padding: 0px;`);
-        divs.frame.setAttribute('style', `width: ${Math.round(baseWidth / 3)}px; height: ${Math.round(baseHeight / 9)}px; ` +
-          `text-align: center; vertical-align: middle; display: table-cell; background-color: ${backgroundStyle}; border: 3px ${lineStyle} solid; ` +
-          `color: ${lineStyle}; font-size: 150%; box-sizing: border-box; margin: 0px; padding: 0px;`);
-        divs.ctrl.setAttribute('style', `width: ${Math.round(baseWidth / 3)}px; height: ${Math.round(baseHeight * 2 / 9)}px; ` +
-          `background-color: ${backgroundStyle}; border: 3px ${lineStyle} solid; box-sizing: border-box; margin: 0px; padding: 0px;`);
-        divs.log.setAttribute('style', `width: ${Math.round(baseWidth / 3)}px; height: ${Math.round(baseHeight / 3)}px; ` +
-          `overflow: scroll; background-color: ${backgroundStyle}; border: 3px ${lineStyle} solid; box-sizing: border-box; margin: 0px; padding: 0px;`);
-        divs.timeline.setAttribute('style', `width: ${baseWidth}px; height: ${Math.round(baseHeight / 3)}px; ` +
-          `overflow: scroll; background-color: ${backgroundStyle}; border: 3px ${lineStyle} solid; box-sizing: border-box; margin: 0px; padding: 0px;`);
-        timelineCanvasPainter.canvas.width = baseWidth - 3;
-        timelineCanvasPainter.canvas.height = Math.round(baseHeight / 3) - 3;
-
-        canvas.setAttribute('style', `transform: scale(${options.expansionRate * 2 / 3}, ${options.expansionRate * 2 / 3}); position: relative; ` +
-          `left: ${Math.round((options.expansionRate * 2 / 3 - 1) * canvas.width / 2)}px; ` +
-          `top: ${Math.round((options.expansionRate * 2 / 3 - 1) * canvas.height / 2)}px;`);
-      };
-      const createControlUI = () => {
-        const div0 = document.createElement('div');
-        const div1 = document.createElement('div');
-        div0.setAttribute('style', 'text-align: center; padding: 8px;');
-        div1.setAttribute('style', 'border: 1px #0f0 solid; display: inline-block; margin: auto; font-size: 20px;');
-        div0.appendChild(div1);
-
-        const stepForwardI = document.createElement('i');
-        const playI = document.createElement('i');
-        stepForwardI.setAttribute('style', 'background-color: #000; color: #0f0; width: 25.7px; height: 20px;');
-        stepForwardI.setAttribute('class', 'fa fa-fw fa-step-forward');
-        stepForwardI.setAttribute('title', 'step forward');
-        playI.setAttribute('style', 'background-color: #000; color: #0f0; width: 25.7px; height: 20px;');
-        playI.setAttribute('class', 'fa fa-fw fa-play');
-        playI.setAttribute('title', 'play');
-        stepForwardI.addEventListener('mousedown', () => {
-          animationState.next();
-        });
-        playI.addEventListener('mousedown', () => {
-          if (animationState.getFlag()) {
-            animationState.stop();
-            playI.setAttribute('class', 'fa fa-fw fa-play');
-            playI.setAttribute('title', 'play');
-          } else {
-            animationState.play();
-            playI.setAttribute('class', 'fa fa-fw fa-pause');
-            playI.setAttribute('title', 'pause');
-          }
-        });
-        div1.appendChild(stepForwardI);
-        div1.appendChild(playI);
-
-        return div0;
-      };
-
-      const sideDiv = document.createElement('div');
-      divs.frame = document.createElement('div');
-      divs.ctrl = document.createElement('div');
-      divs.log = document.createElement('div');
-      divs.timeline = document.createElement('div');
-
-      const timelineCanvas = document.createElement('canvas');
-      timelineCanvasPainter = new Painter2d(timelineCanvas, new ImageManager([]));
-      divs.timeline.appendChild(timelineCanvas);
-
-      if (options.center) {
-        const onResize = () => {
-          setDivStyle(Math.ceil(canvas.width * options.expansionRate), Math.ceil(canvas.height * options.expansionRate));
-        };
-        window.addEventListener('resize', onResize);
-        onResize();
-      } else {
-        setDivStyle(canvas.width, canvas.height);
-      }
-
-      divs.ctrl.appendChild(createControlUI());
-
-      sideDiv.setAttribute('style', 'float: left;');
-      sideDiv.appendChild(divs.frame);
-      sideDiv.appendChild(divs.ctrl);
-      sideDiv.appendChild(divs.log);
-
-      divs.canvas.appendChild(canvas);
-      divs.base.appendChild(divs.canvas);
-      divs.base.appendChild(sideDiv);
-      divs.base.appendChild(divs.timeline);
-    },
-    sendLog: (msg, style) => {
-      if (divs.log !== null) {
-        const log = document.createElement('div');
-        log.setAttribute('style', `width: auto; border: 1px #999 solid; overflow-wrap: break-word; ${style}`);
-        log.innerHTML = msg.join('<br>').replace(/\n/g, '<br>');
-        divs.log.appendChild(log);
-        divs.log.scrollTop = divs.log.scrollHeight;
-      }
-    },
-    updateDebugInfo: (counters, recorder) => {
-      divs.frame.innerHTML = counters.toString();
-      recorder.printTimeline(timelineCanvasPainter, counters.general);
-    }
-  };
-};
 
 /**
  * Class representing a game.
@@ -239,12 +90,39 @@ export default class Game {
       /** @private @member {AnimationState} */
       privates.animationState = createAnimationState();
 
+      // /** @member {HTMLCanvasElement} */
+      // this.canvas = document.createElement('canvas');
+      // this.canvas.width = 'width' in obj ? obj.width : 600;
+      // this.canvas.height = 'height' in obj ? obj.height : 600;
+      // /** @private @member {DivManager} */
+      // privates.divManager = createDivManager('divID' in obj ? obj.divID : 'koturno-ui', this.canvas);
+      /** @private @member {HtmlManager} */
+      privates.htmlManager = new HtmlManager('divID' in obj ? obj.divID : 'koturno-ui', 'width' in obj ? obj.width : 600, 'height' in obj ? obj.height : 600);
+
+      privates.htmlManager.onPressedBackwardButton(e => {
+        Logger.error('backward is not implemented!');
+      });
+      privates.htmlManager.onPressedPinButton(e => {
+        Logger.error('pin is not implemented!');
+      });
+      privates.htmlManager.onPressedPlayButton((e, interval) => {
+        privates.animationState.play();
+      });
+      privates.htmlManager.onPressedPauseButton(e => {
+        privates.animationState.stop();
+      });
+      privates.htmlManager.onPressedNextButton(e => {
+        privates.animationState.next();
+      });
+      privates.htmlManager.onPressedSaveButton(e => {
+        Logger.error('save is not implemented!');
+      });
+      privates.htmlManager.onPressedLoadButton(e => {
+        Logger.error('load is not implemented!');
+      });
+
       /** @member {HTMLCanvasElement} */
-      this.canvas = document.createElement('canvas');
-      this.canvas.width = 'width' in obj ? obj.width : 600;
-      this.canvas.height = 'height' in obj ? obj.height : 600;
-      /** @private @member {DivManager} */
-      privates.divManager = createDivManager('divID' in obj ? obj.divID : 'koturno-ui', this.canvas);
+      this.canvas = privates.htmlManager.getMainCanvas();
 
       /** @private @member {ImageManager} */
       privates.imageManager = new ImageManager('images' in obj ? obj.images : []);
@@ -301,7 +179,8 @@ export default class Game {
    * @returns {Game} this
    */
   center() {
-    getPrivates(this).divManager.center();
+    // getPrivates(this).divManager.center();
+    getPrivates(this).htmlManager.center();
     return this;
   }
 
@@ -410,7 +289,8 @@ export default class Game {
           recorder.storeAction(privates.action, counters.general);
         }
         if (debug) {
-          privates.divManager.updateDebugInfo(counters, recorder);
+          // privates.divManager.updateDebugInfo(counters, recorder);
+          privates.htmlManager.sendCounters(counters);
         }
 
         privates.action.resetAction();
@@ -440,15 +320,18 @@ export default class Game {
         recorder.storeAction(privates.action, counters.general);
       }
       if (debug) {
-        privates.divManager.updateDebugInfo(counters, recorder);
+        // privates.divManager.updateDebugInfo(counters, recorder);
+        privates.htmlManager.sendCounters(counters);
       }
     };
 
     // set UI
     if (debug) {
-      privates.divManager.setDebugUI(privates.animationState);
+      // privates.divManager.setDebugUI(privates.animationState);
+      privates.htmlManager.setDebugUI();
     } else {
-      privates.divManager.setNormalUI();
+      // privates.divManager.setNormalUI();
+      privates.htmlManager.setNormalUI();
     }
     // blackout
     privates.painter.background('#000000');
@@ -517,7 +400,8 @@ export default class Game {
    * @returns {void}
    */
   sendLog(msg, style) {
-    getPrivates(this).divManager.sendLog(msg, style);
+    // getPrivates(this).divManager.sendLog(msg, style);
+    getPrivates(this).htmlManager.sendLog(msg, style);
   }
 
   /**
