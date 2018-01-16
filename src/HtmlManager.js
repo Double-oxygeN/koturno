@@ -75,6 +75,10 @@ const basicKoturnoStyle = (width, height) => `.koturno {
   align-items: center;
   justify-content: center;
   font-size: 150%;
+  user-select: none;
+  -moz-user-select: none;
+  -webkit-user-select: none;
+  -ms-user-select: none;
 }
 
 .koturno-controller {
@@ -83,6 +87,10 @@ const basicKoturnoStyle = (width, height) => `.koturno {
   flex-flow: column nowrap;
   justify-content: space-around;
   align-items: center;
+  user-select: none;
+  -moz-user-select: none;
+  -webkit-user-select: none;
+  -ms-user-select: none;
 }
 
 .koturno-controller .koturno-top-controller {
@@ -96,6 +104,7 @@ const basicKoturnoStyle = (width, height) => `.koturno {
 
 .koturno-controller .koturno-top-controller div, .koturno-controller .koturno-bottom-controller div {
   transition: background-color 150ms;
+  cursor: pointer;
 }
 
 .koturno-controller .koturno-top-controller div {
