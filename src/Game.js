@@ -32,6 +32,9 @@ const getPrivates = self => {
   return p;
 };
 
+const DEFAULT_CANVAS_WIDTH = 600;
+const DEFAULT_CANVAS_HEIGHT = 600;
+
 const createFPSManager = () => {
   const millisecondsBetweenTwoFrame = [0.0, 0.0];
   return {
@@ -71,7 +74,7 @@ export default class Game {
       privates.animationState = new AnimationState();
 
       /** @private @member {HtmlManager} */
-      privates.htmlManager = new HtmlManager('divID' in obj ? obj.divID : 'koturno-ui', 'width' in obj ? obj.width : 600, 'height' in obj ? obj.height : 600);
+      privates.htmlManager = new HtmlManager('divID' in obj ? obj.divID : 'koturno-ui', 'width' in obj ? obj.width : DEFAULT_CANVAS_WIDTH, 'height' in obj ? obj.height : DEFAULT_CANVAS_HEIGHT);
 
       privates.htmlManager.onPressedBackwardButton(e => {
         Logger.error('backward is not implemented!');
@@ -367,11 +370,14 @@ export default class Game {
    */
   autorun(recorder, opt = {}) {
     recorder.setMode('r');
-    recorder.load(this.divElem.base).then(() => {
-      this.start(false, 'displayFPS' in opt ? opt.displayFPS : false, recorder);
-    }, reason => {
-      Logger.fatal(reason);
-    });
+    Recorder.loadFromFile(getPrivates(this).htmlManager.getBaseDiv())
+      .then(bin => {
+        recorder.load(bin);
+        this.start(false, 'displayFPS' in opt ? opt.displayFPS : false, recorder);
+      })
+      .catch(e => {
+        Logger.fatal(e.message);
+      });
   }
 
   /**
@@ -389,6 +395,6 @@ export default class Game {
    * @returns {string} a string
    */
   toString() {
-    return `[Game]`;
+    return `[Game ${this.name}]`;
   }
 }

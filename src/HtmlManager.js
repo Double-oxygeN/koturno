@@ -305,6 +305,14 @@ export default class HtmlManager {
   }
 
   /**
+   * Get base div element.
+   * @returns {HTMLDivElememt} base div element
+   */
+  getBaseDiv() {
+    return getPrivates(this).baseDiv;
+  }
+
+  /**
    * Center the display.
    * @returns {HtmlManager} this
    */

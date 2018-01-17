@@ -952,6 +952,12 @@
                       <li class='h5'><span>Instance members</span></li>
                       
                       <li><a
+                        href='#htmlmanagergetbasediv'
+                        class='regular pre-open'>
+                        #getBaseDiv
+                      </a></li>
+                      
+                      <li><a
                         href='#htmlmanagercenter'
                         class='regular pre-open'>
                         #center
@@ -1433,6 +1439,62 @@
               
                 
                 <li><a
+                  href='#datadiff'
+                  class="">
+                  DataDiff
+                  
+                </a>
+                
+                </li>
+              
+                
+                <li><a
+                  href='#recorddata'
+                  class=" toggle-sibling">
+                  RecordData
+                  <span class='icon'>▸</span>
+                </a>
+                
+                <div class='toggle-target display-none'>
+                  
+                  
+                    <ul class='list-reset py1-ul pl1'>
+                      <li class='h5'><span>Instance members</span></li>
+                      
+                      <li><a
+                        href='#recorddatagetkeyboardbuttons'
+                        class='regular pre-open'>
+                        #getKeyboardButtons
+                      </a></li>
+                      
+                      <li><a
+                        href='#recorddatagetmousebuttons'
+                        class='regular pre-open'>
+                        #getMouseButtons
+                      </a></li>
+                      
+                      <li><a
+                        href='#recorddatagetmouseposition'
+                        class='regular pre-open'>
+                        #getMousePosition
+                      </a></li>
+                      
+                      <li><a
+                        href='#recorddatadifference'
+                        class='regular pre-open'>
+                        #difference
+                      </a></li>
+                      
+                    </ul>
+                  
+                  
+                  
+                </div>
+                
+                </li>
+              
+                
+                <li><a
                   href='#recorder'
                   class=" toggle-sibling">
                   Recorder
@@ -1445,21 +1507,15 @@
                     <li class='h5'><span>Static members</span></li>
                     
                       <li><a
-                        href='#recordermagic'
+                        href='#recordersaveasfile'
                         class='regular pre-open'>
-                        .MAGIC
+                        .saveAsFile
                       </a></li>
                     
                       <li><a
-                        href='#recorderversion'
+                        href='#recorderloadfromfile'
                         class='regular pre-open'>
-                        .VERSION
-                      </a></li>
-                    
-                      <li><a
-                        href='#recordershowing_log'
-                        class='regular pre-open'>
-                        .SHOWING_LOG
+                        .loadFromFile
                       </a></li>
                     
                     </ul>
@@ -1502,12 +1558,6 @@
                         href='#recorderload'
                         class='regular pre-open'>
                         #load
-                      </a></li>
-                      
-                      <li><a
-                        href='#recorderparsedata'
-                        class='regular pre-open'>
-                        #parseData
                       </a></li>
                       
                       <li><a
@@ -9172,6 +9222,60 @@ div
     <div class='py1 quiet mt1 prose-big'>Instance Members</div>
     <div class="clearfix">
   
+    <div class='border-bottom' id='htmlmanagergetbasediv'>
+      <div class="clearfix small pointer toggle-sibling">
+        <div class="py1 contain">
+            <a class='icon pin-right py1 dark-link caret-right'>▸</a>
+            <span class='code strong strong truncate'>getBaseDiv()</span>
+        </div>
+      </div>
+      <div class="clearfix display-none toggle-target">
+        <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+
+  <p>Get base div element.</p>
+
+
+  <div class='pre p1 fill-light mt0'>getBaseDiv(): HTMLDivElememt</div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+
+  
+
+  
+    
+      <div class='py1 quiet mt1 prose-big'>Returns</div>
+      <code>HTMLDivElememt</code>:
+        base div element
+
+      
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+      </div>
+    </div>
+  
     <div class='border-bottom' id='htmlmanagercenter'>
       <div class="clearfix small pointer toggle-sibling">
         <div class="py1 contain">
@@ -13886,6 +13990,391 @@ px
   
   <div class='clearfix'>
     
+    <h3 class='fl m0' id='datadiff'>
+      DataDiff
+    </h3>
+    
+    
+  </div>
+  
+
+  
+
+  <div class='pre p1 fill-light mt0'>DataDiff</div>
+  
+    <p>
+      Type:
+      <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a>
+    </p>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Properties</div>
+    <div>
+      
+        <div class='space-bottom0'>
+          <span class='code bold'>plus</span> <code class='quiet'>(<a href="#recorddata">RecordData</a>)</code>
+          : plus data with current mouse position
+
+          
+        </div>
+      
+        <div class='space-bottom0'>
+          <span class='code bold'>minus</span> <code class='quiet'>(<a href="#recorddata">RecordData</a>)</code>
+          : minus data with previous mouse position
+
+          
+        </div>
+      
+    </div>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+          
+        
+          
+            <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+  <div class='clearfix'>
+    
+    <h3 class='fl m0' id='recorddata'>
+      RecordData
+    </h3>
+    
+    
+  </div>
+  
+
+  <p>Data for Recorder class.</p>
+
+
+  <div class='pre p1 fill-light mt0'>new RecordData(keyboard: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a>>, mouseButtons: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="#mousebutton">MouseButton</a>>, mousePosition: <a href="#vector2d">Vector2d</a>)</div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Parameters</div>
+    <div class='prose'>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>keyboard</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a>>)</code>
+	    pressing keyboard button names
+
+          </div>
+          
+        </div>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>mouseButtons</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="#mousebutton">MouseButton</a>>)</code>
+	    pressing mouse buttons
+
+          </div>
+          
+        </div>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>mousePosition</span> <code class='quiet'>(<a href="#vector2d">Vector2d</a>)</code>
+	    current mouse position
+
+          </div>
+          
+        </div>
+      
+    </div>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Instance Members</div>
+    <div class="clearfix">
+  
+    <div class='border-bottom' id='recorddatagetkeyboardbuttons'>
+      <div class="clearfix small pointer toggle-sibling">
+        <div class="py1 contain">
+            <a class='icon pin-right py1 dark-link caret-right'>▸</a>
+            <span class='code strong strong truncate'>getKeyboardButtons()</span>
+        </div>
+      </div>
+      <div class="clearfix display-none toggle-target">
+        <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+
+  <p>Get pressing keyboard buttons.</p>
+
+
+  <div class='pre p1 fill-light mt0'>getKeyboardButtons(): <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a>></div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+
+  
+
+  
+    
+      <div class='py1 quiet mt1 prose-big'>Returns</div>
+      <code><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a>></code>:
+        pressing keyboard buttons
+
+      
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+      </div>
+    </div>
+  
+    <div class='border-bottom' id='recorddatagetmousebuttons'>
+      <div class="clearfix small pointer toggle-sibling">
+        <div class="py1 contain">
+            <a class='icon pin-right py1 dark-link caret-right'>▸</a>
+            <span class='code strong strong truncate'>getMouseButtons()</span>
+        </div>
+      </div>
+      <div class="clearfix display-none toggle-target">
+        <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+
+  <p>Get pressing mouse buttons.</p>
+
+
+  <div class='pre p1 fill-light mt0'>getMouseButtons(): <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="#mousebutton">MouseButton</a>></div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+
+  
+
+  
+    
+      <div class='py1 quiet mt1 prose-big'>Returns</div>
+      <code><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="#mousebutton">MouseButton</a>></code>:
+        pressing mouse buttons
+
+      
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+      </div>
+    </div>
+  
+    <div class='border-bottom' id='recorddatagetmouseposition'>
+      <div class="clearfix small pointer toggle-sibling">
+        <div class="py1 contain">
+            <a class='icon pin-right py1 dark-link caret-right'>▸</a>
+            <span class='code strong strong truncate'>getMousePosition()</span>
+        </div>
+      </div>
+      <div class="clearfix display-none toggle-target">
+        <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+
+  <p>Get current mouse position.</p>
+
+
+  <div class='pre p1 fill-light mt0'>getMousePosition(): <a href="#vector2d">Vector2d</a></div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+
+  
+
+  
+    
+      <div class='py1 quiet mt1 prose-big'>Returns</div>
+      <code><a href="#vector2d">Vector2d</a></code>:
+        current mouse position
+
+      
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+      </div>
+    </div>
+  
+    <div class='border-bottom' id='recorddatadifference'>
+      <div class="clearfix small pointer toggle-sibling">
+        <div class="py1 contain">
+            <a class='icon pin-right py1 dark-link caret-right'>▸</a>
+            <span class='code strong strong truncate'>difference(previous)</span>
+        </div>
+      </div>
+      <div class="clearfix display-none toggle-target">
+        <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+
+  <p>Returns difference from previous data.</p>
+
+
+  <div class='pre p1 fill-light mt0'>difference(previous: <a href="#recorddata">RecordData</a>): <a href="#datadiff">DataDiff</a></div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Parameters</div>
+    <div class='prose'>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>previous</span> <code class='quiet'>(<a href="#recorddata">RecordData</a>)</code>
+	    previous data
+
+          </div>
+          
+        </div>
+      
+    </div>
+  
+
+  
+
+  
+    
+      <div class='py1 quiet mt1 prose-big'>Returns</div>
+      <code><a href="#datadiff">DataDiff</a></code>:
+        difference
+
+      
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+      </div>
+    </div>
+  
+</div>
+
+  
+
+  
+</section>
+
+          
+        
+          
+            <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+  <div class='clearfix'>
+    
     <h3 class='fl m0' id='recorder'>
       Recorder
     </h3>
@@ -13922,11 +14411,11 @@ px
     <div class='py1 quiet mt1 prose-big'>Static Members</div>
     <div class="clearfix">
   
-    <div class='border-bottom' id='recordermagic'>
+    <div class='border-bottom' id='recordersaveasfile'>
       <div class="clearfix small pointer toggle-sibling">
         <div class="py1 contain">
             <a class='icon pin-right py1 dark-link caret-right'>▸</a>
-            <span class='code strong strong truncate'>MAGIC</span>
+            <span class='code strong strong truncate'>saveAsFile(binary, fileName)</span>
         </div>
       </div>
       <div class="clearfix display-none toggle-target">
@@ -13934,24 +14423,56 @@ px
 
   
 
-  <p>Magic number of Recorder.js.</p>
+  <p>Save binary data as file using File API.</p>
 
 
-  <div class='pre p1 fill-light mt0'>MAGIC</div>
-  
-  
-
-  
-  
-  
-  
+  <div class='pre p1 fill-light mt0'>saveAsFile(binary: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Uint8Array">Uint8Array</a>, fileName: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a>): void</div>
   
   
 
   
+  
+  
+  
+  
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Parameters</div>
+    <div class='prose'>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>binary</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Uint8Array">Uint8Array</a>)</code>
+	    binary data
+
+          </div>
+          
+        </div>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>fileName</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a>
+            = <code>&#39;autorun.savedata&#39;</code>)</code>
+	    file name
+
+          </div>
+          
+        </div>
+      
+    </div>
+  
 
   
 
+  
+    
+      <div class='py1 quiet mt1 prose-big'>Returns</div>
+      <code>void</code>:
+        
+
+      
+    
   
 
   
@@ -13968,11 +14489,11 @@ px
       </div>
     </div>
   
-    <div class='border-bottom' id='recorderversion'>
+    <div class='border-bottom' id='recorderloadfromfile'>
       <div class="clearfix small pointer toggle-sibling">
         <div class="py1 contain">
             <a class='icon pin-right py1 dark-link caret-right'>▸</a>
-            <span class='code strong strong truncate'>VERSION</span>
+            <span class='code strong strong truncate'>loadFromFile(target)</span>
         </div>
       </div>
       <div class="clearfix display-none toggle-target">
@@ -13980,70 +14501,46 @@ px
 
   
 
-  <p>Version number of Recorder.js.</p>
+  <p>Load data from a file using File API.</p>
 
 
-  <div class='pre p1 fill-light mt0'>VERSION</div>
-  
-  
-
-  
-  
-  
-  
+  <div class='pre p1 fill-light mt0'>loadFromFile(target: EventTarget): <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promise</a></div>
   
   
 
   
-
+  
+  
+  
+  
   
 
   
+    <div class='py1 quiet mt1 prose-big'>Parameters</div>
+    <div class='prose'>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>target</span> <code class='quiet'>(EventTarget)</code>
+	    trigger for opening file
 
-  
-
-  
-
-  
-
-  
-
-  
-</section>
-
-      </div>
+          </div>
+          
+        </div>
+      
     </div>
   
-    <div class='border-bottom' id='recordershowing_log'>
-      <div class="clearfix small pointer toggle-sibling">
-        <div class="py1 contain">
-            <a class='icon pin-right py1 dark-link caret-right'>▸</a>
-            <span class='code strong strong truncate'>SHOWING_LOG</span>
-        </div>
-      </div>
-      <div class="clearfix display-none toggle-target">
-        <section class='p2 mb2 clearfix bg-white minishadow'>
-
-  
-
-  <p>Number of showing log at once.</p>
-
-
-  <div class='pre p1 fill-light mt0'>SHOWING_LOG</div>
-  
-  
-
-  
-  
-  
-  
-  
-  
 
   
 
   
+    
+      <div class='py1 quiet mt1 prose-big'>Returns</div>
+      <code><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promise</a></code>:
+        promise object resolving binary data
 
+      
+    
   
 
   
@@ -14143,7 +14640,7 @@ px
       <div class="clearfix small pointer toggle-sibling">
         <div class="py1 contain">
             <a class='icon pin-right py1 dark-link caret-right'>▸</a>
-            <span class='code strong strong truncate'>startRecord(title = null)</span>
+            <span class='code strong strong truncate'>startRecord(title)</span>
         </div>
       </div>
       <div class="clearfix display-none toggle-target">
@@ -14154,7 +14651,7 @@ px
   <p>Start recording.</p>
 
 
-  <div class='pre p1 fill-light mt0'>startRecord(title: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a>?): void</div>
+  <div class='pre p1 fill-light mt0'>startRecord(title: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a>): void</div>
   
   
 
@@ -14171,8 +14668,8 @@ px
       
         <div class='space-bottom0'>
           <div>
-            <span class='code bold'>title</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a>?
-            = <code>null</code>)</code>
+            <span class='code bold'>title</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a>
+            = <code>&#39;!NO TITLE!&#39;</code>)</code>
 	    game title
 
           </div>
@@ -14357,7 +14854,7 @@ px
       <div class="clearfix small pointer toggle-sibling">
         <div class="py1 contain">
             <a class='icon pin-right py1 dark-link caret-right'>▸</a>
-            <span class='code strong strong truncate'>save(fileName)</span>
+            <span class='code strong strong truncate'>save()</span>
         </div>
       </div>
       <div class="clearfix display-none toggle-target">
@@ -14368,7 +14865,7 @@ px
   <p>Save as a file.</p>
 
 
-  <div class='pre p1 fill-light mt0'>save(fileName: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a>): void</div>
+  <div class='pre p1 fill-light mt0'>save(): <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Uint8Array">Uint8Array</a></div>
   
   
 
@@ -14379,21 +14876,6 @@ px
   
   
 
-  
-    <div class='py1 quiet mt1 prose-big'>Parameters</div>
-    <div class='prose'>
-      
-        <div class='space-bottom0'>
-          <div>
-            <span class='code bold'>fileName</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a>
-            = <code>&#39;savedata&#39;</code>)</code>
-	    name of save file
-
-          </div>
-          
-        </div>
-      
-    </div>
   
 
   
@@ -14401,8 +14883,8 @@ px
   
     
       <div class='py1 quiet mt1 prose-big'>Returns</div>
-      <code>void</code>:
-        
+      <code><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Uint8Array">Uint8Array</a></code>:
+        binary save data
 
       
     
@@ -14426,7 +14908,7 @@ px
       <div class="clearfix small pointer toggle-sibling">
         <div class="py1 contain">
             <a class='icon pin-right py1 dark-link caret-right'>▸</a>
-            <span class='code strong strong truncate'>load(target)</span>
+            <span class='code strong strong truncate'>load(binary)</span>
         </div>
       </div>
       <div class="clearfix display-none toggle-target">
@@ -14437,75 +14919,7 @@ px
   <p>Load a record data.</p>
 
 
-  <div class='pre p1 fill-light mt0'>load(target: EventTarget): <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promise</a></div>
-  
-  
-
-  
-  
-  
-  
-  
-  
-
-  
-    <div class='py1 quiet mt1 prose-big'>Parameters</div>
-    <div class='prose'>
-      
-        <div class='space-bottom0'>
-          <div>
-            <span class='code bold'>target</span> <code class='quiet'>(EventTarget)</code>
-	    event target
-
-          </div>
-          
-        </div>
-      
-    </div>
-  
-
-  
-
-  
-    
-      <div class='py1 quiet mt1 prose-big'>Returns</div>
-      <code><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promise</a></code>:
-        resolve if loading is completed
-
-      
-    
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-</section>
-
-      </div>
-    </div>
-  
-    <div class='border-bottom' id='recorderparsedata'>
-      <div class="clearfix small pointer toggle-sibling">
-        <div class="py1 contain">
-            <a class='icon pin-right py1 dark-link caret-right'>▸</a>
-            <span class='code strong strong truncate'>parseData(binary)</span>
-        </div>
-      </div>
-      <div class="clearfix display-none toggle-target">
-        <section class='p2 mb2 clearfix bg-white minishadow'>
-
-  
-
-  <p>Parse binary to data.</p>
-
-
-  <div class='pre p1 fill-light mt0'>parseData(binary: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Uint8Array">Uint8Array</a>): void</div>
+  <div class='pre p1 fill-light mt0'>load(binary: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Uint8Array">Uint8Array</a>): <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean">boolean</a></div>
   
   
 
@@ -14537,13 +14951,20 @@ px
   
     
       <div class='py1 quiet mt1 prose-big'>Returns</div>
-      <code>void</code>:
-        
+      <code><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean">boolean</a></code>:
+        if loading is successful
 
       
     
   
 
+  
+    <div class='py1 quiet mt1 prose-big'>Throws</div>
+    <ul>
+      
+        <li><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Error">Error</a>: </li>
+      
+    </ul>
   
 
   
