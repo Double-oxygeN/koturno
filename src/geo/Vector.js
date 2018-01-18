@@ -18,7 +18,7 @@ import Logger from '../logger/Logger.js';
 
 /**
  * Class representing vector.
- * @param {number[]} vector vector
+ * @param {...number} vector vector
  */
 export default class Vector {
   constructor(...vector) {

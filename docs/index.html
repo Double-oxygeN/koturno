@@ -1439,16 +1439,6 @@
               
                 
                 <li><a
-                  href='#datadiff'
-                  class="">
-                  DataDiff
-                  
-                </a>
-                
-                </li>
-              
-                
-                <li><a
                   href='#recorddata'
                   class=" toggle-sibling">
                   RecordData
@@ -1490,6 +1480,16 @@
                   
                   
                 </div>
+                
+                </li>
+              
+                
+                <li><a
+                  href='#datadiff'
+                  class="">
+                  DataDiff
+                  
+                </a>
                 
                 </li>
               
@@ -7645,7 +7645,7 @@
   <p>Class representing vector.</p>
 
 
-  <div class='pre p1 fill-light mt0'>new Vector(vector: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>>)</div>
+  <div class='pre p1 fill-light mt0'>new Vector(vector: ...<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>)</div>
   
   
 
@@ -7662,7 +7662,7 @@
       
         <div class='space-bottom0'>
           <div>
-            <span class='code bold'>vector</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>>)</code>
+            <span class='code bold'>vector</span> <code class='quiet'>(...<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>)</code>
 	    vector
 
           </div>
@@ -9609,7 +9609,7 @@ div
       <div class="clearfix small pointer toggle-sibling">
         <div class="py1 contain">
             <a class='icon pin-right py1 dark-link caret-right'>▸</a>
-            <span class='code strong strong truncate'>sendTimeline(counters, action)</span>
+            <span class='code strong strong truncate'>sendTimeline(counters, recorder)</span>
         </div>
       </div>
       <div class="clearfix display-none toggle-target">
@@ -9620,7 +9620,7 @@ div
   <p>Send information of timeline.</p>
 
 
-  <div class='pre p1 fill-light mt0'>sendTimeline(counters: <a href="#counters">Counters</a>, action: <a href="#actionmanager">ActionManager</a>): <a href="#htmlmanager">HtmlManager</a></div>
+  <div class='pre p1 fill-light mt0'>sendTimeline(counters: <a href="#counters">Counters</a>, recorder: <a href="#recorder">Recorder</a>): <a href="#htmlmanager">HtmlManager</a></div>
   
   
 
@@ -9646,8 +9646,8 @@ div
       
         <div class='space-bottom0'>
           <div>
-            <span class='code bold'>action</span> <code class='quiet'>(<a href="#actionmanager">ActionManager</a>)</code>
-	    action manager
+            <span class='code bold'>recorder</span> <code class='quiet'>(<a href="#recorder">Recorder</a>)</code>
+	    recorder
 
           </div>
           
@@ -14012,76 +14012,6 @@ px
   
   <div class='clearfix'>
     
-    <h3 class='fl m0' id='datadiff'>
-      DataDiff
-    </h3>
-    
-    
-  </div>
-  
-
-  
-
-  <div class='pre p1 fill-light mt0'>DataDiff</div>
-  
-    <p>
-      Type:
-      <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a>
-    </p>
-  
-  
-
-  
-  
-  
-  
-  
-  
-
-  
-
-  
-    <div class='py1 quiet mt1 prose-big'>Properties</div>
-    <div>
-      
-        <div class='space-bottom0'>
-          <span class='code bold'>plus</span> <code class='quiet'>(<a href="#recorddata">RecordData</a>)</code>
-          : plus data with current mouse position
-
-          
-        </div>
-      
-        <div class='space-bottom0'>
-          <span class='code bold'>minus</span> <code class='quiet'>(<a href="#recorddata">RecordData</a>)</code>
-          : minus data with previous mouse position
-
-          
-        </div>
-      
-    </div>
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-</section>
-
-          
-        
-          
-            <section class='p2 mb2 clearfix bg-white minishadow'>
-
-  
-  <div class='clearfix'>
-    
     <h3 class='fl m0' id='recorddata'>
       RecordData
     </h3>
@@ -14383,6 +14313,76 @@ px
     </div>
   
 </div>
+
+  
+
+  
+</section>
+
+          
+        
+          
+            <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+  <div class='clearfix'>
+    
+    <h3 class='fl m0' id='datadiff'>
+      DataDiff
+    </h3>
+    
+    
+  </div>
+  
+
+  
+
+  <div class='pre p1 fill-light mt0'>DataDiff</div>
+  
+    <p>
+      Type:
+      <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a>
+    </p>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Properties</div>
+    <div>
+      
+        <div class='space-bottom0'>
+          <span class='code bold'>plus</span> <code class='quiet'>(<a href="#recorddata">RecordData</a>)</code>
+          : plus data with current mouse position
+
+          
+        </div>
+      
+        <div class='space-bottom0'>
+          <span class='code bold'>minus</span> <code class='quiet'>(<a href="#recorddata">RecordData</a>)</code>
+          : minus data with previous mouse position
+
+          
+        </div>
+      
+    </div>
+  
+
+  
+
+  
+
+  
+
+  
 
   
 
