@@ -16,6 +16,8 @@
 
 import {} from 'https://use.fontawesome.com/releases/v5.0.3/js/solid.js';
 import {} from 'https://use.fontawesome.com/releases/v5.0.3/js/fontawesome.js';
+import Painter2d from './painter/Painter2d.js';
+import ImageManager from './resource/ImageManager.js';
 
 const _privates = new WeakMap();
 const getPrivates = self => {
@@ -155,7 +157,13 @@ const basicKoturnoStyle = (width, height) => `.koturno {
 
 .koturno-timeline {
   grid-area: 4 / 1 / 5 / 3;
-}`;
+  border: none;
+}
+
+.koturno-timeline canvas {
+  transform-origin: left top;
+}
+`;
 
 const applyCSS = (width, height) => {
   const style = document.createElement('style');
@@ -272,6 +280,9 @@ export default class HtmlManager {
 
     privates.mainCanvas = createCanvasElement(canvasWidth, canvasHeight, 2);
     privates.subCanvas = createCanvasElement(canvasWidth, canvasHeight, 4);
+    privates.timelineCanvas = createCanvasElement(canvasWidth * 3 / 2, canvasHeight / 2, 0);
+
+    privates.timelinePainter = new Painter2d(privates.timelineCanvas, new ImageManager([]));
 
     privates.baseDiv = document.getElementById(baseDivId);
     smallDivNames.forEach(name => {
@@ -300,6 +311,7 @@ export default class HtmlManager {
 
     privates.canvasDiv.appendChild(privates.mainCanvas);
     privates.canvasDiv.appendChild(privates.subCanvas);
+    privates.timelineDiv.appendChild(privates.timelineCanvas);
 
     privates.expansionRate = 1;
   }
@@ -374,7 +386,7 @@ export default class HtmlManager {
     applyCSS(privates.canvasWidth, privates.canvasHeight);
 
     const onResize = () => {
-      [privates.mainCanvas, privates.subCanvas].forEach(canvas => {
+      [privates.mainCanvas, privates.subCanvas, privates.timelineCanvas].forEach(canvas => {
         canvas.setAttribute('style', `transform: scale(${privates.expansionRate * 2 / 3}, ${privates.expansionRate * 2 / 3});`);
       });
     };
@@ -413,10 +425,11 @@ export default class HtmlManager {
   /**
    * Send information of timeline.
    * @param {Counters} counters counters
-   * @param {ActionManager} action action manager
+   * @param {Recorder} recorder recorder
    * @returns {HtmlManager} this
    */
-  sendTimeline(counters, action) {
+  sendTimeline(counters, recorder) {
+    recorder.printTimeline(getPrivates(this).timelinePainter, counters.general);
     return this;
   }
 
