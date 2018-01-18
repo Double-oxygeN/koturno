@@ -31,6 +31,12 @@ const getPrivates = self => {
   return p;
 };
 
+/**
+ * @typedef {Object} DetailedState
+ * @property {State} state state
+ * @property {number} frame frame number of the state
+ */
+
 /** @private @enum {number} */
 const Mode = {
   READ: 0b00100000,
@@ -137,6 +143,9 @@ export default class Recorder {
     privates.rerecord = 0;
     /** @private @member {string} */
     privates.title = '';
+
+    /** @private @member {DetailedState[]} */
+    privates.savedStateStack = [];
   }
 
   /**
@@ -196,6 +205,24 @@ export default class Recorder {
   }
 
   /**
+   * Push state to the stack.
+   * @param {State} state state at the frame
+   * @param {number} frame current frame number
+   * @returns {void}
+   */
+  pushState(state, frame) {
+    getPrivates(this).savedStateStack.push({ state, frame });
+  }
+
+  /**
+   * Pop state from the stack.
+   * @returns {DetailedState} state with frame number
+   */
+  popState() {
+    return getPrivates(this).savedStateStack.pop();
+  }
+
+  /**
    * Reset data after the frame.
    * @param {number} frame the frame number
    * @returns {void}
@@ -212,13 +239,13 @@ export default class Recorder {
 
   /**
    * Save as a file.
-   * @returns {Uint8Array} binary save data
+   * @returns {?Uint8Array} binary save data
    */
   save() {
     // TODO
     const privates = getPrivates(this);
     // this method runs only when the mode is writing mode.
-    if (privates.mode === Mode.READ) return;
+    if (privates.mode === Mode.READ) return null;
 
     privates.endTime = Date.now();
 
@@ -466,6 +493,7 @@ export default class Recorder {
    * @returns {void}
    */
   printTimeline(painter, frame) {
+    const privates = getPrivates(this);
     const LOG_HEIGHT = painter.height / SHOWING_LOG;
     const LOG_MARK_WIDTH = painter.width / 20;
     const LOG_FRAME_WIDTH = painter.width / 5;
@@ -482,13 +510,13 @@ export default class Recorder {
         return `${Math.floor(seconds / 3600).toString(10)}h${(Math.floor(seconds / 60) % 60).toString(10)}m${(seconds % 60).toFixed(2)}s`;
       }
       return `${Math.floor(seconds / 86400).toString(10)}d${(Math.floor(seconds / 3600) % 24).toString(10)}h${(Math.floor(seconds / 60) % 60).toString(10)}m${(seconds % 60).toFixed(2)}s`;
-
     };
+
     painter.background('#000');
     for (let i = 0; i < SHOWING_LOG; i++) {
       if (i > frame) break;
 
-      const FRAME_DATA = this.data[frame - i];
+      const FRAME_DATA = privates.data[frame - i];
       painter.rect(0, painter.height - LOG_HEIGHT * (i + 1), LOG_MARK_WIDTH, LOG_HEIGHT).stroke('#0f0', { width: 1 });
       painter.rect(LOG_MARK_WIDTH, painter.height - LOG_HEIGHT * (i + 1), LOG_FRAME_WIDTH, LOG_HEIGHT).stroke('#0f0');
       painter.rect(LOG_MARK_WIDTH + LOG_FRAME_WIDTH, painter.height - LOG_HEIGHT * (i + 1), LOG_TIME_WIDTH, LOG_HEIGHT).stroke('#0f0');
@@ -497,8 +525,8 @@ export default class Recorder {
       painter.text('-', LOG_MARK_WIDTH / 2, painter.height - LOG_HEIGHT * (i + 0.5), { size: LOG_HEIGHT / 2, align: 'center', baseline: 'middle' }).fill('#0f0');
       painter.text(`${(frame - i).toString(10)}f`, LOG_MARK_WIDTH + LOG_FRAME_WIDTH / 2, painter.height - LOG_HEIGHT * (i + 0.5)).fill('#0f0');
       painter.text(frameToTime(frame - i), LOG_MARK_WIDTH + LOG_FRAME_WIDTH + LOG_TIME_WIDTH / 2, painter.height - LOG_HEIGHT * (i + 0.5)).fill('#0f0');
-      painter.text(FRAME_DATA.keyboard.toString(), LOG_MARK_WIDTH + LOG_FRAME_WIDTH + LOG_TIME_WIDTH + LOG_KEYBOARD_WIDTH / 2, painter.height - LOG_HEIGHT * (i + 0.5)).fill('#0f0');
-      painter.text(`(${FRAME_DATA.mousePosition.x}, ${FRAME_DATA.mousePosition.y})`, LOG_MARK_WIDTH + LOG_FRAME_WIDTH + LOG_TIME_WIDTH + LOG_KEYBOARD_WIDTH + LOG_MOUSE_WIDTH / 2, painter.height - LOG_HEIGHT * (i + 0.5)).fill('#0f0');
+      painter.text(FRAME_DATA.getKeyboardButtons().toString(), LOG_MARK_WIDTH + LOG_FRAME_WIDTH + LOG_TIME_WIDTH + LOG_KEYBOARD_WIDTH / 2, painter.height - LOG_HEIGHT * (i + 0.5)).fill('#0f0');
+      painter.text(`(${FRAME_DATA.getMousePosition().x}, ${FRAME_DATA.getMousePosition().y})`, LOG_MARK_WIDTH + LOG_FRAME_WIDTH + LOG_TIME_WIDTH + LOG_KEYBOARD_WIDTH + LOG_MOUSE_WIDTH / 2, painter.height - LOG_HEIGHT * (i + 0.5)).fill('#0f0');
     }
   }
 

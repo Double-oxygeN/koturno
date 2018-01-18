@@ -1495,6 +1495,16 @@
               
                 
                 <li><a
+                  href='#detailedstate'
+                  class="">
+                  DetailedState
+                  
+                </a>
+                
+                </li>
+              
+                
+                <li><a
                   href='#recorder'
                   class=" toggle-sibling">
                   Recorder
@@ -1540,6 +1550,18 @@
                         href='#recorderstoreaction'
                         class='regular pre-open'>
                         #storeAction
+                      </a></li>
+                      
+                      <li><a
+                        href='#recorderpushstate'
+                        class='regular pre-open'>
+                        #pushState
+                      </a></li>
+                      
+                      <li><a
+                        href='#recorderpopstate'
+                        class='regular pre-open'>
+                        #popState
                       </a></li>
                       
                       <li><a
@@ -14375,6 +14397,76 @@ px
   
   <div class='clearfix'>
     
+    <h3 class='fl m0' id='detailedstate'>
+      DetailedState
+    </h3>
+    
+    
+  </div>
+  
+
+  
+
+  <div class='pre p1 fill-light mt0'>DetailedState</div>
+  
+    <p>
+      Type:
+      <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a>
+    </p>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Properties</div>
+    <div>
+      
+        <div class='space-bottom0'>
+          <span class='code bold'>state</span> <code class='quiet'>(<a href="#state">State</a>)</code>
+          : state
+
+          
+        </div>
+      
+        <div class='space-bottom0'>
+          <span class='code bold'>frame</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>)</code>
+          : frame number of the state
+
+          
+        </div>
+      
+    </div>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+          
+        
+          
+            <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+  <div class='clearfix'>
+    
     <h3 class='fl m0' id='recorder'>
       Recorder
     </h3>
@@ -14782,6 +14874,137 @@ px
       </div>
     </div>
   
+    <div class='border-bottom' id='recorderpushstate'>
+      <div class="clearfix small pointer toggle-sibling">
+        <div class="py1 contain">
+            <a class='icon pin-right py1 dark-link caret-right'>▸</a>
+            <span class='code strong strong truncate'>pushState(state, frame)</span>
+        </div>
+      </div>
+      <div class="clearfix display-none toggle-target">
+        <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+
+  <p>Push state to the stack.</p>
+
+
+  <div class='pre p1 fill-light mt0'>pushState(state: <a href="#state">State</a>, frame: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>): void</div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Parameters</div>
+    <div class='prose'>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>state</span> <code class='quiet'>(<a href="#state">State</a>)</code>
+	    state at the frame
+
+          </div>
+          
+        </div>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>frame</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>)</code>
+	    current frame number
+
+          </div>
+          
+        </div>
+      
+    </div>
+  
+
+  
+
+  
+    
+      <div class='py1 quiet mt1 prose-big'>Returns</div>
+      <code>void</code>:
+        
+
+      
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+      </div>
+    </div>
+  
+    <div class='border-bottom' id='recorderpopstate'>
+      <div class="clearfix small pointer toggle-sibling">
+        <div class="py1 contain">
+            <a class='icon pin-right py1 dark-link caret-right'>▸</a>
+            <span class='code strong strong truncate'>popState()</span>
+        </div>
+      </div>
+      <div class="clearfix display-none toggle-target">
+        <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+
+  <p>Pop state from the stack.</p>
+
+
+  <div class='pre p1 fill-light mt0'>popState(): <a href="#detailedstate">DetailedState</a></div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+
+  
+
+  
+    
+      <div class='py1 quiet mt1 prose-big'>Returns</div>
+      <code><a href="#detailedstate">DetailedState</a></code>:
+        state with frame number
+
+      
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+      </div>
+    </div>
+  
     <div class='border-bottom' id='recorderresetafter'>
       <div class="clearfix small pointer toggle-sibling">
         <div class="py1 contain">
@@ -14865,7 +15088,7 @@ px
   <p>Save as a file.</p>
 
 
-  <div class='pre p1 fill-light mt0'>save(): <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Uint8Array">Uint8Array</a></div>
+  <div class='pre p1 fill-light mt0'>save(): <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Uint8Array">Uint8Array</a>?</div>
   
   
 
@@ -14883,7 +15106,7 @@ px
   
     
       <div class='py1 quiet mt1 prose-big'>Returns</div>
-      <code><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Uint8Array">Uint8Array</a></code>:
+      <code><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Uint8Array">Uint8Array</a>?</code>:
         binary save data
 
       

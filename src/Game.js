@@ -272,6 +272,7 @@ export default class Game {
         if (debug) {
           // privates.divManager.updateDebugInfo(counters, recorder);
           privates.htmlManager.sendCounters(counters);
+          privates.htmlManager.sendTimeline(counters, recorder);
         }
 
         privates.action.resetAction();
@@ -304,6 +305,7 @@ export default class Game {
       if (debug) {
         // privates.divManager.updateDebugInfo(counters, recorder);
         privates.htmlManager.sendCounters(counters);
+        privates.htmlManager.sendTimeline(counters, recorder);
       }
     };
 
