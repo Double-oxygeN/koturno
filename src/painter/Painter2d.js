@@ -18,6 +18,87 @@ import Painter from './Painter.js';
 import { Directions } from '../geo/Directions.js';
 
 /**
+ * Operations to paint the path.
+ * @typedef {Object} PathOperations
+ * @property {function} fill fill the path
+ * @property {function} stroke stroke the path
+ * @property {function} outlined fill the path with outline
+ * @property {function} clipAndDraw clip the path and draw
+ */
+
+/**
+ * @private
+ * @param {Painter2d} self this
+ * @returns {PathOperations} path operations
+ */
+const getPathOperations = self => ({
+  /**
+   * Fill the path.
+   * @param {(string|CanvasGradient|CanvasPattern)} style fill style
+   * @returns {void}
+   */
+  fill: style => {
+    self.context.fillStyle = style;
+    self.context.fill();
+  },
+  /**
+   * Stroke the path.
+   * @param {(string|CanvasGradient|CanvasPattern)} style stroke style
+   * @param {Object} [opt = {}] options
+   * @param {number} [opt.width] line width
+   * @param {string} [opt.cap] line cap
+   * @param {string} [opt.join] line join
+   * @param {number} [opt.miterLimit] line miter limit
+   * @param {number[]} [opt.dash] line dash
+   * @param {number} [opt.dashOffset] line dash offset
+   * @returns {void}
+   */
+  stroke: (style, opt = {}) => {
+    // configuration
+    if ('width' in opt) self.recentLineOptions.width = opt.width;
+    if ('cap' in opt) self.recentLineOptions.cap = opt.cap;
+    if ('join' in opt) self.recentLineOptions.join = opt.join;
+    if ('miterLimit' in opt) self.context.miterLimit = self.recentLineOptions.miterLimit = opt.miterLimit;
+    if ('dash' in opt) self.context.setLineDash(self.recentLineOptions.dash = opt.dash);
+    if ('dashOffset' in opt) self.context.lineDashOffset = self.recentLineOptions.dashOffset = opt.dashOffset;
+
+    self.context.lineWidth = self.recentLineOptions.width;
+    self.context.lineCap = self.recentLineOptions.cap;
+    self.context.lineJoin = self.recentLineOptions.join;
+
+    self.context.strokeStyle = style;
+    self.context.stroke();
+  },
+  /**
+   * Fill the path with outline.
+   * @param {(string|CanvasGradient|CanvasPattern)} innerStyle fill style
+   * @param {(string|CanvasGradient|CanvasPattern)} outerStyle stroke style
+   * @param {number} [lineWidth=1] line width
+   * @returns {void}
+   */
+  outlined: (innerStyle, outerStyle, lineWidth = 1) => {
+    self.context.fillStyle = innerStyle;
+    self.context.strokeStyle = outerStyle;
+    self.context.lineCap = 'round';
+    self.context.lineJoin = 'round';
+    self.context.lineWidth = lineWidth * 2;
+    self.context.stroke();
+    self.context.fill();
+  },
+  /**
+   * Clip the path and draw.
+   * @param {function} cb callback function
+   * @returns {void}
+   */
+  clipAndDraw: cb => {
+    self.context.save();
+    self.context.clip();
+    cb();
+    self.context.restore();
+  }
+});
+
+/**
  * Class of 2-dimentional graphics.
  * @param {HTMLCanvasElement} canvas canvas element to paint
  * @param {ImageManager} imageManager image manager
@@ -69,82 +150,6 @@ export default class Painter2d extends Painter {
   }
 
   /**
-   * @member {Object}
-   */
-  get pathOperations() {
-    return {
-      /**
-       * Fill the path.
-       * @param {(string|CanvasGradient|CanvasPattern)} style fill style
-       * @memberof Painter2d#pathOperations
-       * @returns {void}
-       */
-      fill: style => {
-        this.context.fillStyle = style;
-        this.context.fill();
-      },
-      /**
-       * Stroke the path.
-       * @param {(string|CanvasGradient|CanvasPattern)} style stroke style
-       * @param {Object} [opt = {}] options
-       * @param {number} [opt.width] line width
-       * @param {string} [opt.cap] line cap
-       * @param {string} [opt.join] line join
-       * @param {number} [opt.miterLimit] line miter limit
-       * @param {number[]} [opt.dash] line dash
-       * @param {number} [opt.dashOffset] line dash offset
-       * @memberof Painter2d#pathOperations
-       * @returns {void}
-       */
-      stroke: (style, opt = {}) => {
-        // configuration
-        if ('width' in opt) this.recentLineOptions.width = opt.width;
-        if ('cap' in opt) this.recentLineOptions.cap = opt.cap;
-        if ('join' in opt) this.recentLineOptions.join = opt.join;
-        if ('miterLimit' in opt) this.context.miterLimit = this.recentLineOptions.miterLimit = opt.miterLimit;
-        if ('dash' in opt) this.context.setLineDash(this.recentLineOptions.dash = opt.dash);
-        if ('dashOffset' in opt) this.context.lineDashOffset = this.recentLineOptions.dashOffset = opt.dashOffset;
-
-        this.context.lineWidth = this.recentLineOptions.width;
-        this.context.lineCap = this.recentLineOptions.cap;
-        this.context.lineJoin = this.recentLineOptions.join;
-
-        this.context.strokeStyle = style;
-        this.context.stroke();
-      },
-      /**
-       * Fill the path with outline.
-       * @param {(string|CanvasGradient|CanvasPattern)} innerStyle fill style
-       * @param {(string|CanvasGradient|CanvasPattern)} outerStyle stroke style
-       * @param {number} [lineWidth=1] line width
-       * @memberof Painter2d#pathOperations
-       * @returns {void}
-       */
-      outlined: (innerStyle, outerStyle, lineWidth = 1) => {
-        this.context.fillStyle = innerStyle;
-        this.context.strokeStyle = outerStyle;
-        this.context.lineCap = 'round';
-        this.context.lineJoin = 'round';
-        this.context.lineWidth = lineWidth * 2;
-        this.context.stroke();
-        this.context.fill();
-      },
-      /**
-       * Clip the path and draw.
-       * @param {function} cb callback function
-       * @memberof Painter2d#pathOperations
-       * @returns {void}
-       */
-      clipAndDraw: cb => {
-        this.context.save();
-        this.context.clip();
-        cb();
-        this.context.restore();
-      }
-    };
-  }
-
-  /**
    * Clear the canvas.
    * @returns {void}
    */
@@ -167,13 +172,13 @@ export default class Painter2d extends Painter {
    * @param {number} y y-coordinate of the uppermost point
    * @param {number} w width
    * @param {number} h height
-   * @returns {Object} path operations
+   * @returns {PathOperations} path operations
    */
   rect(x, y, w, h) {
     this.context.beginPath();
     this.context.rect(x, y, w, h);
     this.context.closePath();
-    return this.pathOperations;
+    return getPathOperations(this);
   }
 
   /**
@@ -183,7 +188,7 @@ export default class Painter2d extends Painter {
    * @param {number} w width
    * @param {number} h height
    * @param {number} r radius of the corner
-   * @returns {Object} path operations
+   * @returns {PathOperations} path operations
    */
   roundRect(x, y, w, h, r) {
     const hw = w / 2;
@@ -196,7 +201,7 @@ export default class Painter2d extends Painter {
     this.context.arcTo(x + w, y + h, x + w, y + hh, _r);
     this.context.arcTo(x + w, y, x + hw, y, _r);
     this.context.closePath();
-    return this.pathOperations;
+    return getPathOperations(this);
   }
 
   /**
@@ -204,13 +209,13 @@ export default class Painter2d extends Painter {
    * @param {number} x x-coordinate of the center point
    * @param {number} y y-coordinate of the center point
    * @param {number} r radius
-   * @returns {Object} path operations
+   * @returns {PathOperations} path operations
    */
   circle(x, y, r) {
     this.context.beginPath();
     this.context.arc(x, y, Math.abs(r), -Math.PI, Math.PI);
     this.context.closePath();
-    return this.pathOperations;
+    return getPathOperations(this);
   }
 
   /**
@@ -220,13 +225,13 @@ export default class Painter2d extends Painter {
    * @param {number} radiusX major-axis radius
    * @param {number} radiusY minor-axis radius
    * @param {number} [rotation=0] the rotation for the ellipse, expressed in radius
-   * @returns {Object} path operations
+   * @returns {PathOperations} path operations
    */
   ellipse(x, y, radiusX, radiusY, rotation = 0) {
     this.context.beginPath();
     this.context.ellipse(x, y, Math.abs(radiusX), Math.abs(radiusY), rotation, -Math.PI, Math.PI);
     this.context.closePath();
-    return this.pathOperations;
+    return getPathOperations(this);
   }
 
   /**
@@ -242,7 +247,7 @@ export default class Painter2d extends Painter {
       this.context.lineTo(vertex.x, vertex.y);
     });
     this.context.closePath();
-    return this.pathOperations;
+    return getPathOperations(this);
   }
 
   /**
@@ -251,7 +256,7 @@ export default class Painter2d extends Painter {
    * @param {number} y y-coordinate of the uppermost point
    * @param {number} w width
    * @param {number} h height
-   * @returns {Object} path operations
+   * @returns {PathOperations} path operations
    */
   diamond(x, y, w, h) {
     this.context.beginPath();
@@ -260,7 +265,7 @@ export default class Painter2d extends Painter {
     this.context.lineTo(x + w / 2, y + h);
     this.context.lineTo(x + w, y + h / 2);
     this.context.closePath();
-    return this.pathOperations;
+    return getPathOperations(this);
   }
 
   /**
@@ -274,7 +279,7 @@ export default class Painter2d extends Painter {
    * @param {string} [opt.align] text alignment (start, end, left, right, center)
    * @param {string} [opt.baseline] baseline alignment (top, hanging, middle, alphabetic, ideographic, bottom)
    * @param {string} [opt.lineHeight] line height
-   * @returns {Object} path operations
+   * @returns {PathOperations} path operations
    */
   text(str, x, y, opt = {}) {
     if ('size' in opt) this.context.font = `${(this.recentTextOptions.size = opt.size).toString(10)}px ${this.recentTextOptions.font}`;

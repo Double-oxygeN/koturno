@@ -53,6 +53,6 @@ export default class Painter {
    * @returns {string} a string
    */
   toString() {
-    return `[Painter]`;
+    return `[Painter ${this.contextType}]`;
   }
 }
