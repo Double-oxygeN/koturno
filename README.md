@@ -17,7 +17,7 @@ Then add this line to your HTML.
 
 ## More information
 
-See [Documentation](http://double-oxygen.net/koturno/).
+See [Documentation](https://gh.double-oxygen.net/koturno/).
 
 ## Support browser
 
